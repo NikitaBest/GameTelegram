@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import DrawPage from './pages/DrawPage'
 import PathToTreasuresPage from './pages/PathToTreasuresPage'
-import GamePage from './game/GamePage'
+import { GameContainer } from './game/game cosmos/GameContainer.tsx'
 import './App.css'
 
 function App() {
@@ -46,7 +46,7 @@ function App() {
         {currentPage === 'draw' && (
           <DrawPage onStartGame={() => setCurrentPage('game')} />
         )}
-        {currentPage === 'game' && <GamePage />}
+        {currentPage === 'game' && <GameContainer />}
       </div>
     </div>
   )

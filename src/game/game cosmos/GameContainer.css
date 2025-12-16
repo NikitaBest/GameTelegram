@@ -1,0 +1,93 @@
+/* Базовые стили для космической игры */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: black;
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+}
+
+.game-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.game-area {
+  position: relative;
+  overflow: hidden;
+  background: black;
+  width: 100%;
+  height: 100%;
+}
+
+.game-area.playing {
+  cursor: grab;
+}
+
+.game-area.playing:active {
+  cursor: grabbing;
+}
+
+.game-inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.game-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.6;
+  background-size: cover;
+  background-position: center;
+}
+
+.game-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.4;
+  background-size: 200% 200%;
+  animation: pulse 4s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spaceship-container {
+  position: absolute;
+  z-index: 20;
+  transition: transform 75ms;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.falling-object-container {
+  position: absolute;
+  z-index: 10;
+  min-width: 20px;
+  min-height: 20px;
+}
+
