@@ -1,5 +1,7 @@
 // Простые утилиты для работы внутри Telegram WebApp
 
+import { getStartParam } from '../utils/urlParams';
+
 export function isTelegramWebApp(): boolean {
   if (typeof window === 'undefined') return false;
   // @ts-expect-error: глобальный объект Telegram приходит снаружи
@@ -68,19 +70,23 @@ export function getTelegramUserData(): TelegramUserData | null {
     return null;
   }
 
+  // Получаем параметр из URL или Telegram Web App
+  // Приоритет: сначала URL, потом Telegram
+  const startParam = getStartParam();
+
   return {
     userTelegramId: user.id,
     firstName: user.first_name || '',
     lastName: user.last_name || null,
     userName: user.username || null,
-    addedToAttachmentMenu: Boolean(tg.initDataUnsafe?.start_param),
+    addedToAttachmentMenu: Boolean(startParam || tg.initDataUnsafe?.start_param),
     allowsWriteToPm: true, // По умолчанию
     ignoreValidate: false,
     initData: initData, // Полный initData с хешем
     isPremium: user.is_premium || false,
     languageCode: user.language_code || 'ru',
     photoUrl: user.photo_url || null,
-    utm: tg.initDataUnsafe?.start_param || undefined,
+    utm: startParam || tg.initDataUnsafe?.start_param || undefined,
   };
 }
 
@@ -91,6 +97,10 @@ export function getMockTelegramUserData(): TelegramUserData {
   // Формируем initData без хеша (для тестирования)
   // В реальном Telegram Web App initData содержит хеш автоматически
   const mockInitData = 'user=%7B%22id%22%3A1343546686%2C%22first_name%22%3A%22%D0%9D%D0%B8%D0%BA%D0%B8%D1%82%D0%B0%22%2C%22last_name%22%3A%22%D0%91%D0%B5%D1%81%D1%81%D0%BE%D0%BD%D0%BE%D0%B2%22%2C%22username%22%3A%22bessonovnikita%22%2C%22language_code%22%3A%22ru%22%2C%22is_premium%22%3Atrue%7D';
+  
+  // Получаем параметр из URL для тестирования
+  // В реальном приложении это будет работать автоматически
+  const startParam = getStartParam();
   
   // Формат данных точно соответствует Swagger:
   // Порядок полей соответствует документации для удобства сравнения
@@ -103,10 +113,10 @@ export function getMockTelegramUserData(): TelegramUserData {
     initData: mockInitData,            // string (обязательное)
     languageCode: 'ru',                // string (обязательное)
     isPremium: true,                   // boolean (обязательное)
-    addedToAttachmentMenu: true,       // boolean (обязательное)
+    addedToAttachmentMenu: Boolean(startParam), // boolean (обязательное)
     allowsWriteToPm: true,             // boolean (обязательное)
     ignoreValidate: true,              // boolean (обязательное) - для локальной разработки
-    utm: '72',                         // string (опциональное)
+    utm: startParam || '72',           // string (опциональное) - используем параметр из URL если есть
   };
 }
 

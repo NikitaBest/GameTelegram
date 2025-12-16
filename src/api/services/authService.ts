@@ -76,9 +76,19 @@ export async function login(): Promise<AuthResponse> {
     addedToAttachmentMenu: userData.addedToAttachmentMenu,
     allowsWriteToPm: userData.allowsWriteToPm,
     ignoreValidate: userData.ignoreValidate,
-    // utm - опциональное поле, отправляем только если есть
+    // utm - опциональное поле, отправляем только если есть параметр tgWebAppStartParam
+    // Если параметр есть, отправляем его ПОЛНОЕ значение (например, "33_utm-channel")
     ...(userData.utm ? { utm: userData.utm } : {}),
   };
+  
+  // Логируем для отладки
+  if (import.meta.env.DEV) {
+    console.log('Параметр utm для запроса login:', {
+      hasUtm: Boolean(userData.utm),
+      utmValue: userData.utm || '(не отправляется)',
+      source: userData.utm ? 'из tgWebAppStartParam' : 'параметр отсутствует',
+    });
+  }
   
   // Логируем отправляемые данные для отладки (только в режиме разработки)
   if (import.meta.env.DEV) {

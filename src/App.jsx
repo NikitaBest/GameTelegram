@@ -2,14 +2,41 @@ import { useEffect, useState } from 'react'
 import DrawPage from './pages/DrawPage'
 import PathToTreasuresPage from './pages/PathToTreasuresPage'
 import GameResultsPage from './pages/GameResultsPage'
+import ActiveDrawsPage from './pages/ActiveDrawsPage'
 import { GameContainer } from './game/game cosmos/GameContainer.tsx'
 import { useAuth } from './hooks/useAuth'
+import { getParsedStartParam } from './utils/urlParams'
 import './App.css'
 
 function App() {
-  // Для тестирования: можно переключать страницы
-  // В продакшене это будет определяться через роутинг или состояние бекенда
-  const [currentPage, setCurrentPage] = useState('path-to-treasures'); // 'path-to-treasures' | 'draw' | 'game' | 'results'
+  // Парсим параметр при инициализации
+  const parsedStartParam = getParsedStartParam();
+  
+  // Логируем для отладки
+  if (import.meta.env.DEV) {
+    console.log('Парсинг параметра tgWebAppStartParam:', {
+      parsed: parsedStartParam,
+      url: window.location.href,
+    });
+  }
+  
+  // Состояние для ID текущего розыгрыша
+  const [drawId, setDrawId] = useState(parsedStartParam.drawId);
+  
+  // Определяем начальную страницу на основе параметра tgWebAppStartParam
+  const getInitialPage = () => {
+    if (parsedStartParam.hasParam && parsedStartParam.drawId) {
+      // Если параметр есть и есть ID розыгрыша - открываем страницу с розыгрышем
+      console.log(`Открываем розыгрыш с ID: ${parsedStartParam.drawId}`);
+      return 'path-to-treasures';
+    } else {
+      // Если параметра нет - открываем страницу активных розыгрышей
+      console.log('Параметр не найден, открываем страницу активных розыгрышей');
+      return 'active-draws';
+    }
+  };
+
+  const [currentPage, setCurrentPage] = useState(getInitialPage);
   const [gameScore, setGameScore] = useState(0);
   const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
   
@@ -62,11 +89,20 @@ function App() {
   return (
     <div className="app page-background">
       <div className="app-content">
+        {currentPage === 'active-draws' && (
+          <ActiveDrawsPage />
+        )}
         {currentPage === 'path-to-treasures' && (
-          <PathToTreasuresPage onStartGame={() => setCurrentPage('draw')} />
+          <PathToTreasuresPage 
+            drawId={drawId}
+            onStartGame={() => setCurrentPage('draw')} 
+          />
         )}
         {currentPage === 'draw' && (
-          <DrawPage onStartGame={() => setCurrentPage('game')} />
+          <DrawPage 
+            drawId={drawId}
+            onStartGame={() => setCurrentPage('game')} 
+          />
         )}
         {currentPage === 'game' && (
           <GameContainer 
@@ -80,6 +116,7 @@ function App() {
         {currentPage === 'results' && (
           <GameResultsPage 
             score={gameScore}
+            drawId={drawId}
             onPlayAgain={() => {
               setGameKey(prev => prev + 1); // Пересоздаём игру
               setCurrentPage('game');
