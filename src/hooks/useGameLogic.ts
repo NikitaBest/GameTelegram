@@ -53,6 +53,7 @@ export function useGameLogic(): UseGameLogicResult {
   const playerXRef = useRef(playerX);
   const playerYRef = useRef(playerY);
   const gameObjectsRef = useRef<GameObject[]>([]);
+  const gameStateRef = useRef(gameState);
   
   // Синхронизируем refs с state
   useEffect(() => {
@@ -66,6 +67,10 @@ export function useGameLogic(): UseGameLogicResult {
   useEffect(() => {
     gameObjectsRef.current = gameObjects;
   }, [gameObjects]);
+  
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
 
   const spawnObject = useCallback(() => {
     // Только звезды и кометы
@@ -76,7 +81,9 @@ export function useGameLogic(): UseGameLogicResult {
     const height = 50;
     const x = Math.random() * (GAME_WIDTH - width);
     const y = -height;
-    const speed = 2 + Math.random() * 3;
+    
+    // Базовая скорость: 1.5–3.5 (ускорение применяется глобально при движении)
+    const speed = 1.5 + Math.random() * 2;
 
     const obj: GameObject = {
       id: objectIdCounter++,
@@ -192,8 +199,17 @@ export function useGameLogic(): UseGameLogicResult {
         let scoreDelta = 0;
         let livesDelta = 0;
 
+        // Глобальное ускорение в зависимости от счёта
+        // Каждые 50 очков добавляют 5% к скорости всех объектов
+        // Максимум +50% скорости (при 500+ очках)
+        // Используем актуальное значение из ref
+        const currentScore = gameStateRef.current.score;
+        const speedMultiplier = 1 + Math.min(currentScore / 50 * 0.05, 0.5);
+
         for (const obj of currentObjects) {
-          const ny = obj.y + obj.speed * delta * 4;
+          // Применяем множитель скорости к базовой скорости объекта
+          const effectiveSpeed = obj.speed * speedMultiplier;
+          const ny = obj.y + effectiveSpeed * delta * 4;
           if (ny > GAME_HEIGHT + 100) {
             continue; // вышел за экран
           }
