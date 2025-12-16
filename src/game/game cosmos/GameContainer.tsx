@@ -3,8 +3,8 @@ import { useGameLogic } from '../../hooks/useGameLogic';
 import { Spaceship } from './Spaceship';
 import { FallingObject } from './FallingObject';
 import { HUD } from './HUD';
-import { StartScreen } from './StartScreen';
 import { GameOverScreen } from './GameOverScreen';
+import { RulesScreen } from './RulesScreen';
 import { GAME_WIDTH, GAME_HEIGHT, SHIP_WIDTH, SHIP_HEIGHT } from '../../lib/game-types';
 import { getStableViewportHeight, isTelegramWebApp } from '../../lib/telegram';
 import { VisualEffects } from './VisualEffects';
@@ -235,8 +235,8 @@ export function GameContainer() {
               )}
 
               {/* Screens */}
-              {!gameState.isPlaying && !gameState.isGameOver && (
-                <StartScreen onStart={startGame} />
+              {gameState.showRules && !gameState.isPlaying && !gameState.isGameOver && (
+                <RulesScreen onStart={startGame} />
               )}
 
               {gameState.isGameOver && (

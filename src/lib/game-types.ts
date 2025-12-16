@@ -40,6 +40,7 @@ export interface GameState {
   isPlaying: boolean;
   isPaused: boolean;
   isGameOver: boolean;
+  showRules: boolean;
 }
 
 

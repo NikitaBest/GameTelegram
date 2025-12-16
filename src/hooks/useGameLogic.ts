@@ -32,6 +32,7 @@ const INITIAL_STATE: GameState = {
   isPlaying: false,
   isPaused: false,
   isGameOver: false,
+  showRules: true, // Показываем правила при старте
 };
 
 let objectIdCounter = 1;
@@ -109,6 +110,7 @@ export function useGameLogic(): UseGameLogicResult {
     setGameState({
       ...INITIAL_STATE,
       isPlaying: true,
+      showRules: false,
     });
     setGameObjects([]);
     setEffects([]);
@@ -117,9 +119,18 @@ export function useGameLogic(): UseGameLogicResult {
     lastFrameTimeRef.current = null;
   }, []);
 
+
   const resetGame = useCallback(() => {
-    startGame();
-  }, [startGame]);
+    setGameState({
+      ...INITIAL_STATE,
+      showRules: true,
+    });
+    setGameObjects([]);
+    setEffects([]);
+    movementRef.current = 'stop';
+    lastSpawnTimeRef.current = 0;
+    lastFrameTimeRef.current = null;
+  }, []);
 
   const setMovement = useCallback((dir: MovementDirection) => {
     movementRef.current = dir;
