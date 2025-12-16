@@ -6,6 +6,7 @@ import ActiveDrawsPage from './pages/ActiveDrawsPage'
 import { GameContainer } from './game/game cosmos/GameContainer.tsx'
 import { useAuth } from './hooks/useAuth'
 import { getParsedStartParam } from './utils/urlParams'
+import { saveDrawId, getDrawId } from './utils/storage'
 import './App.css'
 
 function App() {
@@ -21,7 +22,20 @@ function App() {
   }
   
   // Состояние для ID текущего розыгрыша
-  const [drawId, setDrawId] = useState(parsedStartParam.drawId);
+  // Приоритет: параметр из URL > сохраненный в localStorage
+  const initialDrawId = parsedStartParam.drawId || getDrawId();
+  const [drawId, setDrawId] = useState(initialDrawId);
+  
+  // Сохраняем drawId в localStorage если он есть
+  useEffect(() => {
+    if (parsedStartParam.drawId) {
+      saveDrawId(parsedStartParam.drawId);
+      setDrawId(parsedStartParam.drawId);
+      if (import.meta.env.DEV) {
+        console.log(`Сохранен ID розыгрыша: ${parsedStartParam.drawId}`);
+      }
+    }
+  }, [parsedStartParam.drawId]);
   
   // Определяем начальную страницу на основе параметра tgWebAppStartParam
   const getInitialPage = () => {
@@ -72,17 +86,17 @@ function App() {
   }, [])
 
   // Авторизация при загрузке приложения
+  // ВАЖНО: Всегда отправляем запрос login после проверки параметра
   useEffect(() => {
-    // Авторизуемся только если еще не авторизованы
-    if (!isAuthenticated && !isLoading) {
-      login().catch((err) => {
-        console.error('Ошибка авторизации при загрузке:', err);
-        // В режиме разработки продолжаем работу даже при ошибке авторизации
-        if (import.meta.env.DEV) {
-          console.warn('Продолжаем работу в режиме разработки без авторизации');
-        }
-      });
-    }
+    // Авторизуемся при каждой загрузке приложения (независимо от наличия токена)
+    // Это гарантирует, что бекенд получит актуальные данные, включая utm параметр
+    login().catch((err) => {
+      console.error('Ошибка авторизации при загрузке:', err);
+      // В режиме разработки продолжаем работу даже при ошибке авторизации
+      if (import.meta.env.DEV) {
+        console.warn('Продолжаем работу в режиме разработки без авторизации');
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Выполняем только при монтировании компонента
 

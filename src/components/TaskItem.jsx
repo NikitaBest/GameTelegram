@@ -1,13 +1,17 @@
 import './TaskItem.css';
 
 const TaskItem = ({ task, onTaskClick }) => {
+  // task.completed соответствует partner.subscribed
+  const isSubscribed = task.completed;
+  
   return (
     <div 
-      className={`task-item ${task.completed ? 'completed' : 'locked'}`}
-      onClick={() => !task.completed && onTaskClick?.(task)}
+      className={`task-item ${isSubscribed ? 'completed' : 'locked'}`}
+      onClick={() => !isSubscribed && onTaskClick?.(task)}
+      style={{ cursor: !isSubscribed ? 'pointer' : 'default' }}
     >
       <div className="task-icon">
-        {task.completed ? (
+        {isSubscribed ? (
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="10" cy="10" r="10" fill="#4CAF50"/>
             <path d="M6 10L9 13L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
