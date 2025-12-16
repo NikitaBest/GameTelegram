@@ -3,6 +3,7 @@ import DrawPage from './pages/DrawPage'
 import PathToTreasuresPage from './pages/PathToTreasuresPage'
 import GameResultsPage from './pages/GameResultsPage'
 import { GameContainer } from './game/game cosmos/GameContainer.tsx'
+import { useAuth } from './hooks/useAuth'
 import './App.css'
 
 function App() {
@@ -11,6 +12,9 @@ function App() {
   const [currentPage, setCurrentPage] = useState('path-to-treasures'); // 'path-to-treasures' | 'draw' | 'game' | 'results'
   const [gameScore, setGameScore] = useState(0);
   const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
+  
+  // Авторизация
+  const { user, isLoading, isAuthenticated, error, login } = useAuth();
 
   useEffect(() => {
     // Проверяем наличие Telegram Web App
@@ -39,6 +43,21 @@ function App() {
       })
     }
   }, [])
+
+  // Авторизация при загрузке приложения
+  useEffect(() => {
+    // Авторизуемся только если еще не авторизованы
+    if (!isAuthenticated && !isLoading) {
+      login().catch((err) => {
+        console.error('Ошибка авторизации при загрузке:', err);
+        // В режиме разработки продолжаем работу даже при ошибке авторизации
+        if (import.meta.env.DEV) {
+          console.warn('Продолжаем работу в режиме разработки без авторизации');
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Выполняем только при монтировании компонента
 
   return (
     <div className="app page-background">
