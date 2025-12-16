@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { RotateCcw, Clock, Bot } from 'lucide-react';
+import Leaderboard from '../components/Leaderboard';
+import { useAuth } from '../hooks/useAuth';
 import './GameResultsPage.css';
 
-const GameResultsPage = ({ score, onPlayAgain, attemptsLeft = 1 }) => {
+const GameResultsPage = ({ score, drawId, onPlayAgain, attemptsLeft = 1 }) => {
   const [activeTab, setActiveTab] = useState('my-results'); // 'my-results' | 'rating'
+  const { user } = useAuth();
 
   // Моковые данные - в будущем будут приходить с бэкенда
   const userRank = 138;
@@ -57,46 +60,52 @@ const GameResultsPage = ({ score, onPlayAgain, attemptsLeft = 1 }) => {
         </div>
 
         {/* Контент табов */}
-        {activeTab === 'my-results' && (
-          <div className="results-content-area">
-            {/* Карточка с местом и очками */}
-            <div className="result-card">
-              <div className="result-card-label">Твоё место</div>
-              <div className="result-card-rank">{userRank}</div>
-              <div className="result-card-score">{score} очков</div>
-            </div>
-
-            {/* Карточка с таймером и ботом */}
-            <div className="result-card">
-              <div className="result-card-timer">
-                <Clock className="timer-icon" />
-                <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
+        <div className="results-scrollable-content">
+          {activeTab === 'my-results' && (
+            <div className="results-content-area">
+              {/* Карточка с местом и очками */}
+              <div className="result-card">
+                <div className="result-card-label">Твоё место</div>
+                <div className="result-card-rank">{userRank}</div>
+                <div className="result-card-score">{score} очков</div>
               </div>
-              <div className="result-card-bot">
-                <Bot className="bot-icon" />
-                <span>Результаты придут в бот @{botUsername}</span>
+
+              {/* Карточка с таймером и ботом */}
+              <div className="result-card">
+                <div className="result-card-timer">
+                  <Clock className="timer-icon" />
+                  <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
+                </div>
+                <div className="result-card-bot">
+                  <Bot className="bot-icon" />
+                  <span>Результаты придут в бот @{botUsername}</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'rating' && (
-          <div className="results-content-area">
-            <div className="rating-placeholder">
-              <p>Рейтинг будет доступен после финала</p>
+          {activeTab === 'rating' && (
+            <div className="results-content-area">
+              {drawId ? (
+                <Leaderboard drawId={drawId} userId={user?.id} />
+              ) : (
+                <div className="rating-placeholder">
+                  <p>Рейтинг будет доступен после финала</p>
+                </div>
+              )}
             </div>
-          </div>
-        )}
-
-        {/* Кнопка "ОТЫГРАТЬСЯ!" */}
-        <button className="play-again-button" onClick={onPlayAgain}>
-          <RotateCcw className="play-again-icon" />
-          <div className="play-again-text">
-            <span className="play-again-main">ОТЫГРАТЬСЯ!</span>
-            <span className="play-again-sub">осталась {attemptsLeft} попытка</span>
-          </div>
-        </button>
+          )}
+        </div>
       </div>
+
+      {/* Кнопка "ОТЫГРАТЬСЯ!" - фиксированная внизу */}
+      <button className="play-again-button" onClick={onPlayAgain}>
+        <RotateCcw className="play-again-icon" />
+        <div className="play-again-text">
+          <span className="play-again-main">ОТЫГРАТЬСЯ!</span>
+          <span className="play-again-sub">осталась {attemptsLeft} попытка</span>
+        </div>
+      </button>
     </div>
   );
 };

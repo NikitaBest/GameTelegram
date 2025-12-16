@@ -1,5 +1,6 @@
 .game-results-page {
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   position: relative;
   display: flex;
@@ -8,8 +9,9 @@
   justify-content: flex-start;
   padding: 20px 16px;
   padding-top: 40px;
-  padding-bottom: 32px;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* Отступ для фиксированной кнопки */
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   /* Градиентный фон из дизайна */
   background: linear-gradient(90deg, #8AB8FD 0%, #5990DD 50%, #4D7AC4 100%);
 }
@@ -22,6 +24,14 @@
   align-items: center;
   gap: 24px;
   z-index: 1;
+  flex: 1;
+}
+
+.results-scrollable-content {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Заголовок */
@@ -88,6 +98,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-bottom: 20px;
 }
 
 /* Карточки результатов */
@@ -173,12 +184,19 @@
   font-size: 15px;
 }
 
-/* Кнопка "ОТЫГРАТЬСЯ!" */
+/* Кнопка "ОТЫГРАТЬСЯ!" - фиксированная внизу */
 .play-again-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
   padding: 18px 24px;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
   border: none;
-  border-radius: 16px;
+  border-radius: 16px 16px 0 0;
   background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%);
   color: #ffffff;
   font-weight: 700;
@@ -188,9 +206,9 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
-  margin-top: 8px;
+  z-index: 10;
 }
 
 .play-again-button:active {
