@@ -143,18 +143,37 @@ const Leaderboard = ({ drawId, userId }) => {
 
   return (
     <div className="leaderboard-container">
-      <h3 className="leaderboard-title">Таблица лидеров</h3>
+      <div className="leaderboard-header">
+        <h3 className="leaderboard-title">Лидеры</h3>
+        {totalCount > 0 && (
+          <div className="leaderboard-count">
+            <img 
+              src="/fa-solid_user-friends.svg" 
+              alt="Участники" 
+              className="leaderboard-count-icon"
+            />
+            <span>{totalCount} участников</span>
+          </div>
+        )}
+      </div>
       <div className="leaderboard-list">
         {leaders.map((leader, index) => {
           const isLast = index === leaders.length - 1;
           const isCurrentUser = userId && leader.userId === userId;
           const medal = getMedalIcon(leader.topNumber);
+          const position = leader.topNumber;
+          
+          // Определяем класс для цвета в зависимости от места
+          let positionClass = 'place-other';
+          if (position === 1) positionClass = 'place-1';
+          else if (position === 2) positionClass = 'place-2';
+          else if (position === 3) positionClass = 'place-3';
           
           return (
             <div
               key={leader.participatingId}
               ref={isLast ? lastLeaderRef : null}
-              className={`leaderboard-item ${isCurrentUser ? 'current-user' : ''}`}
+              className={`leaderboard-item ${positionClass} ${isCurrentUser ? 'current-user' : ''}`}
             >
               <div className="leaderboard-position">
                 {medal ? (
