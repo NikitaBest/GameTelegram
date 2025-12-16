@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import DrawPage from './pages/DrawPage'
 import PathToTreasuresPage from './pages/PathToTreasuresPage'
+import GameResultsPage from './pages/GameResultsPage'
 import { GameContainer } from './game/game cosmos/GameContainer.tsx'
 import './App.css'
 
 function App() {
   // Для тестирования: можно переключать страницы
   // В продакшене это будет определяться через роутинг или состояние бекенда
-  const [currentPage, setCurrentPage] = useState('path-to-treasures'); // 'path-to-treasures' | 'draw' | 'game'
+  const [currentPage, setCurrentPage] = useState('path-to-treasures'); // 'path-to-treasures' | 'draw' | 'game' | 'results'
+  const [gameScore, setGameScore] = useState(0);
+  const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
 
   useEffect(() => {
     // Проверяем наличие Telegram Web App
@@ -46,7 +49,25 @@ function App() {
         {currentPage === 'draw' && (
           <DrawPage onStartGame={() => setCurrentPage('game')} />
         )}
-        {currentPage === 'game' && <GameContainer />}
+        {currentPage === 'game' && (
+          <GameContainer 
+            key={gameKey} // Пересоздаём компонент при каждом переходе на игру
+            onGameOver={(score) => {
+              setGameScore(score);
+              setCurrentPage('results');
+            }} 
+          />
+        )}
+        {currentPage === 'results' && (
+          <GameResultsPage 
+            score={gameScore}
+            onPlayAgain={() => {
+              setGameKey(prev => prev + 1); // Пересоздаём игру
+              setCurrentPage('game');
+            }}
+            attemptsLeft={1}
+          />
+        )}
       </div>
     </div>
   )

@@ -3,14 +3,17 @@ import { useGameLogic } from '../../hooks/useGameLogic';
 import { Spaceship } from './Spaceship';
 import { FallingObject } from './FallingObject';
 import { HUD } from './HUD';
-import { GameOverScreen } from './GameOverScreen';
 import { RulesScreen } from './RulesScreen';
 import { GAME_WIDTH, GAME_HEIGHT, SHIP_WIDTH, SHIP_HEIGHT } from '../../lib/game-types';
 import { getStableViewportHeight, isTelegramWebApp } from '../../lib/telegram';
 import { VisualEffects } from './VisualEffects';
 import './GameContainer.css';
 
-export function GameContainer() {
+interface GameContainerProps {
+  onGameOver?: (score: number) => void;
+}
+
+export function GameContainer({ onGameOver }: GameContainerProps) {
   const {
     gameState,
     playerX,
@@ -18,7 +21,6 @@ export function GameContainer() {
     gameObjects,
     effects,
     startGame,
-    resetGame,
     setMovement,
     setPlayerPosition
   } = useGameLogic();
@@ -27,6 +29,25 @@ export function GameContainer() {
   const isDraggingRef = useRef(false);
   const dragStartScreenRef = useRef<{ x: number; y: number } | null>(null);
   const dragStartPlayerRef = useRef<{ x: number; y: number } | null>(null);
+  const gameOverHandledRef = useRef(false);
+
+  // Обработка окончания игры - переход на страницу результатов
+  useEffect(() => {
+    if (gameState.isGameOver && !gameOverHandledRef.current && onGameOver) {
+      gameOverHandledRef.current = true;
+      // Небольшая задержка для плавного перехода
+      setTimeout(() => {
+        onGameOver(gameState.score);
+      }, 500);
+    }
+  }, [gameState.isGameOver, gameState.score, onGameOver]);
+
+  // Сброс флага при перезапуске игры
+  useEffect(() => {
+    if (!gameState.isGameOver) {
+      gameOverHandledRef.current = false;
+    }
+  }, [gameState.isGameOver]);
 
   // Convert screen coordinates to game coordinates
   const screenToGameCoords = useCallback((screenX: number, screenY: number): [number, number] => {
@@ -282,10 +303,6 @@ export function GameContainer() {
               {/* Screens */}
               {gameState.showRules && !gameState.isPlaying && !gameState.isGameOver && (
                 <RulesScreen onStart={startGame} />
-              )}
-
-              {gameState.isGameOver && (
-                <GameOverScreen score={gameState.score} onRestart={resetGame} />
               )}
             </div>
           </div>
