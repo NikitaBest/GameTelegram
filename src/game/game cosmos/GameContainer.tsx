@@ -25,6 +25,8 @@ export function GameContainer() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const dragStartScreenRef = useRef<{ x: number; y: number } | null>(null);
+  const dragStartPlayerRef = useRef<{ x: number; y: number } | null>(null);
 
   // Convert screen coordinates to game coordinates
   const screenToGameCoords = useCallback((screenX: number, screenY: number): [number, number] => {
@@ -55,7 +57,9 @@ export function GameContainer() {
     if (!gameState.isPlaying || gameState.isPaused) return;
     e.preventDefault();
     isDraggingRef.current = true;
+    setMovement('stop'); // Stop keyboard movement
     
+    // Запоминаем начальную позицию касания и текущую позицию корабля
     const clientX = 'touches' in e && e.touches.length > 0 
       ? e.touches[0].clientX 
       : 'clientX' in e ? e.clientX : 0;
@@ -63,14 +67,14 @@ export function GameContainer() {
       ? e.touches[0].clientY 
       : 'clientY' in e ? e.clientY : 0;
     
-    const [gameX, gameY] = screenToGameCoords(clientX, clientY);
-    setMovement('stop'); // Stop keyboard movement
-    setPlayerPosition(gameX, gameY);
+    dragStartScreenRef.current = { x: clientX, y: clientY };
+    dragStartPlayerRef.current = { x: playerX, y: playerY };
   };
 
   // Handle drag/touch move (local handler)
   const handlePointerMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!gameState.isPlaying || gameState.isPaused || !isDraggingRef.current) return;
+    if (!dragStartScreenRef.current || !dragStartPlayerRef.current) return;
     e.preventDefault();
     
     const clientX = 'touches' in e && e.touches.length > 0 
@@ -80,14 +84,33 @@ export function GameContainer() {
       ? e.touches[0].clientY 
       : 'clientY' in e ? e.clientY : 0;
     
-    const [gameX, gameY] = screenToGameCoords(clientX, clientY);
-    setPlayerPosition(gameX, gameY);
+    // Вычисляем смещение от начальной позиции касания
+    const deltaX = clientX - dragStartScreenRef.current.x;
+    const deltaY = clientY - dragStartScreenRef.current.y;
+    
+    // Конвертируем смещение в экранных координатах в игровые координаты
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const deltaGameX = (deltaX / rect.width) * GAME_WIDTH;
+    const deltaGameY = (deltaY / rect.height) * GAME_HEIGHT;
+    
+    // Применяем смещение к начальной позиции корабля
+    const newX = dragStartPlayerRef.current.x + deltaGameX;
+    const newY = dragStartPlayerRef.current.y + deltaGameY;
+    
+    // Ограничиваем границами игры
+    const clampedX = Math.max(0, Math.min(GAME_WIDTH - SHIP_WIDTH, newX));
+    const clampedY = Math.max(0, Math.min(GAME_HEIGHT - SHIP_HEIGHT, newY));
+    
+    setPlayerPosition(clampedX, clampedY);
   };
 
   // Handle drag/touch end
   const handlePointerEnd = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
     isDraggingRef.current = false;
+    dragStartScreenRef.current = null;
+    dragStartPlayerRef.current = null;
   };
 
   // Add global mouse/touch move handlers for smooth dragging
@@ -96,19 +119,41 @@ export function GameContainer() {
 
     const handleGlobalMove = (e: MouseEvent | TouchEvent) => {
       if (!isDraggingRef.current) return;
+      if (!dragStartScreenRef.current || !dragStartPlayerRef.current) return;
       e.preventDefault();
+      
       const clientX = 'touches' in e && e.touches.length > 0 
         ? e.touches[0].clientX 
         : 'clientX' in e ? e.clientX : 0;
       const clientY = 'touches' in e && e.touches.length > 0 
         ? e.touches[0].clientY 
         : 'clientY' in e ? e.clientY : 0;
-      const [gameX, gameY] = screenToGameCoords(clientX, clientY);
-      setPlayerPosition(gameX, gameY);
+      
+      // Вычисляем смещение от начальной позиции касания
+      const deltaX = clientX - dragStartScreenRef.current.x;
+      const deltaY = clientY - dragStartScreenRef.current.y;
+      
+      // Конвертируем смещение в экранных координатах в игровые координаты
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const deltaGameX = (deltaX / rect.width) * GAME_WIDTH;
+      const deltaGameY = (deltaY / rect.height) * GAME_HEIGHT;
+      
+      // Применяем смещение к начальной позиции корабля
+      const newX = dragStartPlayerRef.current.x + deltaGameX;
+      const newY = dragStartPlayerRef.current.y + deltaGameY;
+      
+      // Ограничиваем границами игры
+      const clampedX = Math.max(0, Math.min(GAME_WIDTH - SHIP_WIDTH, newX));
+      const clampedY = Math.max(0, Math.min(GAME_HEIGHT - SHIP_HEIGHT, newY));
+      
+      setPlayerPosition(clampedX, clampedY);
     };
 
     const handleGlobalEnd = () => {
       isDraggingRef.current = false;
+      dragStartScreenRef.current = null;
+      dragStartPlayerRef.current = null;
     };
 
     window.addEventListener('mousemove', handleGlobalMove);
