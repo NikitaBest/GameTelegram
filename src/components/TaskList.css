@@ -1,0 +1,25 @@
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  align-items: center; /* центрируем блоки каналов */
+  margin-bottom: 32px;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .task-list {
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .task-list {
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+}
+

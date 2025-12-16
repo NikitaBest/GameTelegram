@@ -1,0 +1,22 @@
+.app {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.app-content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Общий фон для всех страниц */
+.page-background {
+  background: radial-gradient(169.2% 42.3% at 49.67% 7.24%, rgba(195, 235, 255, 0.4) 0%, rgba(0, 0, 0, 0.08) 100%),
+    linear-gradient(180deg, #4498FB 0.04%, #2C63DB 33.27%, rgba(25, 81, 183, 0.92) 62.56%);
+}

@@ -1,0 +1,76 @@
+.user-rank {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  width: 100%;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(224, 234, 255, 1) 0%, rgba(206, 218, 245, 1) 100%);
+  box-sizing: border-box;
+  margin-top: 10px;
+  position: relative;
+}
+
+.user-rank-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-icon {
+  width: 29.33px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.user-rank-text-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.user-rank-text {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 700;
+  color: #627fc0;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .user-rank {
+    padding: 5px 6px;
+    margin-top: 8px;
+  }
+  
+  .user-rank-text {
+    font-size: 11px;
+  }
+  
+  .user-icon {
+    width: 26px;
+    height: 27px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .user-rank {
+    padding: 4px 5px;
+    margin-top: 6px;
+    border-radius: 10px;
+  }
+  
+  .user-rank-text {
+    font-size: 10px;
+  }
+  
+  .user-icon {
+    width: 24px;
+    height: 25px;
+  }
+}
+

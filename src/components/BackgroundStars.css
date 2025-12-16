@@ -1,0 +1,42 @@
+.background-stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.stars-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+}
+
+.stars-pattern-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.stars-pattern-image::after {
+  content: '';
+  display: none;
+}
+
+/* Скрываем текст, если изображение не загрузилось */
+.stars-pattern-image[alt] {
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
+

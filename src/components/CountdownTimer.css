@@ -1,0 +1,117 @@
+.countdown-container {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.countdown-label {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 25px;
+  letter-spacing: 0px;
+  text-align: center;
+  vertical-align: middle;
+  background: linear-gradient(180deg, #FFFFFF 0%, #C0DCFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+
+.countdown-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.countdown-box {
+  width: 49px;
+  min-height: 45px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, #236CCA 0%, #3F7ED7 100%);
+  background-clip: padding-box;
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.countdown-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(180deg, #1154AD 0%, #5899F2 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.countdown-separator {
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .countdown-label {
+    font-size: 14px;
+    line-height: 22px;
+    margin-bottom: 10px;
+  }
+  
+  .countdown-box {
+    width: 44px;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 20px;
+  }
+  
+  .countdown-separator {
+    font-size: 20px;
+  }
+  
+  .countdown-timer {
+    gap: 8px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .countdown-label {
+    font-size: 13px;
+    line-height: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .countdown-box {
+    width: 40px;
+    min-height: 36px;
+    padding: 6px 8px;
+    font-size: 18px;
+  }
+  
+  .countdown-separator {
+    font-size: 18px;
+  }
+  
+  .countdown-timer {
+    gap: 6px;
+  }
+  
+  .countdown-container {
+    margin-bottom: 20px;
+  }
+}
+

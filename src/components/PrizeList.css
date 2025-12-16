@@ -1,0 +1,345 @@
+.prize-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.prize-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  width: 100%;
+  border-radius: 12px;
+  background: linear-gradient(0deg, rgba(100, 141, 234, 1) 0%, rgba(88, 127, 213, 1) 100%);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.prize-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(65, 107, 200, 1) 0%, rgba(142, 183, 240, 1) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.prize-item-content {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+  z-index: 10;
+}
+
+.prize-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.trophy-icon {
+  width: 28px;
+  height: 28px;
+  background-size: cover;
+  background-position: 50% 50%;
+  object-fit: contain;
+}
+
+.trophy-gold {
+  background-image: url('/1st-1.png');
+}
+
+.trophy-silver {
+  background-image: url('/2nd-1.png');
+}
+
+.trophy-bronze {
+  background-image: url('/3rd-1.png');
+}
+
+.trophy-4th-10th {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.prize-text-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.prize-label {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 600;
+  color: #fff8f1;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.09);
+}
+
+.prize-amount {
+  display: flex;
+  width: 41px;
+  height: auto;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 4px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(240, 185, 34, 1) 0%, rgba(229, 125, 7, 1) 100%);
+  border: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.prize-amount span {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 600;
+  color: #fff8e1;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.09);
+}
+
+.stars-participants {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  width: 100%;
+  border-radius: 12px;
+  background: linear-gradient(0deg, rgba(100, 141, 234, 1) 0%, rgba(88, 127, 213, 1) 100%);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.stars-content {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+  z-index: 10;
+}
+
+.stars-participants::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(65, 107, 200, 1) 0%, rgba(142, 183, 240, 1) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.stars-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.stars-icon-image {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.stars-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+}
+
+.stars-main-text {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 600;
+  color: #fff8f1;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.09);
+}
+
+.stars-note {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 400;
+  color: #d5e9ff;
+  font-size: 10px;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.09);
+}
+
+.stars-badge {
+  display: flex;
+  width: 41px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 4px;
+  background: #7099f3;
+  border-radius: 6px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.stars-badge-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .prize-item {
+    padding: 5px 6px;
+  }
+  
+  .prize-label {
+    font-size: 11px;
+  }
+  
+  .prize-amount {
+    width: 38px;
+    padding: 3px;
+  }
+  
+  .prize-amount span {
+    font-size: 11px;
+  }
+  
+  .trophy-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .trophy-4th-10th {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .stars-participants {
+    padding: 5px 6px;
+  }
+  
+  .stars-main-text {
+    font-size: 11px;
+  }
+  
+  .stars-note {
+    font-size: 9px;
+  }
+  
+  .stars-icon-image {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .stars-badge {
+    width: 36px;
+    height: 22px;
+    padding: 3px;
+  }
+  
+  .stars-badge-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .prize-item {
+    padding: 4px 5px;
+    border-radius: 10px;
+  }
+  
+  .prize-item-content {
+    gap: 8px;
+  }
+  
+  .prize-label {
+    font-size: 10px;
+  }
+  
+  .prize-amount {
+    width: 35px;
+    padding: 2px;
+  }
+  
+  .prize-amount span {
+    font-size: 10px;
+  }
+  
+  .trophy-icon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .trophy-4th-10th {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .stars-participants {
+    padding: 4px 5px;
+    border-radius: 10px;
+  }
+  
+  .stars-content {
+    gap: 8px;
+  }
+  
+  .stars-main-text {
+    font-size: 10px;
+  }
+  
+  .stars-note {
+    font-size: 8px;
+  }
+  
+  .stars-icon-image {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .stars-badge {
+    width: 32px;
+    height: 20px;
+    padding: 2px;
+  }
+  
+  .stars-badge-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .prize-list {
+    gap: 8px;
+  }
+}
+

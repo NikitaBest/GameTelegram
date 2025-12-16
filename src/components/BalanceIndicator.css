@@ -1,0 +1,65 @@
+.balance-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #D4E1FF;
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin: 0 auto 16px;
+  width: fit-content;
+  box-shadow: 0 2px 8px rgba(212, 225, 255, 0.3);
+}
+
+.balance-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.balance-icon-image {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.balance-text {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .balance-indicator {
+    padding: 6px 14px;
+    margin-bottom: 14px;
+  }
+  
+  .balance-text {
+    font-size: 13px;
+  }
+  
+  .balance-icon-image {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .balance-indicator {
+    padding: 6px 12px;
+    margin-bottom: 12px;
+  }
+  
+  .balance-text {
+    font-size: 12px;
+  }
+  
+  .balance-icon-image {
+    width: 16px;
+    height: 16px;
+  }
+}
+

@@ -1,0 +1,145 @@
+.progress-bar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+  padding: 0 16px; /* небольшой отступ от краёв экрана */
+  position: relative;
+  width: 100%;
+}
+
+.progress-bar {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-step-wrapper {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.progress-track {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 100%;
+  height: 20px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #78a6ff 0%, #4d7be5 100%);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.progress-track-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3fd65f 0%, #33c24e 100%);
+  transition: width 0.35s ease;
+}
+
+.progress-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #ffc947 0%, #ef9a12 100%);
+  border: 2px solid #ffc947;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-circle.completed {
+  background: linear-gradient(180deg, #4CAF50 0%, #45A049 100%);
+  border-color: #4CAF50;
+  color: white;
+  box-shadow: 0 2px 8px rgba(63, 214, 95, 0.4);
+}
+
+.progress-circle.upcoming {
+  box-shadow: 0 2px 8px rgba(255, 201, 71, 0.4);
+}
+
+.progress-step-number {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Адаптация для средних экранов (до 414px) */
+@media (max-width: 414px) {
+  .progress-bar {
+    max-width: 100%;
+  }
+  
+  .progress-track {
+    max-width: 100%;
+  }
+  
+  .progress-circle {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .progress-step-number {
+    font-size: 15px;
+  }
+  
+  .progress-track {
+    height: 18px;
+  }
+}
+
+/* Адаптация для маленьких экранов (до 375px) */
+@media (max-width: 375px) {
+  .progress-bar-container {
+    margin-bottom: 28px;
+  }
+  
+  .progress-circle {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .progress-step-number {
+    font-size: 14px;
+  }
+  
+  .progress-track {
+    height: 16px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов (до 320px) */
+@media (max-width: 320px) {
+  .progress-bar-container {
+    margin-bottom: 24px;
+  }
+  
+  .progress-circle {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .progress-step-number {
+    font-size: 12px;
+  }
+  
+  .progress-track {
+    height: 14px;
+  }
+}
+

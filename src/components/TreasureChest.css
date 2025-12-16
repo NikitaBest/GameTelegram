@@ -1,0 +1,79 @@
+.treasure-chest-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.treasure-chest-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.stars-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.stars-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.treasure-chest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  position: relative;
+}
+
+.chest-image {
+  width: 200px;
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .chest-image {
+    width: 180px;
+  }
+  
+  .stars-background {
+    max-width: 280px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .chest-image {
+    width: 160px;
+  }
+  
+  .stars-background {
+    max-width: 250px;
+  }
+  
+  .treasure-chest-container {
+    margin-bottom: 20px;
+  }
+}
+
+
+

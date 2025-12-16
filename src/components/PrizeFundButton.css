@@ -1,0 +1,94 @@
+.prize-fund-button {
+  display: flex;
+  width: 199px;
+  max-width: calc(100% - 32px);
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 2px 16px;
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 36px;
+  border: none;
+  background: linear-gradient(180deg, rgba(255, 207, 74, 1) 0%, rgba(229, 125, 7, 1) 100%),
+    linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%);
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .prize-fund-button {
+    width: 180px;
+    height: 26px;
+    padding: 2px 12px;
+    top: -13px;
+  }
+  
+  .prize-fund-button span {
+    font-size: 11px;
+  }
+  
+  .prize-fund-button .trophy-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .prize-fund-button {
+    width: 160px;
+    height: 24px;
+    padding: 2px 10px;
+    top: -12px;
+  }
+  
+  .prize-fund-button span {
+    font-size: 10px;
+  }
+  
+  .prize-fund-button .trophy-icon {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.prize-fund-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 36px;
+  background: linear-gradient(180deg, rgba(255, 195, 53, 1) 0%, rgba(199, 118, 2, 1) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.prize-fund-button .trophy-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  position: relative;
+  z-index: 10;
+}
+
+.prize-fund-button span {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 500;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  position: relative;
+  z-index: 10;
+}
+
+
