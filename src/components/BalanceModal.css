@@ -39,9 +39,10 @@
 }
 
 .balance-modal-amount {
-  background: linear-gradient(180deg, #6BA3D4 0%, #5A8FC2 100%);
-  border-radius: 16px;
-  padding: clamp(10px, 3vw, 14px) clamp(30px, 8vw, 40px);
+  background: linear-gradient(180deg, #4584DA 0%, #669BE6 100%);
+  border: 1px solid #1154AD;
+  border-radius: 12px;
+  padding: 10px 35px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,9 +61,10 @@
 }
 
 .balance-modal-info {
-  background: #FFFFFF;
-  border-radius: 12px;
-  padding: clamp(8px, 2vw, 12px) clamp(10px, 3vw, 14px);
+  background: transparent;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 16px 20px;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
@@ -77,9 +79,9 @@
 }
 
 .balance-modal-remaining span {
-  color: #4A90D9;
-  font-size: clamp(14px, 4vw, 16px);
-  font-weight: 600;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .remaining-amount {
@@ -87,16 +89,16 @@
   font-weight: 700 !important;
 }
 
-.balance-star-small {
-  width: clamp(14px, 4vw, 18px);
-  height: clamp(14px, 4vw, 18px);
+.balance-modal-hint {
+  color: #FFFFFF;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.balance-modal-hint {
-  color: #4A90D9;
-  font-size: clamp(11px, 3vw, 13px);
-  margin: 0;
-  line-height: 1.3;
+.balance-star-small {
+  width: 22px;
+  height: 22px;
 }
 
 .balance-modal-withdraw {

@@ -18,14 +18,14 @@ const BalanceModal = ({ isOpen, onClose, balance = 0, minWithdraw = 15 }) => {
 
           <div className="balance-modal-amount">
             <span>{balance}</span>
-            <img src="/tabler_stars-filled.svg" alt="Звезда" className="balance-star" />
+            <img src="/cupleader-1.svg" alt="Звезда" className="balance-star" />
           </div>
 
           <div className="balance-modal-info">
             <div className="balance-modal-remaining">
               <span>До вывода:</span>
               <span className="remaining-amount">{remaining}</span>
-              <img src="/tabler_stars-filled.svg" alt="Звезда" className="balance-star-small" />
+              <img src="/cupleader-1.svg" alt="Звезда" className="balance-star-small" />
             </div>
             <p className="balance-modal-hint">
               Чем выше место в лидерборде тем больше звёзд получите!
