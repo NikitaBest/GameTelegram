@@ -95,12 +95,13 @@
 }
 
 .leaderboard-item.place-1 .leaderboard-name {
-  color: rgba(0, 0, 0, 0.85);
+  color: #45607D;
   font-weight: 700;
 }
 
-.leaderboard-item.place-1 .leaderboard-points {
-  color: rgba(0, 0, 0, 0.6);
+.leaderboard-item.place-1 .leaderboard-points-badge {
+  background: rgba(69, 96, 125, 0.12);
+  border-color: rgba(69, 96, 125, 0.2);
 }
 
 /* 2 место - серебряный цвет */
@@ -114,12 +115,13 @@
 }
 
 .leaderboard-item.place-2 .leaderboard-name {
-  color: rgba(255, 255, 255, 0.95);
+  color: #45607D;
   font-weight: 700;
 }
 
-.leaderboard-item.place-2 .leaderboard-points {
-  color: rgba(255, 255, 255, 0.8);
+.leaderboard-item.place-2 .leaderboard-points-badge {
+  background: rgba(69, 96, 125, 0.15);
+  border-color: rgba(69, 96, 125, 0.25);
 }
 
 /* 3 место - бронзовый цвет */
@@ -133,12 +135,13 @@
 }
 
 .leaderboard-item.place-3 .leaderboard-name {
-  color: rgba(0, 0, 0, 0.85);
+  color: #45607D;
   font-weight: 700;
 }
 
-.leaderboard-item.place-3 .leaderboard-points {
-  color: rgba(0, 0, 0, 0.6);
+.leaderboard-item.place-3 .leaderboard-points-badge {
+  background: rgba(69, 96, 125, 0.12);
+  border-color: rgba(69, 96, 125, 0.2);
 }
 
 /* Остальные места - светло-серый цвет */
@@ -152,11 +155,12 @@
 }
 
 .leaderboard-item.place-other .leaderboard-name {
-  color: rgba(0, 0, 0, 0.85);
+  color: #45607D;
 }
 
-.leaderboard-item.place-other .leaderboard-points {
-  color: rgba(0, 0, 0, 0.6);
+.leaderboard-item.place-other .leaderboard-points-badge {
+  background: rgba(69, 96, 125, 0.1);
+  border-color: rgba(69, 96, 125, 0.15);
 }
 
 .leaderboard-item:hover {
@@ -268,19 +272,39 @@
 }
 
 .leaderboard-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #45607D;
+  line-height: 160%;
+  letter-spacing: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
 }
 
-.leaderboard-points {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.6);
-  white-space: nowrap;
+.leaderboard-points-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(69, 96, 125, 0.15);
+  border-radius: 8px;
+  border: 1px solid rgba(69, 96, 125, 0.2);
+}
+
+.leaderboard-points-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.leaderboard-points-value {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #45607D;
+  line-height: 1.5;
 }
 
 .leaderboard-loading,

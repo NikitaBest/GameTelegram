@@ -195,7 +195,10 @@ const Leaderboard = ({ drawId, userId }) => {
               {/* Имя и очки в центре */}
               <div className="leaderboard-info">
                 <div className="leaderboard-name">{getDisplayName(leader)}</div>
-                <div className="leaderboard-points">{leader.maxPointsAlias || `${leader.maxPoints ?? 0} очков`}</div>
+                <div className="leaderboard-points-badge">
+                  <img src="/Icons.svg" alt="" className="leaderboard-points-icon" />
+                  <span className="leaderboard-points-value">{leader.maxPoints ?? 0}</span>
+                </div>
               </div>
               
               {/* Кубок с номером справа */}
