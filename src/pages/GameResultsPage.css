@@ -8,12 +8,47 @@
   align-items: center;
   justify-content: flex-start;
   padding: 20px 16px;
-  padding-top: 40px;
+  padding-top: 60px;
   padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* Отступ для фиксированной кнопки */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   /* Градиентный фон из дизайна */
   background: linear-gradient(90deg, #8AB8FD 0%, #5990DD 50%, #4D7AC4 100%);
+}
+
+/* Кнопка назад */
+.back-to-main {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  z-index: 10;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  width: auto;
+}
+
+.back-to-main:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.back-to-main:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.back-arrow {
+  width: 24px;
+  height: 24px;
+  transform: rotate(180deg);
 }
 
 .results-content {

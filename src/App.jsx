@@ -153,6 +153,9 @@ function App() {
               // TODO: Логика получения дополнительных попыток
               console.log('Получить ещё попытки');
             }}
+            onGoToMain={() => {
+              setCurrentPage('draw');
+            }}
           />
         )}
       </div>

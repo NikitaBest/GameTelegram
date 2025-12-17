@@ -8,7 +8,7 @@ import { startDraw } from '../api/services/drawService';
 import { getLeaderboard } from '../api/services/leaderboardService';
 import './GameResultsPage.css';
 
-const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
+const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMain }) => {
   const [activeTab, setActiveTab] = useState('my-results'); // 'my-results' | 'rating'
   const [userRank, setUserRank] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -169,6 +169,12 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
         }}
       />
       
+      {/* Кнопка назад */}
+      <button className="back-to-main" onClick={onGoToMain}>
+        <img src="/material-symbols_arrow-back-rounded.svg" alt="Назад" className="back-arrow" />
+        <span>На главную</span>
+      </button>
+
       <div className="results-content">
         {/* Заголовок */}
         <div className="results-title-container">
