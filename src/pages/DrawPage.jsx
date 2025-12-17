@@ -13,7 +13,7 @@ import { useAuth } from '../hooks/useAuth';
 import { formatTime } from '../utils/mockData';
 import './DrawPage.css';
 
-const DrawPage = ({ drawId, onStartGame }) => {
+const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived }) => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [drawData, setDrawData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,6 +97,14 @@ const DrawPage = ({ drawId, onStartGame }) => {
             };
 
             setDrawData(formattedData);
+            
+            // Передаём participatingId (id из ответа) в родительский компонент
+            if (data.id) {
+              onParticipatingIdReceived?.(data.id);
+              if (import.meta.env.DEV) {
+                console.log('ParticipatingId:', data.id);
+              }
+            }
           } else {
             setError(response.error || 'Ошибка при загрузке данных розыгрыша');
           }

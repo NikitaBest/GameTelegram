@@ -1,0 +1,95 @@
+import { apiClient } from '../apiClient';
+import md5 from 'js-md5';
+
+const HASH_SALT = '(02_hKY8123!';
+
+export interface SaveAttemptRequest {
+  hash: string;
+  participatingId: string;
+  points: number;
+  pointsAlias: string;
+}
+
+export interface SaveAttemptResponse {
+  value: any;
+  isSuccess: boolean;
+  error: string | null;
+}
+
+/**
+ * Генерация хеша для защиты от подделки запроса
+ */
+function generateHash(participatingId: number, points: number, pointsAlias: string): string {
+  const hashSeed = 
+    String(participatingId) + 
+    String(points) + 
+    (pointsAlias ?? '') + 
+    HASH_SALT;
+  
+  return md5(hashSeed); // возвращает hex-строку в нижнем регистре
+}
+
+/**
+ * Сохранение результата попытки игры
+ */
+export async function saveAttempt(
+  participatingId: number,
+  points: number
+): Promise<SaveAttemptResponse> {
+  if (!participatingId) {
+    throw new Error('participatingId обязателен');
+  }
+
+  const pointsAlias = `${points} ${getPointsWord(points)}`;
+  const hash = generateHash(participatingId, points, pointsAlias);
+
+  const requestData: SaveAttemptRequest = {
+    hash,
+    participatingId: String(participatingId),
+    points,
+    pointsAlias,
+  };
+
+  if (import.meta.env.DEV) {
+    console.log('Сохранение результата игры:', requestData);
+  }
+
+  try {
+    const response = await apiClient.post<SaveAttemptResponse>(
+      '/attempt/save',
+      requestData
+    );
+    
+    if (import.meta.env.DEV) {
+      console.log('Результат сохранен:', response);
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Ошибка при сохранении результата:', error);
+    throw error;
+  }
+}
+
+/**
+ * Склонение слова "очко"
+ */
+function getPointsWord(points: number): string {
+  const lastTwo = points % 100;
+  const lastOne = points % 10;
+  
+  if (lastTwo >= 11 && lastTwo <= 19) {
+    return 'очков';
+  }
+  
+  if (lastOne === 1) {
+    return 'очко';
+  }
+  
+  if (lastOne >= 2 && lastOne <= 4) {
+    return 'очка';
+  }
+  
+  return 'очков';
+}
+

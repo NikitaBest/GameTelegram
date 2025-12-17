@@ -53,6 +53,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(getInitialPage);
   const [gameScore, setGameScore] = useState(0);
   const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
+  const [participatingId, setParticipatingId] = useState(null); // ID участия из /start
   
   // Авторизация
   const { user, isLoading, isAuthenticated, error, login } = useAuth();
@@ -115,7 +116,8 @@ function App() {
         {currentPage === 'draw' && (
           <DrawPage 
             drawId={drawId}
-            onStartGame={() => setCurrentPage('game')} 
+            onStartGame={() => setCurrentPage('game')}
+            onParticipatingIdReceived={(id) => setParticipatingId(id)}
           />
         )}
         {currentPage === 'game' && (
@@ -131,6 +133,7 @@ function App() {
           <GameResultsPage 
             score={gameScore}
             drawId={drawId}
+            participatingId={participatingId}
             onPlayAgain={() => {
               setGameKey(prev => prev + 1); // Пересоздаём игру
               setCurrentPage('game');

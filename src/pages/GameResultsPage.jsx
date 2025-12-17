@@ -1,15 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RotateCcw, Clock, Bot } from 'lucide-react';
 import Leaderboard from '../components/Leaderboard';
 import { useAuth } from '../hooks/useAuth';
+import { saveAttempt } from '../api/services/attemptService';
 import './GameResultsPage.css';
 
-const GameResultsPage = ({ score, drawId, onPlayAgain, attemptsLeft = 1 }) => {
+const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, attemptsLeft = 1 }) => {
   const [activeTab, setActiveTab] = useState('my-results'); // 'my-results' | 'rating'
+  const [userRank, setUserRank] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const hasSavedRef = useRef(false);
   const { user } = useAuth();
 
-  // Моковые данные - в будущем будут приходить с бэкенда
-  const userRank = 138;
+  // Отправляем результат на бекенд при монтировании
+  useEffect(() => {
+    if (participatingId && score !== undefined && !hasSavedRef.current) {
+      hasSavedRef.current = true;
+      setIsSaving(true);
+      setSaveError(null);
+
+      saveAttempt(participatingId, score)
+        .then((response) => {
+          if (response.isSuccess) {
+            console.log('Результат успешно сохранен:', response);
+            // Можно получить место из ответа если оно там есть
+            if (response.value?.topNumber) {
+              setUserRank(response.value.topNumber);
+            }
+          } else {
+            console.error('Ошибка сохранения результата:', response.error);
+            setSaveError(response.error);
+          }
+        })
+        .catch((err) => {
+          console.error('Ошибка при сохранении результата:', err);
+          setSaveError(err.message);
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
+    }
+  }, [participatingId, score]);
+
   const timeUntilFinal = '11:54:27';
   const botUsername = 'chest_of_goldbot';
 
@@ -66,8 +99,13 @@ const GameResultsPage = ({ score, drawId, onPlayAgain, attemptsLeft = 1 }) => {
               {/* Карточка с местом и очками */}
               <div className="result-card">
                 <div className="result-card-label">Твоё место</div>
-                <div className="result-card-rank">{userRank}</div>
+                <div className="result-card-rank">
+                  {isSaving ? '...' : (userRank || '—')}
+                </div>
                 <div className="result-card-score">{score} очков</div>
+                {saveError && (
+                  <div className="result-card-error">Ошибка сохранения</div>
+                )}
               </div>
 
               {/* Карточка с таймером и ботом */}
