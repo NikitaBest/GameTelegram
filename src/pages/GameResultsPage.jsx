@@ -17,6 +17,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
   const [attemptsLeft, setAttemptsLeft] = useState(0);
   const [secondsToEnd, setSecondsToEnd] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [referralLink, setReferralLink] = useState(null);
   const hasSavedRef = useRef(false);
   const { user } = useAuth();
 
@@ -66,6 +67,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             const remaining = data.maxAttemptsCount - data.attemptsCount;
             setAttemptsLeft(remaining > 0 ? remaining : 0);
             setSecondsToEnd(data.draw?.secondsToEnd || 0);
+            setReferralLink(data.referralLink || null);
             
             if (import.meta.env.DEV) {
               console.log('Данные результатов:', {
@@ -283,8 +285,18 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         onClose={() => setIsModalOpen(false)}
         participatingId={participatingId}
         onInviteFriends={() => {
-          console.log('Пригласить друзей');
-          // TODO: Логика приглашения друзей
+          if (referralLink) {
+            const tg = window.Telegram?.WebApp;
+            if (tg?.openTelegramLink) {
+              // Формируем ссылку для шаринга через Telegram
+              const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
+              const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+              tg.openTelegramLink(shareUrl);
+            } else {
+              // Fallback для браузера
+              window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('Присоединяйся к игре!')}`, '_blank');
+            }
+          }
           setIsModalOpen(false);
         }}
         onAttemptAdded={() => {

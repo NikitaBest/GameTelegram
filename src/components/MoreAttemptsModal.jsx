@@ -127,46 +127,48 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
           <img src="/Close.svg" alt="Закрыть" />
         </button>
 
-        {/* Пригласить друзей */}
-        <button className="attempt-option invite-friends" onClick={onInviteFriends}>
-          <div className="attempt-option-left">
-            <div className="attempt-bonus">+2 попытки</div>
-            <div className="attempt-action">
-              <img src="/fa-solid_user-friends.svg" alt="Друзья" className="attempt-icon" />
-              <span>Пригласить друзей</span>
+        <div className="modal-inner">
+          {/* Пригласить друзей */}
+          <button className="attempt-option invite-friends" onClick={onInviteFriends}>
+            <div className="attempt-option-left">
+              <div className="attempt-bonus">+2 попытки</div>
+              <div className="attempt-action">
+                <img src="/fa-solid_user-friends.svg" alt="Друзья" className="attempt-icon" />
+                <span>Пригласить друзей</span>
+              </div>
             </div>
-          </div>
-          <div className="attempt-option-arrow">
-            <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
-          </div>
-        </button>
-        <p className="attempt-note">*Начисляется после перехода и старта игры</p>
+            <div className="attempt-option-arrow">
+              <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
+            </div>
+          </button>
+          <p className="attempt-note">*Начисляется после перехода и старта игры</p>
 
-        {/* Посмотреть рекламу */}
-        <button 
-          className="attempt-option watch-ad" 
-          onClick={handleWatchAd}
-          disabled={isLoadingAd}
-        >
-          <div className="attempt-option-left">
-            <div className="attempt-bonus">+1 попытка</div>
-            <div className="attempt-action">
-              {isLoadingAd ? (
-                <Loader2 size={20} className="spinning" />
-              ) : (
-                <Film size={20} />
-              )}
-              <span>{isLoadingAd ? 'Загрузка...' : 'Посмотреть рекламу'}</span>
+          {/* Посмотреть рекламу */}
+          <button 
+            className="attempt-option watch-ad" 
+            onClick={handleWatchAd}
+            disabled={isLoadingAd}
+          >
+            <div className="attempt-option-left">
+              <div className="attempt-bonus">+1 попытка</div>
+              <div className="attempt-action">
+                {isLoadingAd ? (
+                  <Loader2 size={20} className="spinning" />
+                ) : (
+                  <Film size={20} />
+                )}
+                <span>{isLoadingAd ? 'Загрузка...' : 'Посмотреть рекламу'}</span>
+              </div>
             </div>
-          </div>
-          <div className="attempt-option-arrow">
-            <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
-          </div>
-        </button>
-        
-        {adError && (
-          <p className="attempt-error">{adError}</p>
-        )}
+            <div className="attempt-option-arrow">
+              <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
+            </div>
+          </button>
+          
+          {adError && (
+            <p className="attempt-error">{adError}</p>
+          )}
+        </div>
       </div>
     </div>
   );
