@@ -138,7 +138,6 @@ function App() {
               setGameKey(prev => prev + 1); // Пересоздаём игру
               setCurrentPage('game');
             }}
-            attemptsLeft={1}
           />
         )}
       </div>
