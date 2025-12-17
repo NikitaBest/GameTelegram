@@ -13,7 +13,7 @@ import { useAuth } from '../hooks/useAuth';
 import { formatTime } from '../utils/mockData';
 import './DrawPage.css';
 
-const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived }) => {
+const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsReceived }) => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [drawData, setDrawData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,6 +105,9 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived }) => {
                 console.log('ParticipatingId:', data.id);
               }
             }
+            
+            // Передаём количество оставшихся попыток
+            onAttemptsReceived?.(formattedData.attemptsLeft);
           } else {
             setError(response.error || 'Ошибка при загрузке данных розыгрыша');
           }
@@ -132,8 +135,9 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived }) => {
   };
 
   const handleStartGame = () => {
-    console.log('Начало игры');
-    onStartGame?.();
+    console.log('Начало игры, попыток осталось:', drawData?.attemptsLeft);
+    // Передаём количество попыток в родительский компонент
+    onStartGame?.(drawData?.attemptsLeft);
   };
 
   if (isLoading || authLoading) {

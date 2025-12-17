@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { RotateCcw, Clock, Bot } from 'lucide-react';
 import Leaderboard from '../components/Leaderboard';
+import MoreAttemptsModal from '../components/MoreAttemptsModal';
 import { useAuth } from '../hooks/useAuth';
 import { saveAttempt } from '../api/services/attemptService';
 import { startDraw } from '../api/services/drawService';
@@ -15,6 +16,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [attemptsLeft, setAttemptsLeft] = useState(0);
   const [secondsToEnd, setSecondsToEnd] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const hasSavedRef = useRef(false);
   const { user } = useAuth();
 
@@ -200,68 +202,90 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
 
         {/* Контент табов */}
         <div className="results-scrollable-content">
-          {activeTab === 'my-results' && (
-            <div className="results-content-area">
-              {/* Карточка с местом и очками */}
-              <div className="result-card">
-                <div className="result-card-label">Твоё место</div>
+        {activeTab === 'my-results' && (
+          <div className="results-content-area">
+            {/* Карточка с местом и очками */}
+            <div className="result-card">
+              <div className="result-card-label">Твоё место</div>
                 <div className="result-card-rank">
                   {isSaving ? '...' : (userRank || '—')}
                 </div>
-                <div className="result-card-score">{score} очков</div>
+              <div className="result-card-score">{score} очков</div>
                 {saveError && (
                   <div className="result-card-error">Ошибка сохранения</div>
                 )}
-              </div>
+            </div>
 
-              {/* Карточка с таймером и ботом */}
-              <div className="result-card">
-                <div className="result-card-timer">
-                  <Clock className="timer-icon" />
-                  <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
-                </div>
-                <div className="result-card-bot">
-                  <Bot className="bot-icon" />
-                  <span>Результаты придут в бот @{botUsername}</span>
-                </div>
+            {/* Карточка с таймером и ботом */}
+            <div className="result-card">
+              <div className="result-card-timer">
+                <Clock className="timer-icon" />
+                <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
+              </div>
+              <div className="result-card-bot">
+                <Bot className="bot-icon" />
+                <span>Результаты придут в бот @{botUsername}</span>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {activeTab === 'rating' && (
-            <div className="results-content-area">
+        {activeTab === 'rating' && (
+          <div className="results-content-area">
               {drawId ? (
                 <Leaderboard drawId={drawId} userId={user?.id} />
               ) : (
-                <div className="rating-placeholder">
-                  <p>Рейтинг будет доступен после финала</p>
-                </div>
-              )}
+            <div className="rating-placeholder">
+              <p>Рейтинг будет доступен после финала</p>
             </div>
-          )}
+              )}
+          </div>
+        )}
         </div>
       </div>
 
-      {/* Кнопка "ОТЫГРАТЬСЯ!" - фиксированная внизу */}
-      <button 
-        className="play-again-button" 
-        onClick={onPlayAgain}
-        disabled={attemptsLeft <= 0}
-      >
-        <RotateCcw className="play-again-icon" />
-        <div className="play-again-text">
-          <span className="play-again-main">
-            {attemptsLeft > 0 
-              ? (isFirstPlace ? 'ЗАКРЕПИТЬ!' : 'ОТЫГРАТЬСЯ!') 
-              : 'ПОПЫТКИ ЗАКОНЧИЛИСЬ'}
-          </span>
-          <span className="play-again-sub">
-            {attemptsLeft > 0 
-              ? `осталась ${attemptsLeft} ${getAttemptsWord(attemptsLeft)}`
-              : 'Ждите следующий розыгрыш'}
-          </span>
-        </div>
-      </button>
+      {/* Кнопка - фиксированная внизу */}
+      {attemptsLeft > 0 ? (
+        <button 
+          className="play-again-button" 
+          onClick={onPlayAgain}
+        >
+          <RotateCcw className="play-again-icon" />
+          <div className="play-again-text">
+            <span className="play-again-main">
+              {isFirstPlace ? 'ЗАКРЕПИТЬ!' : 'ОТЫГРАТЬСЯ!'}
+            </span>
+            <span className="play-again-sub">
+              осталась {attemptsLeft} {getAttemptsWord(attemptsLeft)}
+            </span>
+          </div>
+        </button>
+      ) : (
+        <button 
+          className="play-again-button more-attempts" 
+          onClick={() => setIsModalOpen(true)}
+        >
+          <div className="play-again-text">
+            <span className="play-again-main">ЕЩЁ ПОПЫТКИ</span>
+      </div>
+        </button>
+      )}
+
+      {/* Модальное окно для получения попыток */}
+      <MoreAttemptsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onInviteFriends={() => {
+          console.log('Пригласить друзей');
+          // TODO: Логика приглашения друзей
+          setIsModalOpen(false);
+        }}
+        onWatchAd={() => {
+          console.log('Посмотреть рекламу');
+          // TODO: Логика просмотра рекламы
+          setIsModalOpen(false);
+        }}
+      />
     </div>
   );
 };

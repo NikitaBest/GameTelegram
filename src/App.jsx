@@ -54,6 +54,7 @@ function App() {
   const [gameScore, setGameScore] = useState(0);
   const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
   const [participatingId, setParticipatingId] = useState(null); // ID участия из /start
+  const [attemptsLeft, setAttemptsLeft] = useState(0); // Оставшиеся попытки
   
   // Авторизация
   const { user, isLoading, isAuthenticated, error, login } = useAuth();
@@ -116,8 +117,18 @@ function App() {
         {currentPage === 'draw' && (
           <DrawPage 
             drawId={drawId}
-            onStartGame={() => setCurrentPage('game')}
+            onStartGame={(attempts) => {
+              // Проверяем есть ли попытки
+              if (attempts !== undefined && attempts <= 0) {
+                // Нет попыток - переводим на страницу результатов
+                setCurrentPage('results');
+              } else {
+                // Есть попытки - начинаем игру
+                setCurrentPage('game');
+              }
+            }}
             onParticipatingIdReceived={(id) => setParticipatingId(id)}
+            onAttemptsReceived={(attempts) => setAttemptsLeft(attempts)}
           />
         )}
         {currentPage === 'game' && (
@@ -137,6 +148,10 @@ function App() {
             onPlayAgain={() => {
               setGameKey(prev => prev + 1); // Пересоздаём игру
               setCurrentPage('game');
+            }}
+            onGetMoreAttempts={() => {
+              // TODO: Логика получения дополнительных попыток
+              console.log('Получить ещё попытки');
             }}
           />
         )}
