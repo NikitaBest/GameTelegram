@@ -194,7 +194,11 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
         
         <StartGameButton onClick={handleStartGame} />
         
-        <Leaderboard drawId={drawId} userId={user?.id} />
+        <div className="info-panel-container leaderboard-panel-container">
+          <div className="info-panel">
+            <Leaderboard drawId={drawId} userId={user?.id} />
+          </div>
+        </div>
       </div>
     </div>
   );
