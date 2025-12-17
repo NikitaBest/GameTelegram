@@ -128,10 +128,10 @@
 
 /* 3 место - бронзовый цвет */
 .leaderboard-item.place-3 {
-  background: linear-gradient(180deg, #F5C49C 0%, #BE887A 100%);
+  background: linear-gradient(180deg, #FFD3A8 0%, #FAC19E 100%);
   border: none;
   box-shadow: 
-    0 6px 0 0 #9A6B5E,
+    0 6px 0 0 #C9956E,
     0 8px 12px rgba(0, 0, 0, 0.15);
   border-radius: 16px;
 }
