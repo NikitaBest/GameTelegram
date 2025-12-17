@@ -1,4 +1,4 @@
-import { Users, Film } from 'lucide-react';
+import { Film } from 'lucide-react';
 import './MoreAttemptsModal.css';
 
 const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd }) => {
@@ -16,11 +16,13 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd }) => {
           <div className="attempt-option-left">
             <div className="attempt-bonus">+2 попытки</div>
             <div className="attempt-action">
-              <Users size={20} />
+              <img src="/fa-solid_user-friends.svg" alt="Друзья" className="attempt-icon" />
               <span>Пригласить друзей</span>
             </div>
           </div>
-          <div className="attempt-option-arrow">→</div>
+          <div className="attempt-option-arrow">
+            <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
+          </div>
         </button>
         <p className="attempt-note">*Начисляется после перехода и старта игры</p>
 
@@ -33,7 +35,9 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd }) => {
               <span>Посмотреть рекламу</span>
             </div>
           </div>
-          <div className="attempt-option-arrow">→</div>
+          <div className="attempt-option-arrow">
+            <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
+          </div>
         </button>
       </div>
     </div>
