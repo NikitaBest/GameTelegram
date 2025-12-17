@@ -99,3 +99,139 @@
   padding: 40px 20px;
 }
 
+.error-text {
+  color: #ff6b6b;
+}
+
+/* Карточка розыгрыша */
+.draw-card {
+  background: linear-gradient(0deg, rgba(100, 141, 234, 1) 0%, rgba(88, 127, 213, 1) 100%);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.draw-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(65, 107, 200, 1) 0%, rgba(142, 183, 240, 1) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.draw-card:active {
+  transform: scale(0.98);
+}
+
+.draw-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.draw-card-title {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  flex: 1;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.draw-card-score {
+  background: linear-gradient(180deg, #F0B922 0%, #E57D07 100%);
+  color: #fff8e1;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.09);
+  flex-shrink: 0;
+}
+
+.draw-card-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.draw-card-prize,
+.draw-card-time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.draw-card-prize .prize-label,
+.draw-card-time .time-label {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 12px;
+  color: #d5e9ff;
+  font-weight: 400;
+}
+
+.draw-card-prize .prize-value {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4ADE80;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.draw-card-time .time-value {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.draw-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.draw-status {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+
+.draw-status.participating {
+  background: linear-gradient(180deg, #4ADE80 0%, #22C55E 100%);
+  color: #FFFFFF;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.draw-status.new {
+  background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
+  color: #FFFFFF;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.draw-arrow {
+  font-size: 24px;
+  color: #FFFFFF;
+  font-weight: 700;
+  opacity: 0.8;
+}
+

@@ -179,7 +179,13 @@ function App() {
     <div className="app page-background">
       <div className="app-content">
         {currentPage === 'active-draws' && (
-          <ActiveDrawsPage />
+          <ActiveDrawsPage 
+            onSelectDraw={(selectedDrawId) => {
+              setDrawId(selectedDrawId);
+              saveDrawId(selectedDrawId);
+              checkAndNavigate(selectedDrawId);
+            }}
+          />
         )}
         {currentPage === 'path-to-treasures' && (
           <PathToTreasuresPage 
