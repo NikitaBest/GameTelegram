@@ -1,0 +1,109 @@
+.draw-finished-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background: linear-gradient(90deg, #8AB8FD 0%, #5990DD 50%, #4D7AC4 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.draw-finished-content {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 1;
+}
+
+.draw-finished-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.draw-finished-image {
+  width: 200px;
+  height: auto;
+  margin-bottom: 12px;
+}
+
+.draw-finished-subtitle {
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  max-width: 280px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.draw-finished-leaderboard {
+  width: 100%;
+}
+
+.draw-finished-button-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent 0%, rgba(77, 122, 196, 0.95) 30%);
+  z-index: 100;
+}
+
+.draw-finished-button {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  display: block;
+  padding: 16px 32px;
+  background: linear-gradient(180deg, #F5A623 0%, #E09000 100%);
+  border: none;
+  border-radius: 16px;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0px 4px 0px 0px #B87A00;
+  transition: transform 0.1s, box-shadow 0.1s;
+  text-transform: uppercase;
+}
+
+.draw-finished-button:active {
+  transform: translateY(2px);
+  box-shadow: 0px 2px 0px 0px #B87A00;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .draw-finished-page {
+    padding: 16px 12px;
+  }
+  
+  .draw-finished-image {
+    width: 160px;
+  }
+  
+  .draw-finished-subtitle {
+    font-size: 14px;
+  }
+  
+  .draw-finished-button {
+    font-size: 16px;
+    padding: 14px 24px;
+  }
+}
+

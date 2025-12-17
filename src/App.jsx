@@ -3,12 +3,14 @@ import DrawPage from './pages/DrawPage'
 import PathToTreasuresPage from './pages/PathToTreasuresPage'
 import GameResultsPage from './pages/GameResultsPage'
 import ActiveDrawsPage from './pages/ActiveDrawsPage'
+import DrawFinishedPage from './pages/DrawFinishedPage'
 import LoadingScreen from './components/LoadingScreen'
 import { GameContainer } from './game/game cosmos/GameContainer.tsx'
 import { useAuth } from './hooks/useAuth'
 import { getParsedStartParam } from './utils/urlParams'
 import { saveDrawId, getDrawId } from './utils/storage'
 import { checkPartnersSubscription } from './api/services/partnersService'
+import { startDraw } from './api/services/drawService'
 import './App.css'
 
 function App() {
@@ -99,6 +101,21 @@ function App() {
     }
 
     try {
+      // Сначала проверяем активен ли розыгрыш
+      const drawResponse = await startDraw(currentDrawId);
+      
+      if (drawResponse.isSuccess && drawResponse.value) {
+        const isActive = drawResponse.value.draw?.isActive;
+        
+        if (!isActive) {
+          // Розыгрыш завершён - показываем страницу завершения
+          console.log('Розыгрыш завершён, переход на draw-finished');
+          setCurrentPage('draw-finished');
+          return;
+        }
+      }
+
+      // Розыгрыш активен - проверяем подписки
       const response = await checkPartnersSubscription(currentDrawId);
       
       if (response.isSuccess && response.value) {
@@ -211,6 +228,14 @@ function App() {
             }}
             onGoToMain={() => {
               setCurrentPage('draw');
+            }}
+          />
+        )}
+        {currentPage === 'draw-finished' && (
+          <DrawFinishedPage 
+            drawId={drawId}
+            onNewDraws={() => {
+              setCurrentPage('active-draws');
             }}
           />
         )}
