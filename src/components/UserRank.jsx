@@ -1,14 +1,22 @@
 import './UserRank.css';
 
-const UserRank = ({ userRank }) => {
+const UserRank = ({ userRank, userAvatar }) => {
   return (
     <div className="user-rank">
       <div className="user-rank-content">
-        <img
-          className="user-icon"
-          alt="Leaderboard avatar"
-          src="/leaderboard-avatar-default.svg"
-        />
+        {userAvatar ? (
+          <img
+            className="user-icon"
+            alt="Аватар пользователя"
+            src={userAvatar}
+          />
+        ) : (
+          <img
+            className="user-icon"
+            alt="Аватар по умолчанию"
+            src="/leaderboard-avatar-default.svg"
+          />
+        )}
         <div className="user-rank-text-wrapper">
           <div className="user-rank-text">{userRank.label}</div>
         </div>

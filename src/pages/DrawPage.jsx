@@ -9,6 +9,7 @@ import StartGameButton from '../components/StartGameButton';
 import Leaderboard from '../components/Leaderboard';
 import BackgroundStars from '../components/BackgroundStars';
 import { startDraw } from '../api/services/drawService';
+import { getLeaderboard } from '../api/services/leaderboardService';
 import { useAuth } from '../hooks/useAuth';
 import { formatTime } from '../utils/mockData';
 import './DrawPage.css';
@@ -29,12 +30,17 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
         console.log(`Загрузка данных розыгрыша для ID: ${drawId}`);
       }
 
-      startDraw(drawId)
-        .then((response) => {
-          console.log('Данные розыгрыша:', response);
+      // Загружаем данные розыгрыша и место пользователя параллельно
+      Promise.all([
+        startDraw(drawId),
+        getLeaderboard(drawId, 0, 0) // Минимальный запрос для получения места текущего пользователя
+      ])
+        .then(([drawResponse, leaderboardResponse]) => {
+          console.log('Данные розыгрыша:', drawResponse);
+          console.log('Данные лидерборда:', leaderboardResponse);
           
-          if (response.isSuccess && response.value) {
-            const data = response.value;
+          if (drawResponse.isSuccess && drawResponse.value) {
+            const data = drawResponse.value;
             const draw = data.draw;
             const prizeList = draw.prizeList;
 
@@ -73,6 +79,29 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
               };
             });
 
+            // Получаем место и аватар пользователя из лидерборда
+            let userPlace = null;
+            let userPhotoUrl = null;
+            if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
+              const items = leaderboardResponse.value.items || [];
+              // API with-user возвращает текущего пользователя первым при countBefore=0
+              if (items.length > 0) {
+                // Ищем текущего пользователя по telegramId
+                const currentUser = items.find(item => 
+                  item.userTelegramId === user?.telegramId
+                ) || items[0]; // Fallback на первый элемент
+                
+                if (currentUser) {
+                  if (currentUser.topNumber) {
+                    userPlace = currentUser.topNumber;
+                  }
+                  if (currentUser.photoUrl) {
+                    userPhotoUrl = currentUser.photoUrl;
+                  }
+                }
+              }
+            }
+
             // Формируем данные для компонентов
             const formattedData = {
               balance: user?.starsAmount || 0,
@@ -89,9 +118,12 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
                 iconCount: 2,
               },
               userRank: {
-                place: null, // TODO: получить из отдельного запроса или из ответа
-                label: 'Твоё место будет определено после игры',
+                place: userPlace,
+                label: userPlace 
+                  ? `Твоё место: ${userPlace}` 
+                  : 'Твоё место будет определено после игры',
               },
+              userAvatar: userPhotoUrl,
               attemptsLeft: data.maxAttemptsCount - data.attemptsCount,
               maxAttemptsCount: data.maxAttemptsCount,
             };
@@ -109,7 +141,7 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
             // Передаём количество оставшихся попыток
             onAttemptsReceived?.(formattedData.attemptsLeft);
           } else {
-            setError(response.error || 'Ошибка при загрузке данных розыгрыша');
+            setError(drawResponse.error || 'Ошибка при загрузке данных розыгрыша');
           }
         })
         .catch((err) => {
@@ -188,7 +220,7 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
               starsForParticipants={drawData.starsForParticipants}
             />
             
-            <UserRank userRank={drawData.userRank} />
+            <UserRank userRank={drawData.userRank} userAvatar={drawData.userAvatar} />
           </div>
         </div>
         

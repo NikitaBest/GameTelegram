@@ -72,11 +72,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 12px 16px;
   border-radius: 12px;
   transition: all 0.2s;
   width: 100%;
-  height: 62px;
+  min-height: 70px;
   box-sizing: border-box;
   filter: drop-shadow(0px 13px 5px rgba(0, 0, 0, 0.01)) 
           drop-shadow(0px 7px 4px rgba(0, 0, 0, 0.05)) 
@@ -90,15 +90,13 @@
   border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
-.leaderboard-item.place-1 .leaderboard-name,
-.leaderboard-item.place-1 .leaderboard-points {
-  color: rgba(0, 0, 0, 0.8);
-  font-weight: 600;
+.leaderboard-item.place-1 .leaderboard-name {
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 700;
 }
 
-.leaderboard-item.place-1 .leaderboard-number {
-  color: rgba(0, 0, 0, 0.7);
-  font-weight: bold;
+.leaderboard-item.place-1 .leaderboard-points {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 /* 2 место - бронзовый цвет */
@@ -107,15 +105,13 @@
   border: 1px solid rgba(205, 127, 50, 0.3);
 }
 
-.leaderboard-item.place-2 .leaderboard-name,
-.leaderboard-item.place-2 .leaderboard-points {
+.leaderboard-item.place-2 .leaderboard-name {
   color: rgba(255, 255, 255, 0.95);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.leaderboard-item.place-2 .leaderboard-number {
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: bold;
+.leaderboard-item.place-2 .leaderboard-points {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* 3 место - серебряный цвет */
@@ -124,15 +120,13 @@
   border: 1px solid rgba(192, 192, 192, 0.3);
 }
 
-.leaderboard-item.place-3 .leaderboard-name,
-.leaderboard-item.place-3 .leaderboard-points {
-  color: rgba(0, 0, 0, 0.8);
-  font-weight: 600;
+.leaderboard-item.place-3 .leaderboard-name {
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 700;
 }
 
-.leaderboard-item.place-3 .leaderboard-number {
-  color: rgba(0, 0, 0, 0.7);
-  font-weight: bold;
+.leaderboard-item.place-3 .leaderboard-points {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 /* Остальные места - бело-серый цвет */
@@ -141,12 +135,11 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.leaderboard-item.place-other .leaderboard-name,
-.leaderboard-item.place-other .leaderboard-points {
-  color: rgba(0, 0, 0, 0.7);
+.leaderboard-item.place-other .leaderboard-name {
+  color: rgba(0, 0, 0, 0.85);
 }
 
-.leaderboard-item.place-other .leaderboard-number {
+.leaderboard-item.place-other .leaderboard-points {
   color: rgba(0, 0, 0, 0.6);
 }
 
@@ -160,23 +153,41 @@
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
 }
 
-.leaderboard-position {
+.leaderboard-cup {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
-  font-size: 18px;
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.9);
+  min-width: 50px;
+  height: 50px;
+  flex-shrink: 0;
 }
 
-.leaderboard-medal {
-  font-size: 24px;
+.leaderboard-cup-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
 }
 
-.leaderboard-number {
+.leaderboard-cup-number {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.7);
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Позиция цифры для 1 места */
+.leaderboard-item.place-1 .leaderboard-cup-number {
+  top: 25%;
+}
+
+/* Позиция цифры для 2 места */
+.leaderboard-item.place-2 .leaderboard-cup-number {
+  top: 25%;
 }
 
 .leaderboard-avatar {
@@ -226,29 +237,27 @@
 .leaderboard-info {
   flex: 1;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
   min-width: 0;
 }
 
 .leaderboard-name {
   font-size: 16px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .leaderboard-points {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .leaderboard-loading,

@@ -103,11 +103,12 @@ const Leaderboard = ({ drawId, userId }) => {
     }
   }, [drawId]);
 
-  const getMedalIcon = (position) => {
-    if (position === 1) return '🥇';
-    if (position === 2) return '🥈';
-    if (position === 3) return '🥉';
-    return null;
+  // Получаем иконку кубка в зависимости от места
+  const getCupIcon = (position) => {
+    if (position === 1) return '/1st-1.png';
+    if (position === 2) return '/Component 32.svg';
+    if (position === 3) return '/3rd-1.png';
+    return '/4rth-10th-1-7.png';
   };
 
   const getDisplayName = (user) => {
@@ -160,7 +161,6 @@ const Leaderboard = ({ drawId, userId }) => {
         {leaders.map((leader, index) => {
           const isLast = index === leaders.length - 1;
           const isCurrentUser = userId && leader.userId === userId;
-          const medal = getMedalIcon(leader.topNumber);
           const position = leader.topNumber;
           
           // Определяем класс для цвета в зависимости от места
@@ -169,20 +169,15 @@ const Leaderboard = ({ drawId, userId }) => {
           else if (position === 2) positionClass = 'place-2';
           else if (position === 3) positionClass = 'place-3';
           
+          const cupIcon = getCupIcon(position);
+          
           return (
             <div
               key={leader.participatingId}
               ref={isLast ? lastLeaderRef : null}
               className={`leaderboard-item ${positionClass} ${isCurrentUser ? 'current-user' : ''}`}
             >
-              <div className="leaderboard-position">
-                {medal ? (
-                  <span className="leaderboard-medal">{medal}</span>
-                ) : (
-                  <span className="leaderboard-number">{leader.topNumber}</span>
-                )}
-              </div>
-              
+              {/* Аватар слева */}
               <div className="leaderboard-avatar">
                 {leader.photoUrl ? (
                   <img 
@@ -197,9 +192,16 @@ const Leaderboard = ({ drawId, userId }) => {
                 )}
               </div>
               
+              {/* Имя и очки в центре */}
               <div className="leaderboard-info">
                 <div className="leaderboard-name">{getDisplayName(leader)}</div>
-                <div className="leaderboard-points">{leader.maxPointsAlias || `${leader.maxPoints} очков`}</div>
+                <div className="leaderboard-points">{leader.maxPointsAlias || `${leader.maxPoints ?? 0} очков`}</div>
+              </div>
+              
+              {/* Кубок с номером справа */}
+              <div className="leaderboard-cup">
+                <img src={cupIcon} alt={`Место ${position}`} className="leaderboard-cup-img" />
+                <span className="leaderboard-cup-number">{position}</span>
               </div>
             </div>
           );
