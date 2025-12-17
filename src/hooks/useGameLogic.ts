@@ -49,6 +49,7 @@ export function useGameLogic(): UseGameLogicResult {
   const lastSpawnTimeRef = useRef(0);
   const lastFrameTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  const lastDamageTimeRef = useRef(0); // Время последнего урона для неуязвимости
   // Используем refs для позиции игрока в игровом цикле, чтобы избежать лишних зависимостей
   const playerXRef = useRef(playerX);
   const playerYRef = useRef(playerY);
@@ -209,7 +210,7 @@ export function useGameLogic(): UseGameLogicResult {
         for (const obj of currentObjects) {
           // Применяем множитель скорости к базовой скорости объекта
           const effectiveSpeed = obj.speed * speedMultiplier;
-          const ny = obj.y + effectiveSpeed * delta * 4;
+          const ny = obj.y + effectiveSpeed * delta * 2;
           if (ny > GAME_HEIGHT + 100) {
             continue; // вышел за экран
           }
@@ -240,8 +241,13 @@ export function useGameLogic(): UseGameLogicResult {
             const centerX = nextObj.x + nextObj.width / 2;
             const centerY = nextObj.y + nextObj.height / 2;
             if (nextObj.type === 'asteroid' || nextObj.type === 'enemy') {
-              livesDelta -= 1;
-              addEffect(centerX, centerY, 'damage', '-1');
+              // Проверяем неуязвимость (500мс после последнего урона)
+              const now = Date.now();
+              if (now - lastDamageTimeRef.current > 500) {
+                livesDelta = -1;
+                lastDamageTimeRef.current = now;
+                addEffect(centerX, centerY, 'damage', '-1');
+              }
             } else {
               scoreDelta += 10;
               addEffect(centerX, centerY, 'score', '+10');
