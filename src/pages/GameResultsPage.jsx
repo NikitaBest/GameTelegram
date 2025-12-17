@@ -129,6 +129,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
 
   const timeUntilFinal = formatTime(secondsToEnd);
   const botUsername = 'chest_of_goldbot';
+  const isFirstPlace = userRank === 1;
 
   return (
     <div className="game-results-page">
@@ -153,12 +154,16 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
         {/* Заголовок */}
         <div className="results-title-container">
           <img 
-            src="/Frame 1171275345.svg" 
-            alt="ТВОЙ РЕЗУЛЬТАТ" 
+            src={isFirstPlace ? "/winner.svg" : "/Frame 1171275345.svg"}
+            alt={isFirstPlace ? "ПОБЕДИТЕЛЬ" : "ТВОЙ РЕЗУЛЬТАТ"}
             className="results-title-image"
           />
         </div>
-        <p className="results-subtitle">Отличная работа! Сможешь лучше?</p>
+        <p className="results-subtitle">
+          {isFirstPlace 
+            ? "Теперь удержи эту позицию до конца розыгрыша." 
+            : "Отличная работа! Сможешь лучше?"}
+        </p>
 
         {/* Табы */}
         <div className="results-tabs">
