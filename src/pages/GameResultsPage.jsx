@@ -258,7 +258,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           className="play-again-button" 
           onClick={onPlayAgain}
         >
-          <RotateCcw className="play-again-icon" />
+          <img src="/Vector.svg" alt="" className="play-again-icon" />
           <div className="play-again-text">
             <span className="play-again-main">
               {isFirstPlace ? 'ЗАКРЕПИТЬ!' : 'ОТЫГРАТЬСЯ!'}
@@ -275,7 +275,8 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         >
           <div className="play-again-text">
             <span className="play-again-main">ЕЩЁ ПОПЫТКИ</span>
-      </div>
+          </div>
+          <img src="/material-symbols_arrow-back-rounded.svg" alt="" className="play-again-arrow" />
         </button>
       )}
 
