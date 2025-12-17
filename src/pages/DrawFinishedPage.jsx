@@ -23,7 +23,7 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
 
         {/* Список участников */}
         <div className="draw-finished-leaderboard">
-          <Leaderboard drawId={drawId} showPrizes={true} />
+          <Leaderboard drawId={drawId} showPrizes={true} hideHeader={true} />
         </div>
 
       </div>

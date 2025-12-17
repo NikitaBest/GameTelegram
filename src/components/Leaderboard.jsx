@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getLeaderboard } from '../api/services/leaderboardService';
 import './Leaderboard.css';
 
-const Leaderboard = ({ drawId, userId }) => {
+const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   const [leaders, setLeaders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -144,19 +144,21 @@ const Leaderboard = ({ drawId, userId }) => {
 
   return (
     <div className="leaderboard-container">
-      <div className="leaderboard-header">
-        <h3 className="leaderboard-title">Лидеры</h3>
-        {totalCount > 0 && (
-          <div className="leaderboard-count">
-            <img 
-              src="/fa-solid_user-friends.svg" 
-              alt="Участники" 
-              className="leaderboard-count-icon"
-            />
-            <span>{totalCount} участников</span>
-          </div>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="leaderboard-header">
+          <h3 className="leaderboard-title">Лидеры</h3>
+          {totalCount > 0 && (
+            <div className="leaderboard-count">
+              <img 
+                src="/fa-solid_user-friends.svg" 
+                alt="Участники" 
+                className="leaderboard-count-icon"
+              />
+              <span>{totalCount} участников</span>
+            </div>
+          )}
+        </div>
+      )}
       <div className="leaderboard-list">
         {leaders.map((leader, index) => {
           const isLast = index === leaders.length - 1;
