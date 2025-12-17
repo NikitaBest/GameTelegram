@@ -120,7 +120,7 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
               userRank: {
                 place: userPlace,
                 label: userPlace 
-                  ? `Твоё место: ${userPlace}` 
+                  ? `Ты на ${userPlace} месте` 
                   : 'Твоё место будет определено после игры',
               },
               userAvatar: userPhotoUrl,

@@ -58,7 +58,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
       // Параллельно загружаем данные розыгрыша и место в рейтинге
       Promise.all([
         startDraw(drawId),
-        getLeaderboard(drawId, 0, 0) // Минимальный запрос чтобы получить данные текущего пользователя
+        getLeaderboard(drawId, 1, 1) // Запрос с текущим пользователем и соседями
       ])
         .then(([drawResponse, leaderboardResponse]) => {
           // Обрабатываем данные розыгрыша

@@ -1,8 +1,10 @@
 import './UserRank.css';
 
 const UserRank = ({ userRank, userAvatar }) => {
+  const isFirstPlace = userRank?.place === 1;
+  
   return (
-    <div className="user-rank">
+    <div className={`user-rank ${isFirstPlace ? 'place-1' : ''}`}>
       <div className="user-rank-content">
         {userAvatar ? (
           <img

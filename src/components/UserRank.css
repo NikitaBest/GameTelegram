@@ -11,6 +11,15 @@
   position: relative;
 }
 
+.user-rank.place-1 {
+  background: linear-gradient(180deg, #F6E46C 0%, #CFB031 100%);
+  box-shadow: 0px 4px 0px 0px #575035;
+}
+
+.user-rank.place-1 .user-rank-text {
+  color: #5a4a1a;
+}
+
 .user-rank-content {
   display: inline-flex;
   align-items: center;
