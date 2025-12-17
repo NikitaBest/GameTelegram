@@ -13,14 +13,10 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  console.log('ActiveDrawsPage рендер, isLoading:', isLoading, 'draws:', draws.length, 'error:', error);
-
   useEffect(() => {
     setIsLoading(true);
-    console.log('Загрузка активных розыгрышей...');
     getActiveDraws()
       .then((response) => {
-        console.log('Ответ активных розыгрышей:', response);
         if (response.isSuccess && response.value) {
           setDraws(response.value);
         } else {
@@ -35,15 +31,6 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
         setIsLoading(false);
       });
   }, []);
-
-  // Вычисляем общий призовой фонд
-  const calculatePrizeFund = (prizeList) => {
-    if (!prizeList?.items) return 0;
-    return prizeList.items.reduce((sum, item) => {
-      const prizeValue = parseFloat(item.prize.value) || 0;
-      return sum + prizeValue * item.countWinner;
-    }, 0);
-  };
 
   return (
     <div className="active-draws-page">
@@ -73,39 +60,21 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
               className="draw-card"
               onClick={() => onSelectDraw?.(draw.id)}
             >
-              <div className="draw-card-header">
-                <h3 className="draw-card-title">{draw.name}</h3>
-                {draw.participating?.maxPoints !== null && (
-                  <div className="draw-card-score">
-                    {draw.participating.maxPointsAlias || `${draw.participating.maxPoints} очков`}
-                  </div>
-                )}
-              </div>
-              
-              <div className="draw-card-info">
-                <div className="draw-card-prize">
-                  <span className="prize-label">Призовой фонд:</span>
-                  <span className="prize-value">{calculatePrizeFund(draw.prizeList)} ₽</span>
-                </div>
-                
-                <div className="draw-card-time">
-                  <span className="time-label">До конца:</span>
-                  <span className="time-value">
-                    {(() => {
-                      const time = formatTime(draw.secondsToEnd);
-                      return `${time.hours}:${time.minutes}:${time.seconds}`;
-                    })()}
-                  </span>
-                </div>
-              </div>
+              <h3 className="draw-card-title">{draw.name}</h3>
               
               <div className="draw-card-footer">
+                <div className="draw-card-time">
+                  {(() => {
+                    const time = formatTime(draw.secondsToEnd);
+                    return `${time.hours}:${time.minutes}:${time.seconds}`;
+                  })()}
+                </div>
+                
                 {draw.hasParticipating ? (
-                  <span className="draw-status participating">Вы участвуете</span>
+                  <span className="draw-status participating">Участвовать</span>
                 ) : (
-                  <span className="draw-status new">Новый</span>
+                  <span className="draw-status new">Участвовать</span>
                 )}
-                <span className="draw-arrow">→</span>
               </div>
             </div>
           ))}

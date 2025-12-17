@@ -2,8 +2,10 @@
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
-  background: radial-gradient(169.2% 42.3% at 49.67% 7.24%, rgba(195, 235, 255, 0.4) 0%, rgba(0, 0, 0, 0.08) 100%),
-    linear-gradient(180deg, #4498FB 0.04%, #2C63DB 33.27%, rgba(25, 81, 183, 0.92) 62.56%);
+  background-image: url('/Задник.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 40px 16px;
   padding-top: 60px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
@@ -132,71 +134,12 @@
   transform: scale(0.98);
 }
 
-.draw-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-  gap: 12px;
-}
-
 .draw-card-title {
   font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #FFFFFF;
-  margin: 0;
-  flex: 1;
-  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-.draw-card-score {
-  background: linear-gradient(180deg, #F0B922 0%, #E57D07 100%);
-  color: #fff8e1;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 8px;
-  white-space: nowrap;
-  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.09);
-  flex-shrink: 0;
-}
-
-.draw-card-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  gap: 12px;
-}
-
-.draw-card-prize,
-.draw-card-time {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.draw-card-prize .prize-label,
-.draw-card-time .time-label {
-  font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 12px;
-  color: #d5e9ff;
-  font-weight: 400;
-}
-
-.draw-card-prize .prize-value {
-  font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #4ADE80;
-  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-.draw-card-time .time-value {
-  font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #FFFFFF;
+  margin: 0 0 12px 0;
   text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
 }
 
@@ -204,34 +147,36 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.draw-card-time {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .draw-status {
   font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 .draw-status.participating {
-  background: linear-gradient(180deg, #4ADE80 0%, #22C55E 100%);
+  background: linear-gradient(180deg, #F0B922 0%, #E57D07 100%);
   color: #FFFFFF;
   text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 0px 0px #B87A00;
 }
 
 .draw-status.new {
-  background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
+  background: linear-gradient(180deg, #F0B922 0%, #E57D07 100%);
   color: #FFFFFF;
   text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
-}
-
-.draw-arrow {
-  font-size: 24px;
-  color: #FFFFFF;
-  font-weight: 700;
-  opacity: 0.8;
+  box-shadow: 0px 3px 0px 0px #B87A00;
 }
 
