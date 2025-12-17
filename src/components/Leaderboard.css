@@ -86,8 +86,9 @@
 
 /* 1 место - золотой цвет */
 .leaderboard-item.place-1 {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: linear-gradient(180deg, #F6E46C 0%, #CFB031 100%);
+  border: 1px solid rgba(87, 80, 53, 0.2);
+  box-shadow: 0 2px 0 0 #575035;
 }
 
 .leaderboard-item.place-1 .leaderboard-name {
@@ -99,10 +100,11 @@
   color: rgba(0, 0, 0, 0.6);
 }
 
-/* 2 место - бронзовый цвет */
+/* 2 место - серебряный цвет */
 .leaderboard-item.place-2 {
-  background: linear-gradient(135deg, #CD7F32 0%, #B8860B 100%);
-  border: 1px solid rgba(205, 127, 50, 0.3);
+  background: linear-gradient(180deg, #D8E7F2 0%, #ABBCC9 100%);
+  border: 1px solid rgba(49, 72, 87, 0.2);
+  box-shadow: 0 2px 0 0 #314857;
 }
 
 .leaderboard-item.place-2 .leaderboard-name {
@@ -114,10 +116,11 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* 3 место - серебряный цвет */
+/* 3 место - бронзовый цвет */
 .leaderboard-item.place-3 {
-  background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 100%);
-  border: 1px solid rgba(192, 192, 192, 0.3);
+  background: linear-gradient(180deg, #F5C49C 0%, #BE887A 100%);
+  border: 1px solid rgba(86, 49, 39, 0.2);
+  box-shadow: 0 2px 0 0 #563127;
 }
 
 .leaderboard-item.place-3 .leaderboard-name {
@@ -129,10 +132,11 @@
   color: rgba(0, 0, 0, 0.6);
 }
 
-/* Остальные места - бело-серый цвет */
+/* Остальные места - светло-серый цвет */
 .leaderboard-item.place-other {
-  background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: linear-gradient(180deg, #E8E8E8 0%, #F0F0F0 100%);
+  border: 1px solid rgba(61, 61, 61, 0.15);
+  box-shadow: 0 2px 0 0 #3D3D3D;
 }
 
 .leaderboard-item.place-other .leaderboard-name {
