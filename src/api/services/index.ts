@@ -23,4 +23,5 @@ export {
   type LeaderboardUser,
   type LeaderboardValue
 } from './leaderboardService';
+export { viewAd } from './adService';
 

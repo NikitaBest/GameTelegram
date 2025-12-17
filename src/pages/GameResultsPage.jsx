@@ -281,15 +281,16 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
       <MoreAttemptsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        participatingId={participatingId}
         onInviteFriends={() => {
           console.log('Пригласить друзей');
           // TODO: Логика приглашения друзей
           setIsModalOpen(false);
         }}
-        onWatchAd={() => {
-          console.log('Посмотреть рекламу');
-          // TODO: Логика просмотра рекламы
-          setIsModalOpen(false);
+        onAttemptAdded={() => {
+          // Обновляем количество попыток после успешного просмотра рекламы
+          setAttemptsLeft(prev => prev + 1);
+          console.log('Попытка добавлена через рекламу');
         }}
       />
     </div>
