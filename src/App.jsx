@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import DrawPage from './pages/DrawPage'
 import PathToTreasuresPage from './pages/PathToTreasuresPage'
 import GameResultsPage from './pages/GameResultsPage'
 import ActiveDrawsPage from './pages/ActiveDrawsPage'
+import LoadingScreen from './components/LoadingScreen'
 import { GameContainer } from './game/game cosmos/GameContainer.tsx'
 import { useAuth } from './hooks/useAuth'
 import { getParsedStartParam } from './utils/urlParams'
 import { saveDrawId, getDrawId } from './utils/storage'
+import { checkPartnersSubscription } from './api/services/partnersService'
 import './App.css'
 
 function App() {
@@ -55,6 +57,7 @@ function App() {
   const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
   const [participatingId, setParticipatingId] = useState(null); // ID участия из /start
   const [attemptsLeft, setAttemptsLeft] = useState(0); // Оставшиеся попытки
+  const [isAppReady, setIsAppReady] = useState(false); // Флаг готовности приложения
   
   // Авторизация
   const { user, isLoading, isAuthenticated, error, login } = useAuth();
@@ -87,20 +90,73 @@ function App() {
     }
   }, [])
 
+  // Проверка подписок партнёров и определение начальной страницы
+  const checkAndNavigate = useCallback(async (currentDrawId) => {
+    if (!currentDrawId) {
+      // Нет drawId - открываем активные розыгрыши
+      setCurrentPage('active-draws');
+      return;
+    }
+
+    try {
+      const response = await checkPartnersSubscription(currentDrawId);
+      
+      if (response.isSuccess && response.value) {
+        if (response.value.success) {
+          // Все подписки выполнены - сразу на главную страницу draw
+          console.log('Все подписки выполнены, переход на draw');
+          setCurrentPage('draw');
+        } else {
+          // Есть невыполненные подписки - на страницу партнёров
+          console.log('Есть невыполненные подписки, переход на path-to-treasures');
+          setCurrentPage('path-to-treasures');
+        }
+      } else {
+        // Ошибка - на страницу партнёров для проверки
+        setCurrentPage('path-to-treasures');
+      }
+    } catch (error) {
+      console.error('Ошибка проверки подписок:', error);
+      // При ошибке - на страницу партнёров
+      setCurrentPage('path-to-treasures');
+    }
+  }, []);
+
   // Авторизация при загрузке приложения
   // ВАЖНО: Всегда отправляем запрос login после проверки параметра
   useEffect(() => {
-    // Авторизуемся при каждой загрузке приложения (независимо от наличия токена)
-    // Это гарантирует, что бекенд получит актуальные данные, включая utm параметр
-    login().catch((err) => {
-      console.error('Ошибка авторизации при загрузке:', err);
-      // В режиме разработки продолжаем работу даже при ошибке авторизации
-      if (import.meta.env.DEV) {
-        console.warn('Продолжаем работу в режиме разработки без авторизации');
+    const initApp = async () => {
+      try {
+        // Авторизуемся
+        await login();
+        
+        // Если есть drawId - проверяем подписки
+        if (drawId) {
+          await checkAndNavigate(drawId);
+        }
+        
+        // Небольшая задержка для плавности
+        setTimeout(() => {
+          setIsAppReady(true);
+        }, 300);
+      } catch (err) {
+        console.error('Ошибка авторизации при загрузке:', err);
+        // В режиме разработки продолжаем работу даже при ошибке авторизации
+        if (import.meta.env.DEV) {
+          console.warn('Продолжаем работу в режиме разработки без авторизации');
+          setIsAppReady(true);
+        }
       }
-    });
+    };
+
+    initApp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Выполняем только при монтировании компонента
+
+  // Показываем экран загрузки пока приложение не готово
+  if (!isAppReady) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="app page-background">

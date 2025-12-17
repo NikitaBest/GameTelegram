@@ -47,12 +47,10 @@ const PathToTreasuresPage = ({ drawId, onStartGame }) => {
             setAllSubscribed(allSubscribedCheck);
             
             // Если success: true, значит все подписки выполнены - переходим на страницу draw
+            // Примечание: основная проверка уже делается в App.jsx при загрузке
             if (response.value.success) {
               console.log('Все подписки выполнены, переход на страницу draw');
-              // Небольшая задержка для плавного перехода
-              setTimeout(() => {
-                onStartGame?.();
-              }, 500);
+              onStartGame?.();
             }
           } else {
             console.error('Ошибка в ответе от бекенда:', response.error);
