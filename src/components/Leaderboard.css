@@ -89,8 +89,8 @@
   background: linear-gradient(180deg, #FFF39A 0%, #F4E266 100%);
   border: none;
   box-shadow: 
-    0 6px 0 0 #A89530,
-    0 8px 12px rgba(0, 0, 0, 0.15);
+    0 6px 0 0 #D4C44E,
+    0 8px 12px rgba(0, 0, 0, 0.15) !important;
   border-radius: 16px;
 }
 
@@ -167,6 +167,13 @@
 .leaderboard-item.current-user {
   border: 2px solid rgba(74, 144, 226, 0.8);
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+}
+
+.leaderboard-item.place-1.current-user {
+  border: none;
+  box-shadow: 
+    0 6px 0 0 #D4C44E,
+    0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
 .leaderboard-cup {
