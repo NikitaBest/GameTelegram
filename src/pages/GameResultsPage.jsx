@@ -109,6 +109,23 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
     }
   }, [drawId, participatingId]);
 
+  // Таймер обратного отсчёта
+  useEffect(() => {
+    if (secondsToEnd <= 0) return;
+    
+    const interval = setInterval(() => {
+      setSecondsToEnd(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [secondsToEnd > 0]); // Запускаем только когда есть время
+
   // Форматирование времени
   const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600);
@@ -234,7 +251,9 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain }) => {
         <RotateCcw className="play-again-icon" />
         <div className="play-again-text">
           <span className="play-again-main">
-            {attemptsLeft > 0 ? 'ОТЫГРАТЬСЯ!' : 'ПОПЫТКИ ЗАКОНЧИЛИСЬ'}
+            {attemptsLeft > 0 
+              ? (isFirstPlace ? 'ЗАКРЕПИТЬ!' : 'ОТЫГРАТЬСЯ!') 
+              : 'ПОПЫТКИ ЗАКОНЧИЛИСЬ'}
           </span>
           <span className="play-again-sub">
             {attemptsLeft > 0 
