@@ -96,7 +96,8 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
   const handlePointerMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!gameState.isPlaying || gameState.isPaused || !isDraggingRef.current) return;
     if (!dragStartScreenRef.current || !dragStartPlayerRef.current) return;
-    e.preventDefault();
+    // Не вызываем preventDefault здесь, так как React обработчики могут быть passive
+    // preventDefault вызывается в глобальном обработчике
     
     const clientX = 'touches' in e && e.touches.length > 0 
       ? e.touches[0].clientX 
@@ -136,7 +137,7 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
 
   // Add global mouse/touch move handlers for smooth dragging
   useEffect(() => {
-    if (!gameState.isPlaying || gameState.isPaused) return;
+    if (!gameState.isPlaying || gameState.isPaused || !containerRef.current) return;
 
     const handleGlobalMove = (e: MouseEvent | TouchEvent) => {
       if (!isDraggingRef.current) return;
@@ -177,16 +178,23 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
       dragStartPlayerRef.current = null;
     };
 
+    const container = containerRef.current;
+
+    // Добавляем обработчики на window для глобального отслеживания
     window.addEventListener('mousemove', handleGlobalMove);
     window.addEventListener('touchmove', handleGlobalMove, { passive: false });
     window.addEventListener('mouseup', handleGlobalEnd);
     window.addEventListener('touchend', handleGlobalEnd);
+
+    // Также добавляем обработчик на сам контейнер с passive: false для предотвращения ошибок
+    container.addEventListener('touchmove', handleGlobalMove, { passive: false });
 
     return () => {
       window.removeEventListener('mousemove', handleGlobalMove);
       window.removeEventListener('touchmove', handleGlobalMove);
       window.removeEventListener('mouseup', handleGlobalEnd);
       window.removeEventListener('touchend', handleGlobalEnd);
+      container.removeEventListener('touchmove', handleGlobalMove);
     };
       }, [gameState.isPlaying, gameState.isPaused, setPlayerPosition, screenToGameCoords]);
 
@@ -233,7 +241,7 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
           onMouseUp={gameState.isPlaying && !gameState.isGameOver ? handlePointerEnd : undefined}
           onMouseLeave={gameState.isPlaying && !gameState.isGameOver ? handlePointerEnd : undefined}
           onTouchStart={gameState.isPlaying && !gameState.isGameOver ? handlePointerStart : undefined}
-          onTouchMove={gameState.isPlaying && !gameState.isGameOver ? handlePointerMove : undefined}
+          // onTouchMove убран - используем глобальный обработчик с passive: false
           onTouchEnd={gameState.isPlaying && !gameState.isGameOver ? handlePointerEnd : undefined}
         >
           {/* Inner container to scale logic coordinates to visual size */}

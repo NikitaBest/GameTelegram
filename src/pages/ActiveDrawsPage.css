@@ -6,6 +6,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   padding: 40px 16px;
   padding-top: 60px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
