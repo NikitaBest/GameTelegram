@@ -16,8 +16,8 @@ if (window.Telegram?.WebApp) {
   }
   
   // Настройка цветовой схемы под цвет приложения (синий градиент)
-  // Используем основной цвет из градиента приложения: #2C63DB (темно-синий)
-  const appPrimaryColor = '#2C63DB'
+  // Используем основной цвет из градиента приложения: #67ADF7
+  const appPrimaryColor = '#67ADF7'
   tg.setHeaderColor(appPrimaryColor)
   tg.setBackgroundColor(appPrimaryColor)
 }
