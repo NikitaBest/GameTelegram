@@ -227,8 +227,7 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
 
   return (
     <div 
-      className="flex flex-col items-center justify-center w-full bg-black overflow-hidden relative touch-none"
-      style={{ height: `${viewportHeight}px` }}
+      className="game-container-fullscreen flex flex-col items-center justify-center w-full bg-black overflow-hidden relative touch-none"
     >
       {/* Game Area Wrapper - Handles aspect ratio and scaling */}
       {/* On mobile: flex-1 w-full relative (fills screen). On desktop: constrained */}
