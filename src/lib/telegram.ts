@@ -5,7 +5,16 @@ import { getStartParam } from '../utils/urlParams';
 export function isTelegramWebApp(): boolean {
   if (typeof window === 'undefined') return false;
   // @ts-expect-error: глобальный объект Telegram приходит снаружи
-  return Boolean(window.Telegram && window.Telegram.WebApp);
+  const tg = window.Telegram?.WebApp;
+  if (!tg) return false;
+
+  // В обычном браузере скрипт telegram-web-app.js может создать объект,
+  // но без initData / initDataUnsafe.user. Считаем, что мы в Telegram,
+  // только если есть реальные данные от контейнера Telegram.
+  const hasInitData = Boolean(tg.initData && typeof tg.initData === 'string' && tg.initData.length > 0);
+  const hasUnsafeUser = Boolean(tg.initDataUnsafe && tg.initDataUnsafe.user);
+
+  return hasInitData || hasUnsafeUser;
 }
 
 export function getStableViewportHeight(): number {
