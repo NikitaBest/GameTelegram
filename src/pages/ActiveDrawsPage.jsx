@@ -91,30 +91,41 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
                 
                 {/* Контент справа */}
                 <div className="draw-card-content">
-                  {/* Верхняя часть: время справа */}
+                  {/* Верхняя часть: информация и время */}
                   <div className="draw-card-header">
                     <div className="draw-card-info">
-                      <h3 className="draw-card-title">
-                        {draw.game?.name || draw.name}
-                      </h3>
-                      {(draw.game?.description || draw.description) && (
+                      {draw.name && (
+                        <h3 className="draw-card-title">
+                          {draw.name}
+                        </h3>
+                      )}
+                      {draw.description && (
                         <p className="draw-card-description">
-                          {draw.game?.description || draw.description}
+                          {draw.description}
                         </p>
                       )}
                     </div>
-                    <div className="draw-card-time">
-                      {timeString}
+                    <div className="draw-card-time-wrapper">
+                      <div className="draw-card-time">
+                        {timeString}
+                      </div>
+                      {/* Иконка стрелки под временем */}
+                      <div className="draw-card-footer">
+                        {draw.attemptsCount > 0 ? (
+                          <img 
+                            src="/maki_arrow.svg" 
+                            alt="Участвовать" 
+                            className="draw-card-arrow-icon"
+                          />
+                        ) : (
+                          <img 
+                            src="/maki_arrow (1).svg" 
+                            alt="Участвовать" 
+                            className="draw-card-arrow-icon"
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* Нижняя часть: кнопка справа */}
-                  <div className="draw-card-footer">
-                    {draw.hasParticipating ? (
-                      <span className="draw-status participating">Участвовать</span>
-                    ) : (
-                      <span className="draw-status new">Участвовать</span>
-                    )}
                   </div>
                 </div>
               </div>

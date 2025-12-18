@@ -95,18 +95,24 @@
 }
 
 .placeholder-text {
+  font-family: 'Rubik', Helvetica, sans-serif;
   text-align: center;
   color: rgba(255, 255, 255, 0.7);
   font-size: 16px;
+  font-weight: 400;
   padding: 40px 20px;
+  margin: 0;
 }
 
 .error-text {
+  font-family: 'Rubik', Helvetica, sans-serif;
   color: #ff6b6b;
+  font-weight: 500;
 }
 
 /* Карточка розыгрыша */
 .draw-card {
+  font-family: 'Rubik', Helvetica, sans-serif;
   background: linear-gradient(0deg, rgba(100, 141, 234, 1) 0%, rgba(88, 127, 213, 1) 100%);
   border-radius: 16px;
   padding: 16px;
@@ -117,6 +123,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  /* 3D эффект наклона вперед - верх ближе к экрану, низ дальше (более мягкий эффект) */
+  transform: perspective(400px) rotateX(-2deg);
+  transform-style: preserve-3d;
+  /* Дополнительные тени для усиления эффекта глубины */
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .draw-card::before {
@@ -134,7 +147,7 @@
 }
 
 .draw-card:active {
-  transform: scale(0.98);
+  transform: perspective(400px) rotateX(-2deg) scale(0.98);
 }
 
 /* Иконка слева по середине */
@@ -142,11 +155,14 @@
   flex-shrink: 0;
   width: 60px;
   height: 60px;
+  min-width: 60px;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 2;
+  align-self: center; /* Выравнивание по вертикали */
 }
 
 .draw-card-icon-img {
@@ -160,23 +176,33 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0; /* Убираем gap, чтобы элементы были ближе */
   position: relative;
   z-index: 2;
   min-width: 0; /* Для правильной работы text-overflow */
+  justify-content: center; /* Выравнивание по центру вертикально */
+  min-height: 60px; /* Минимальная высота для выравнивания с иконкой */
+  align-items: stretch; /* Растягиваем элементы на всю ширину */
 }
 
 /* Верхняя часть: информация и время */
 .draw-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center; /* Выравнивание по центру вертикально */
   gap: 12px;
+  width: 100%;
+  flex: 1; /* Занимает доступное пространство для центрирования */
+  min-height: 0; /* Позволяет сжиматься */
 }
 
 .draw-card-info {
   flex: 1;
   min-width: 0; /* Для правильной работы text-overflow */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Выравнивание по центру вертикально */
+  gap: 4px;
 }
 
 .draw-card-title {
@@ -184,10 +210,12 @@
   font-size: 16px;
   font-weight: 700;
   color: #FFFFFF;
-  margin: 0 0 4px 0;
+  margin: 0;
+  padding: 0;
   text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
   line-height: 1.3;
   word-wrap: break-word;
+  text-align: left;
 }
 
 .draw-card-description {
@@ -196,26 +224,73 @@
   font-weight: 400;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
+  padding: 0;
   text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
   line-height: 1.4;
   word-wrap: break-word;
+  text-align: left;
+}
+
+/* Обертка для времени и кнопки */
+.draw-card-time-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .draw-card-time {
   font-family: 'Rubik', Helvetica, sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #FFFFFF;
-  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+  color: rgba(255, 255, 255, 0.95);
   white-space: nowrap;
   flex-shrink: 0;
+  /* Вдавленное поле с округленными углами */
+  background: linear-gradient(135deg, rgba(65, 107, 200, 0.8) 0%, rgba(88, 127, 213, 0.6) 100%);
+  border-radius: 12px;
+  padding: 8px 16px;
+  box-shadow: 
+    inset 0px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0px 1px 2px rgba(0, 0, 0, 0.2),
+    0px 1px 0px rgba(255, 255, 255, 0.1);
+  /* Эффект вдавленности */
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+  /* 3D эффект наклона вперед - верх ближе к экрану, низ дальше */
+  transform: perspective(200px) rotateX(-8deg);
+  transform-style: preserve-3d;
+  /* Дополнительные тени для усиления эффекта глубины */
+  box-shadow: 
+    inset 0px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0px 1px 2px rgba(0, 0, 0, 0.2),
+    0px 1px 0px rgba(255, 255, 255, 0.1),
+    0px 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Нижняя часть: кнопка */
+/* Нижняя часть: иконка стрелки под временем */
 .draw-card-footer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.draw-card-arrow-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.draw-card-arrow-icon:hover {
+  transform: scale(1.1);
+}
+
+.draw-card-arrow-icon:active {
+  transform: scale(0.95);
 }
 
 .draw-status {
