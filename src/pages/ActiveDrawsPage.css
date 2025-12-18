@@ -35,16 +35,23 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 335px;
+  max-width: 100%; /* Убрал ограничение, чтобы было такой же ширины как карточки */
   min-height: 91px;
   padding: 8px 24px;
   gap: 8px;
-  border-radius: 12px;
+  border-radius: 16px; /* Увеличил до 16px, как у карточки */
   background: linear-gradient(180deg, #407AD3 0%, #487ED2 100%);
   border: 1px solid transparent;
   box-sizing: border-box;
   position: relative;
   margin-bottom: 32px;
+  /* 3D эффект наклона вперед - такой же как у карточек */
+  transform: perspective(400px) rotateX(-2deg);
+  transform-style: preserve-3d;
+  /* Эффект вдавленности - только внутренние тени, без внешних */
+  box-shadow: 
+    inset 0px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .title-block::before {
@@ -52,7 +59,7 @@
   position: absolute;
   inset: 0;
   padding: 1px;
-  border-radius: 12px;
+  border-radius: 16px; /* Обновлен для соответствия основному блоку */
   background: linear-gradient(180deg, #1154AD 0%, #94B7E6 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
