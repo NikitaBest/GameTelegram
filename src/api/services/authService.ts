@@ -82,7 +82,9 @@ export async function login(): Promise<AuthResponse> {
     isPremium: userData.isPremium,
     addedToAttachmentMenu: userData.addedToAttachmentMenu,
     allowsWriteToPm: userData.allowsWriteToPm,
-    ignoreValidate: userData.ignoreValidate,
+    // Временно всегда просим бекенд игнорировать строгую валидацию initData
+    // согласно Swagger: "ignoreValidate": true
+    ignoreValidate: true,
     // utm - опциональное поле, отправляем только если есть параметр tgWebAppStartParam
     // Если параметр есть, отправляем его ПОЛНОЕ значение (например, "33_utm-channel")
     ...(userData.utm ? { utm: userData.utm } : {}),
