@@ -2,9 +2,8 @@
   min-height: 100vh;
   min-height: 100dvh;
   width: 100%;
-  /* Фон такой же, как на главной странице */
-  background: radial-gradient(169.2% 42.3% at 49.67% 7.24%, rgba(195, 235, 255, 0.4) 0%, rgba(0, 0, 0, 0.08) 100%),
-    linear-gradient(180deg, #4498FB 0.04%, #2C63DB 33.27%, rgba(25, 81, 183, 0.92) 62.56%);
+  /* Фон убран - используется общий фон из .page-background */
+  background: transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,8 +14,6 @@
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background-attachment: fixed;
-  background-size: cover;
   overscroll-behavior: none; /* Отключаем bounce эффект */
   overscroll-behavior-y: none;
 }

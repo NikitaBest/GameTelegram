@@ -2,11 +2,8 @@
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
-  background-image: url('/Задник.svg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  /* Фон убран - используется общий фон из .page-background */
+  background: transparent;
   padding: 40px 16px;
   padding-top: 60px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
