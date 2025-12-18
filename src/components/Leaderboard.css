@@ -65,6 +65,12 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  /* Оптимизация для плавной прокрутки */
+  will-change: scroll-position;
+  transform: translateZ(0);
+  /* Улучшаем производительность скролла */
+  -webkit-overflow-scrolling: touch;
+  overflow-anchor: none; /* Предотвращаем автоматическую прокрутку при загрузке */
 }
 
 .leaderboard-item {
@@ -74,14 +80,19 @@
   gap: 12px;
   padding: 8px 16px;
   border-radius: 12px;
-  transition: all 0.2s;
+  transition: transform 0.2s ease, opacity 0.2s ease;
   width: 100%;
   min-height: 56px;
   box-sizing: border-box;
-  filter: drop-shadow(0px 13px 5px rgba(0, 0, 0, 0.01)) 
-          drop-shadow(0px 7px 4px rgba(0, 0, 0, 0.05)) 
-          drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.09)) 
-          drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1));
+  /* Оптимизированные тени - используем box-shadow вместо множественных filter */
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1),
+              0px 3px 3px rgba(0, 0, 0, 0.09),
+              0px 7px 4px rgba(0, 0, 0, 0.05),
+              0px 13px 5px rgba(0, 0, 0, 0.01);
+  /* GPU ускорение для плавной прокрутки */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* 1 место - золотой цвет */
@@ -261,6 +272,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Оптимизация загрузки изображений */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  /* GPU ускорение */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .leaderboard-avatar-placeholder {

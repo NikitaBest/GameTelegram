@@ -1,6 +1,63 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { getLeaderboard } from '../api/services/leaderboardService';
 import './Leaderboard.css';
+
+// Мемоизированный компонент элемента лидерборда для оптимизации рендеринга
+const LeaderboardItem = memo(({ leader, isLast, isCurrentUser, userId, onLastItemRef, getCupIcon, getDisplayName }) => {
+  const position = leader.topNumber;
+  
+  // Мемоизируем вычисления класса позиции
+  const positionClass = useMemo(() => {
+    if (position === 1) return 'place-1';
+    if (position === 2) return 'place-2';
+    if (position === 3) return 'place-3';
+    return 'place-other';
+  }, [position]);
+
+  const cupIcon = useMemo(() => getCupIcon(position), [position, getCupIcon]);
+  const displayName = useMemo(() => getDisplayName(leader), [leader, getDisplayName]);
+
+  return (
+    <div
+      ref={isLast ? onLastItemRef : null}
+      className={`leaderboard-item ${positionClass} ${isCurrentUser ? 'current-user' : ''}`}
+    >
+      {/* Аватар слева */}
+      <div className="leaderboard-avatar">
+        {leader.photoUrl ? (
+          <img 
+            src={leader.photoUrl} 
+            alt={displayName}
+            className="leaderboard-avatar-img"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="leaderboard-avatar-placeholder">
+            {leader.firstName?.[0]?.toUpperCase() || '?'}
+          </div>
+        )}
+      </div>
+      
+      {/* Имя и очки в центре */}
+      <div className="leaderboard-info">
+        <div className="leaderboard-name">{displayName}</div>
+        <div className="leaderboard-points-badge">
+          <img src="/Icons.svg" alt="" className="leaderboard-points-icon" loading="lazy" />
+          <span className="leaderboard-points-value">{leader.maxPoints ?? 0}</span>
+        </div>
+      </div>
+      
+      {/* Кубок с номером справа */}
+      <div className="leaderboard-cup">
+        <img src={cupIcon} alt={`Место ${position}`} className="leaderboard-cup-img" loading="lazy" />
+        <span className="leaderboard-cup-number">{position}</span>
+      </div>
+    </div>
+  );
+});
+
+LeaderboardItem.displayName = 'LeaderboardItem';
 
 const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   const [leaders, setLeaders] = useState([]);
@@ -10,68 +67,91 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const observerRef = useRef(null);
+  const loadingTimeoutRef = useRef(null);
   
-  // Загрузка дополнительных данных при прокрутке
+  // Загрузка дополнительных данных при прокрутке с оптимизацией
   const loadMore = useCallback(() => {
     if (loadingMore || !hasMore || !drawId) return;
 
-    setLoadingMore(true);
+    // Отменяем предыдущий таймаут, если он есть
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
 
-    // Загружаем следующую порцию (увеличиваем CountAfter)
-    // CountBefore остается 10, CountAfter увеличиваем на 20
-    const currentAfter = Math.max(10, leaders.length - 10); // Учитываем, что первые 10 уже загружены
-    const newAfter = currentAfter + 20;
-    
-    getLeaderboard(drawId, 10, newAfter)
-      .then((response) => {
-        if (response.isSuccess && response.value) {
-          const newItems = response.value.items || [];
-          // Берем только новые элементы (которые еще не загружены)
-          const existingIds = new Set(leaders.map(l => l.participatingId));
-          const uniqueNewItems = newItems.filter(item => !existingIds.has(item.participatingId));
-          
-          if (uniqueNewItems.length > 0) {
+    // Небольшая задержка для предотвращения множественных запросов
+    loadingTimeoutRef.current = setTimeout(() => {
+      setLoadingMore(true);
+
+      // Загружаем следующую порцию (увеличиваем CountAfter)
+      // CountBefore остается 10, CountAfter увеличиваем на 20
+      // Учитываем, что начальная загрузка теперь 20 элементов
+      const currentAfter = Math.max(20, leaders.length - 10); // Учитываем, что первые 20 уже загружены
+      const newAfter = currentAfter + 20;
+      
+      getLeaderboard(drawId, 10, newAfter)
+        .then((response) => {
+          if (response.isSuccess && response.value) {
+            const newItems = response.value.items || [];
+            // Берем только новые элементы (которые еще не загружены)
             setLeaders(prev => {
-              const updated = [...prev, ...uniqueNewItems];
-              const total = response.value.totalCount || totalCount;
-              setTotalCount(total);
-              if (updated.length >= total) {
+              const existingIds = new Set(prev.map(l => l.participatingId));
+              const uniqueNewItems = newItems.filter(item => !existingIds.has(item.participatingId));
+              
+              if (uniqueNewItems.length > 0) {
+                const updated = [...prev, ...uniqueNewItems];
+                const total = response.value.totalCount || totalCount;
+                setTotalCount(total);
+                if (updated.length >= total) {
+                  setHasMore(false);
+                }
+                return updated;
+              } else {
                 setHasMore(false);
+                return prev;
               }
-              return updated;
             });
           } else {
             setHasMore(false);
           }
-        } else {
+        })
+        .catch((err) => {
+          console.error('Ошибка при загрузке дополнительных лидеров:', err);
           setHasMore(false);
-        }
-      })
-      .catch((err) => {
-        console.error('Ошибка при загрузке дополнительных лидеров:', err);
-        setHasMore(false);
-      })
-      .finally(() => {
-        setLoadingMore(false);
-      });
-  }, [drawId, leaders, loadingMore, hasMore, totalCount]);
+        })
+        .finally(() => {
+          setLoadingMore(false);
+        });
+    }, 100); // Небольшая задержка для батчинга
+  }, [drawId, leaders.length, loadingMore, hasMore, totalCount]);
 
   const lastLeaderRef = useCallback((node) => {
     if (isLoading || loadingMore) return;
     if (observerRef.current) observerRef.current.disconnect();
+    
+    // Оптимизированный IntersectionObserver с debounce
+    let timeoutId = null;
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          loadMore();
+          // Debounce для предотвращения множественных вызовов
+          if (timeoutId) clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            loadMore();
+          }, 150);
         }
       },
       {
         root: null, // Используем viewport как root для отслеживания прокрутки страницы
-        rootMargin: '200px', // Начинаем загрузку за 200px до конца списка
-        threshold: 0.1,
+        rootMargin: '300px', // Увеличиваем до 300px для более ранней загрузки
+        threshold: 0.01, // Уменьшаем threshold для более раннего срабатывания
       }
     );
     if (node) observerRef.current.observe(node);
+    
+    // Cleanup
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [isLoading, loadingMore, hasMore, loadMore]);
 
   // Загружаем начальный список лидеров
@@ -80,7 +160,8 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
       setIsLoading(true);
       setError(null);
 
-      getLeaderboard(drawId, 10, 10)
+      // Загружаем больше элементов сразу для лучшей производительности
+      getLeaderboard(drawId, 10, 20)
         .then((response) => {
           if (response.isSuccess && response.value) {
             const items = response.value.items || [];
@@ -101,22 +182,32 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
           setIsLoading(false);
         });
     }
+
+    // Cleanup при размонтировании
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
   }, [drawId]);
 
-  // Получаем иконку кубка в зависимости от места
-  const getCupIcon = (position) => {
+  // Мемоизируем функции для предотвращения лишних ре-рендеров
+  const getCupIcon = useCallback((position) => {
     if (position === 1) return '/1st-1.png';
     if (position === 2) return '/Component 32.svg';
     if (position === 3) return '/3rd-1.png';
     return '/4rth-10th-1-7.png';
-  };
+  }, []);
 
-  const getDisplayName = (user) => {
+  const getDisplayName = useCallback((user) => {
     if (user.userName) return `@${user.userName}`;
     if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
     if (user.firstName) return user.firstName;
     return 'Пользователь';
-  };
+  }, []);
 
   if (isLoading) {
     return (
@@ -163,52 +254,18 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
         {leaders.map((leader, index) => {
           const isLast = index === leaders.length - 1;
           const isCurrentUser = userId && leader.userId === userId;
-          const position = leader.topNumber;
-          
-          // Определяем класс для цвета в зависимости от места
-          let positionClass = 'place-other';
-          if (position === 1) positionClass = 'place-1';
-          else if (position === 2) positionClass = 'place-2';
-          else if (position === 3) positionClass = 'place-3';
-          
-          const cupIcon = getCupIcon(position);
           
           return (
-            <div
+            <LeaderboardItem
               key={leader.participatingId}
-              ref={isLast ? lastLeaderRef : null}
-              className={`leaderboard-item ${positionClass} ${isCurrentUser ? 'current-user' : ''}`}
-            >
-              {/* Аватар слева */}
-              <div className="leaderboard-avatar">
-                {leader.photoUrl ? (
-                  <img 
-                    src={leader.photoUrl} 
-                    alt={getDisplayName(leader)}
-                    className="leaderboard-avatar-img"
-                  />
-                ) : (
-                  <div className="leaderboard-avatar-placeholder">
-                    {leader.firstName?.[0]?.toUpperCase() || '?'}
-                  </div>
-                )}
-              </div>
-              
-              {/* Имя и очки в центре */}
-              <div className="leaderboard-info">
-                <div className="leaderboard-name">{getDisplayName(leader)}</div>
-                <div className="leaderboard-points-badge">
-                  <img src="/Icons.svg" alt="" className="leaderboard-points-icon" />
-                  <span className="leaderboard-points-value">{leader.maxPoints ?? 0}</span>
-                </div>
-              </div>
-              
-              {/* Кубок с номером справа */}
-              <div className="leaderboard-cup">
-                <img src={cupIcon} alt={`Место ${position}`} className="leaderboard-cup-img" />
-                <span className="leaderboard-cup-number">{position}</span>
-              </div>
-            </div>
+              leader={leader}
+              isLast={isLast}
+              isCurrentUser={isCurrentUser}
+              userId={userId}
+              onLastItemRef={lastLeaderRef}
+              getCupIcon={getCupIcon}
+              getDisplayName={getDisplayName}
+            />
           );
         })}
       </div>
