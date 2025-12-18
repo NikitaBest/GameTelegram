@@ -36,30 +36,38 @@ function App() {
   }
   
   // Состояние для ID текущего розыгрыша
-  // Приоритет: параметр из URL > сохраненный в localStorage
-  const initialDrawId = parsedStartParam.drawId || getDrawId();
+  // ВАЖНО: Используем только drawId из URL параметра при инициализации
+  // localStorage используется только для сохранения, но не для определения начальной страницы
+  const initialDrawId = parsedStartParam.drawId || null;
   const [drawId, setDrawId] = useState(initialDrawId);
   
-  // Сохраняем drawId в localStorage если он есть
+  // Сохраняем drawId в localStorage если он есть в URL параметре
   useEffect(() => {
     if (parsedStartParam.drawId) {
       saveDrawId(parsedStartParam.drawId);
       setDrawId(parsedStartParam.drawId);
       if (import.meta.env.DEV) {
-        console.log(`Сохранен ID розыгрыша: ${parsedStartParam.drawId}`);
+        console.log(`Сохранен ID розыгрыша из URL: ${parsedStartParam.drawId}`);
+      }
+    } else {
+      // Если в URL нет drawId, очищаем состояние (но не localStorage, чтобы не терять данные)
+      // Это гарантирует, что при открытии без параметра всегда будет страница активных розыгрышей
+      if (import.meta.env.DEV) {
+        console.log('ID розыгрыша в URL не найден, открываем страницу активных розыгрышей');
       }
     }
   }, [parsedStartParam.drawId]);
   
   // Определяем начальную страницу на основе параметра tgWebAppStartParam
+  // ВАЖНО: Если в URL нет drawId, всегда открываем страницу активных розыгрышей
   const getInitialPage = () => {
     if (parsedStartParam.hasParam && parsedStartParam.drawId) {
       // Если параметр есть и есть ID розыгрыша - открываем страницу с розыгрышем
       console.log(`Открываем розыгрыш с ID: ${parsedStartParam.drawId}`);
       return 'path-to-treasures';
     } else {
-      // Если параметра нет - открываем страницу активных розыгрышей
-      console.log('Параметр не найден, открываем страницу активных розыгрышей');
+      // Если параметра нет или нет ID розыгрыша - открываем страницу активных розыгрышей
+      console.log('ID розыгрыша в URL не найден, открываем страницу активных розыгрышей');
       return 'active-draws';
     }
   };
@@ -157,9 +165,15 @@ function App() {
         // Авторизуемся
         await login();
         
-        // Если есть drawId - проверяем подписки
-        if (drawId) {
-          await checkAndNavigate(drawId);
+        // ВАЖНО: Проверяем drawId только если он есть в URL параметре
+        // Если drawId есть только в localStorage, но не в URL - не используем его для навигации
+        const drawIdFromUrl = parsedStartParam.drawId;
+        if (drawIdFromUrl) {
+          // Если есть drawId в URL - проверяем подписки и навигируем
+          await checkAndNavigate(drawIdFromUrl);
+        } else {
+          // Если нет drawId в URL - гарантируем, что открыта страница активных розыгрышей
+          setCurrentPage('active-draws');
         }
         
         // Небольшая задержка для плавности
@@ -171,6 +185,10 @@ function App() {
         // В режиме разработки продолжаем работу даже при ошибке авторизации
         if (import.meta.env.DEV) {
           console.warn('Продолжаем работу в режиме разработки без авторизации');
+          // Если нет drawId в URL - открываем страницу активных розыгрышей
+          if (!parsedStartParam.drawId) {
+            setCurrentPage('active-draws');
+          }
           setIsAppReady(true);
         }
       }
