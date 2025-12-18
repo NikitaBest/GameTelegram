@@ -139,13 +139,13 @@
   font-family: 'Rubik', Helvetica, sans-serif;
   background: linear-gradient(180deg, #81B1F9 0%, #5B80E0 100%);
   border-radius: 16px;
-  padding: 16px;
+  padding: 16px 12px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   /* 3D эффект наклона вперед - верх ближе к экрану, низ дальше (более мягкий эффект) */
   transform: perspective(400px) rotateX(-2deg);
   transform-style: preserve-3d;
@@ -213,7 +213,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center; /* Выравнивание по центру вертикально */
-  gap: 12px;
+  gap: 2px;
   width: 100%;
   flex: 1; /* Занимает доступное пространство для центрирования */
   min-height: 0; /* Позволяет сжиматься */
@@ -226,6 +226,7 @@
   flex-direction: column;
   justify-content: center; /* Выравнивание по центру вертикально */
   gap: 4px;
+  flex-grow: 1; /* Позволяет занимать больше места */
 }
 
 .draw-card-title {
@@ -261,6 +262,8 @@
   align-items: flex-end;
   gap: 8px;
   flex-shrink: 0;
+  min-width: 50px; /* Минимальная ширина, чтобы кнопка не смещалась */
+  max-width: 50px; /* Ограничиваем максимальную ширину, чтобы дать больше места тексту */
 }
 
 .draw-card-time {
@@ -324,5 +327,180 @@
   color: #FFFFFF;
   text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
   box-shadow: 0px 3px 0px 0px #B87A00;
+}
+
+/* Адаптивные стили для разных размеров экранов */
+/* Очень маленькие экраны (до 360px) */
+@media (max-width: 360px) {
+  .draw-card {
+    padding: 14px 10px;
+    gap: 8px;
+  }
+
+  .draw-card-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    min-height: 50px;
+  }
+
+  .draw-card-content {
+    min-height: 50px;
+  }
+
+  .draw-card-title {
+    font-size: 15px;
+  }
+
+  .draw-card-description {
+    font-size: 13px;
+  }
+
+  .draw-card-time {
+    font-size: 16px;
+  }
+
+  .draw-card-time-wrapper {
+    min-width: 45px;
+    max-width: 45px;
+  }
+
+  .draw-card-arrow-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .active-draws-content {
+    max-width: 100%;
+  }
+}
+
+/* Маленькие экраны (361px - 375px) */
+@media (min-width: 361px) and (max-width: 375px) {
+  .draw-card {
+    padding: 15px 11px;
+    gap: 9px;
+  }
+
+  .draw-card-icon {
+    width: 55px;
+    height: 55px;
+    min-width: 55px;
+    min-height: 55px;
+  }
+
+  .draw-card-content {
+    min-height: 55px;
+  }
+
+  .draw-card-title {
+    font-size: 15px;
+  }
+
+  .draw-card-description {
+    font-size: 13px;
+  }
+
+  .draw-card-time {
+    font-size: 17px;
+  }
+
+  .draw-card-time-wrapper {
+    min-width: 48px;
+    max-width: 48px;
+  }
+
+  .draw-card-arrow-icon {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* Средние экраны (376px - 414px) */
+@media (min-width: 376px) and (max-width: 414px) {
+  .draw-card {
+    padding: 16px 12px;
+    gap: 10px;
+  }
+
+  .draw-card-title {
+    font-size: 16px;
+  }
+
+  .draw-card-description {
+    font-size: 14px;
+  }
+
+  .draw-card-time {
+    font-size: 18px;
+  }
+
+  .draw-card-time-wrapper {
+    min-width: 50px;
+    max-width: 50px;
+  }
+}
+
+/* Большие экраны (415px и выше) */
+@media (min-width: 415px) {
+  .draw-card {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  .draw-card-time-wrapper {
+    min-width: 55px;
+    max-width: 55px;
+  }
+}
+
+/* Обеспечиваем стабильность layout на всех экранах */
+.draw-card-header {
+  min-width: 0; /* Позволяет flex-элементам сжиматься */
+}
+
+.draw-card-info {
+  overflow: hidden; /* Предотвращаем переполнение */
+}
+
+/* Дополнительные стили для стабильности на всех экранах */
+.draw-card-title,
+.draw-card-description {
+  /* Предотвращаем изменение размера текста браузером */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Унифицируем размеры для средних и больших экранов */
+@media (min-width: 376px) {
+  .draw-card-title {
+    font-size: 16px;
+  }
+
+  .draw-card-description {
+    font-size: 14px;
+  }
+
+  .draw-card-time {
+    font-size: 18px;
+  }
+
+  .draw-card-icon {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+  }
+
+  .draw-card-content {
+    min-height: 60px;
+  }
+
+  .draw-card-arrow-icon {
+    width: 32px;
+    height: 32px;
+  }
 }
 
