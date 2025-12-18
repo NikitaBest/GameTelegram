@@ -142,7 +142,6 @@
   padding: 16px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   position: relative;
   display: flex;
   align-items: center;
@@ -150,10 +149,10 @@
   /* 3D эффект наклона вперед - верх ближе к экрану, низ дальше (более мягкий эффект) */
   transform: perspective(400px) rotateX(-2deg);
   transform-style: preserve-3d;
-  /* Дополнительные тени для усиления эффекта глубины */
+  /* Уменьшенные внешние тени */
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    0 8px 16px rgba(0, 0, 0, 0.15);
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .draw-card::before {
