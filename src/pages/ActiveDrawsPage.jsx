@@ -55,7 +55,7 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
       <div className="active-draws-content">
         <div className="title-block">
           <h1 className="page-title">Активные розыгрыши</h1>
-          <p className="page-subtitle">Выберите розыгрыш для участия</p>
+          <p className="page-subtitle">фарми звёзды!</p>
         </div>
         
         <div className="draws-list">
