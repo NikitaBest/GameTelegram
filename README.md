@@ -1,16 +1,194 @@
-# React + Vite
+# GameTelegram - Telegram Web App для игровых розыгрышей
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Telegram Web App приложение для проведения игровых розыгрышей с космической мини-игрой. Пользователи подписываются на партнерские каналы, играют и соревнуются за призы.
 
-Currently, two official plugins are available:
+## 🚀 Технологии
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19.2** - UI библиотека
+- **Vite 7.2** - Сборщик и dev-сервер
+- **TypeScript** - Типизация (частично)
+- **Tailwind CSS** - Стилизация
+- **Telegram Web App SDK** - Интеграция с Telegram
+- **Framer Motion** - Анимации
 
-## React Compiler
+## 📋 Требования
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Node.js** версии 18+ (рекомендуется 20+)
+- **npm** или **yarn**
 
-## Expanding the ESLint configuration
+## 🔧 Установка и запуск
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. Клонирование и установка зависимостей
+
+```bash
+# Клонируйте репозиторий
+git clone <repository-url>
+cd GameTelegram
+
+# Установите зависимости
+npm install
+```
+
+### 2. Настройка переменных окружения
+
+Скопируйте файл `.env.example` в `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Отредактируйте `.env` и укажите URL вашего бекенда:
+
+```env
+VITE_API_BASE_URL=https://telegram-games.tg-projects.ru
+```
+
+### 3. Запуск в режиме разработки
+
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу `http://localhost:5173`
+
+**Важно:** Для полноценной работы в режиме разработки приложение должно быть запущено через Telegram Web App. Используйте [Telegram Bot](https://core.telegram.org/bots/webapps) для тестирования.
+
+### 4. Сборка для продакшена
+
+```bash
+npm run build
+```
+
+Собранные файлы будут в папке `dist/`
+
+### 5. Предпросмотр продакшен-сборки
+
+```bash
+npm run preview
+```
+
+## 📦 Деплой на сервер
+
+### Вариант 1: Статический хостинг (рекомендуется)
+
+1. Соберите проект:
+   ```bash
+   npm run build
+   ```
+
+2. Загрузите содержимое папки `dist/` на ваш веб-сервер
+
+3. Настройте веб-сервер (nginx пример):
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /path/to/dist;
+    index index.html;
+
+    # SPA routing - все запросы на index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Кеширование статических файлов
+    location /assets {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+### Вариант 2: Docker
+
+Создайте `Dockerfile`:
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### Настройка Telegram Bot
+
+1. Создайте бота через [@BotFather](https://t.me/BotFather)
+2. Настройте Web App:
+   - Используйте команду `/newapp` в BotFather
+   - Укажите URL вашего развернутого приложения (должен быть HTTPS)
+   - Укажите название и описание приложения
+
+## 🔑 Переменные окружения
+
+| Переменная | Описание | Обязательная |
+|-----------|----------|--------------|
+| `VITE_API_BASE_URL` | URL бекенд API | Да |
+
+## 📁 Структура проекта
+
+```
+GameTelegram/
+├── src/
+│   ├── api/              # API клиент и сервисы
+│   ├── components/        # Переиспользуемые компоненты
+│   ├── pages/             # Страницы приложения
+│   ├── game/              # Игровая логика
+│   ├── hooks/             # React хуки
+│   ├── lib/               # Библиотеки и типы
+│   └── utils/             # Утилиты
+├── public/                # Статические файлы
+└── dist/                  # Собранные файлы (генерируется)
+```
+
+## 🛠️ Доступные команды
+
+- `npm run dev` - Запуск dev-сервера
+- `npm run build` - Сборка для продакшена
+- `npm run preview` - Предпросмотр продакшен-сборки
+- `npm run lint` - Проверка кода линтером
+
+## 📝 API Endpoints
+
+Приложение использует следующие эндпоинты бекенда:
+
+- `POST /auth/login` - Авторизация
+- `GET /draw/active` - Активные розыгрыши
+- `POST /participating/start` - Начало участия
+- `POST /participating/check-partners-subscription` - Проверка подписок
+- `POST /attempt/save` - Сохранение результата игры
+- `POST /participating/top-list/with-user` - Лидерборд
+- `POST /participating/view-ad` - Просмотр рекламы
+
+## ⚠️ Важные замечания
+
+1. **HTTPS обязателен** - Telegram Web App требует HTTPS для работы
+2. **Переменные окружения** - После изменения `.env` перезапустите dev-сервер
+3. **Telegram Web App** - Приложение работает только внутри Telegram
+4. **Бекенд API** - Убедитесь, что бекенд доступен и настроен CORS
+
+## 🐛 Решение проблем
+
+### Ошибка "initData не доступен"
+- Убедитесь, что приложение запущено через Telegram Web App
+- Проверьте, что бот правильно настроен в BotFather
+
+### Ошибки API запросов
+- Проверьте `VITE_API_BASE_URL` в `.env`
+- Убедитесь, что бекенд доступен и CORS настроен правильно
+
+### Проблемы со сборкой
+- Убедитесь, что Node.js версии 18+
+- Удалите `node_modules` и `package-lock.json`, затем выполните `npm install`
+
+## 📄 Лицензия
+
+[Укажите лицензию проекта]
