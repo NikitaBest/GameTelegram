@@ -15,9 +15,11 @@ if (window.Telegram?.WebApp) {
     tg.disableVerticalSwipes()
   }
   
-  // Настройка цветовой схемы
-  tg.setHeaderColor('#000000')
-  tg.setBackgroundColor('#000000')
+  // Настройка цветовой схемы под цвет приложения (синий градиент)
+  // Используем основной цвет из градиента приложения: #2C63DB (темно-синий)
+  const appPrimaryColor = '#2C63DB'
+  tg.setHeaderColor(appPrimaryColor)
+  tg.setBackgroundColor(appPrimaryColor)
 }
 
 createRoot(document.getElementById('root')).render(
