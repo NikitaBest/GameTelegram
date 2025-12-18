@@ -222,7 +222,7 @@
   font-family: 'Rubik', Helvetica, sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.9);
+  color: #C7DFFF;
   margin: 0;
   padding: 0;
   text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
@@ -243,14 +243,14 @@
 .draw-card-time {
   font-family: 'Rubik', Helvetica, sans-serif;
   font-size: 18px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.95);
+  font-weight: 900; /* Medium */
+  color: #C7DFFF; /* Цвет по умолчанию (светло-голубой) */
   white-space: nowrap;
   flex-shrink: 0;
   /* Вдавленное поле с округленными углами */
   background: linear-gradient(135deg, rgba(65, 107, 200, 0.8) 0%, rgba(88, 127, 213, 0.6) 100%);
-  border-radius: 12px;
-  padding: 8px 16px;
+  border-radius: 8px; /* Еще уменьшил радиус */
+  padding: 4px 10px; /* Еще уменьшил padding для более компактного поля */
   box-shadow: 
     inset 0px 2px 4px rgba(0, 0, 0, 0.3),
     inset 0px 1px 2px rgba(0, 0, 0, 0.2),

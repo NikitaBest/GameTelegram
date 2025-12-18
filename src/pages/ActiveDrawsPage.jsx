@@ -78,6 +78,10 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
             const time = formatTime(remainingSeconds);
             const timeString = `${time.hours}:${time.minutes}:${time.seconds}`;
             
+            // Вычисляем оставшееся время в часах для определения цвета
+            const remainingHours = remainingSeconds / 3600;
+            const isLessThan2Hours = remainingHours < 2;
+            
             return (
               <div 
                 key={draw.id} 
@@ -106,7 +110,12 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
                       )}
                     </div>
                     <div className="draw-card-time-wrapper">
-                      <div className="draw-card-time">
+                      <div 
+                        className="draw-card-time"
+                        style={{
+                          color: isLessThan2Hours ? '#FFAD98' : '#C7DFFF'
+                        }}
+                      >
                         {timeString}
                       </div>
                       {/* Иконка стрелки под временем */}
