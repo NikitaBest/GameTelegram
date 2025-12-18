@@ -1,5 +1,6 @@
-import { TelegramUserData, getTelegramUserData, getMockTelegramUserData, isTelegramWebApp } from '../../lib/telegram';
+import { TelegramUserData, getTelegramUserData, getMockTelegramUserData } from '../../lib/telegram';
 
+// @ts-expect-error - Vite добавляет env в import.meta
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://telegram-games.tg-projects.ru';
 
 export interface AuthResponse {
@@ -82,6 +83,7 @@ export async function login(): Promise<AuthResponse> {
   };
   
   // Логируем для отладки
+  // @ts-expect-error - Vite добавляет env в import.meta
   if (import.meta.env.DEV) {
     console.log('Параметр utm для запроса login:', {
       hasUtm: Boolean(userData.utm),
@@ -91,6 +93,7 @@ export async function login(): Promise<AuthResponse> {
   }
   
   // Логируем отправляемые данные для отладки (только в режиме разработки)
+  // @ts-expect-error - Vite добавляет env в import.meta
   if (import.meta.env.DEV) {
     const jsonBody = JSON.stringify(requestData);
     console.log('Отправляемые данные авторизации:', {
@@ -121,6 +124,7 @@ export async function login(): Promise<AuthResponse> {
     const responseText = await response.text();
     
     // Логируем информацию о ответе для отладки
+    // @ts-expect-error - Vite добавляет env в import.meta
     if (import.meta.env.DEV) {
       console.log('Ответ от бекенда:', {
         status: response.status,

@@ -1,5 +1,6 @@
 import { getToken } from '../utils/storage';
 
+// @ts-expect-error - Vite добавляет env в import.meta
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://telegram-games.tg-projects.ru';
 
 /**
@@ -22,9 +23,12 @@ export class ApiClient {
     const token = getToken();
     const url = `${this.baseURL}${endpoint}`;
 
-    const headers: HeadersInit = {
+    // Создаем объект заголовков, который можно безопасно модифицировать
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers && typeof options.headers === 'object' && !Array.isArray(options.headers)
+        ? (options.headers as Record<string, string>)
+        : {}),
     };
 
     // Добавляем токен авторизации, если он есть

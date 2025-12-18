@@ -1,5 +1,5 @@
 import { apiClient } from '../apiClient';
-import md5 from 'js-md5';
+import { md5 } from 'js-md5';
 
 const HASH_SALT = '(02_hKY8123!';
 
@@ -50,6 +50,7 @@ export async function saveAttempt(
     pointsAlias,
   };
 
+  // @ts-expect-error - Vite добавляет env в import.meta
   if (import.meta.env.DEV) {
     console.log('Сохранение результата игры:', requestData);
   }
@@ -60,6 +61,7 @@ export async function saveAttempt(
       requestData
     );
     
+    // @ts-expect-error - Vite добавляет env в import.meta
     if (import.meta.env.DEV) {
       console.log('Результат сохранен:', response);
     }
