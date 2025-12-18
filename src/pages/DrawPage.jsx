@@ -14,7 +14,7 @@ import { useAuth } from '../hooks/useAuth';
 import { formatTime } from '../utils/mockData';
 import './DrawPage.css';
 
-const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsReceived }) => {
+const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsReceived, onGameIdReceived }) => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [drawData, setDrawData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +43,14 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
             const data = drawResponse.value;
             const draw = data.draw;
             const prizeList = draw.prizeList;
+            
+            // Передаём gameId в родительский компонент
+            if (draw.gameId) {
+              console.log('[DrawPage] GameId получен из бекенда:', draw.gameId);
+              onGameIdReceived?.(draw.gameId);
+            } else {
+              console.warn('[DrawPage] GameId не найден в ответе бекенда, будет использована игра по умолчанию');
+            }
 
             // Вычисляем общий призовой фонд (сумма всех призов)
             const totalPrizeFund = prizeList.items.reduce((sum, item) => {

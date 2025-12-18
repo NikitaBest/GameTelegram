@@ -6,7 +6,7 @@ import ActiveDrawsPage from './pages/ActiveDrawsPage'
 import DrawFinishedPage from './pages/DrawFinishedPage'
 import LoadingScreen from './components/LoadingScreen'
 import TelegramLanding from './components/TelegramLanding'
-import { GameContainer } from './game/game cosmos/GameContainer.tsx'
+import { GameRouter } from './game/GameRouter'
 import { useAuth } from './hooks/useAuth'
 import { getParsedStartParam } from './utils/urlParams'
 import { saveDrawId, getDrawId } from './utils/storage'
@@ -77,6 +77,9 @@ function App() {
   const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
   const [participatingId, setParticipatingId] = useState(null); // ID участия из /start
   const [attemptsLeft, setAttemptsLeft] = useState(0); // Оставшиеся попытки
+  // ВРЕМЕННО для тестирования: в DEV режиме используем gameId = 1 (Flappy Bird)
+  // В продакшене должно быть: useState(null)
+  const [gameId, setGameId] = useState(import.meta.env.DEV ? 1 : null); // ID игры из бекенда
   const [isAppReady, setIsAppReady] = useState(false); // Флаг готовности приложения
   
   // Авторизация
@@ -225,23 +228,29 @@ function App() {
           <DrawPage 
             drawId={drawId}
             onStartGame={(attempts) => {
+              console.log('[App] Нажата кнопка "Начать игру", попыток:', attempts);
               // Проверяем есть ли попытки
               if (attempts !== undefined && attempts <= 0) {
                 // Нет попыток - переводим на страницу результатов
+                console.log('[App] Нет попыток, переходим на results');
                 setCurrentPage('results');
               } else {
                 // Есть попытки - начинаем игру
+                console.log('[App] Есть попытки, переходим на game, gameId:', gameId);
                 setCurrentPage('game');
               }
             }}
             onParticipatingIdReceived={(id) => setParticipatingId(id)}
             onAttemptsReceived={(attempts) => setAttemptsLeft(attempts)}
+            onGameIdReceived={(id) => setGameId(id)}
           />
         )}
         {currentPage === 'game' && (
-          <GameContainer 
+          <GameRouter 
             key={gameKey} // Пересоздаём компонент при каждом переходе на игру
+            gameId={gameId}
             onGameOver={(score) => {
+              console.log('[App] Игра завершена с очками:', score);
               setGameScore(score);
               setCurrentPage('results');
             }} 
