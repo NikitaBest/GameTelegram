@@ -12,8 +12,12 @@
   padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* Отступ для фиксированной кнопки */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  /* Градиентный фон из дизайна */
+  /* Градиентный фон из дизайна - оставляем, так как это уникальный фон для страницы результатов */
   background: linear-gradient(90deg, #8AB8FD 0%, #5990DD 50%, #4D7AC4 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  overscroll-behavior: none; /* Отключаем bounce эффект */
+  overscroll-behavior-y: none;
 }
 
 /* Кнопка назад */

@@ -13,6 +13,10 @@
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  background-attachment: fixed;
+  background-size: cover;
+  overscroll-behavior: none; /* Отключаем bounce эффект */
+  overscroll-behavior-y: none;
 }
 
 .draw-finished-content {

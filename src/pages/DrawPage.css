@@ -2,8 +2,8 @@
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
-  background: radial-gradient(169.2% 42.3% at 49.67% 7.24%, rgba(195, 235, 255, 0.4) 0%, rgba(0, 0, 0, 0.08) 100%),
-    linear-gradient(180deg, #4498FB 0.04%, #2C63DB 33.27%, rgba(25, 81, 183, 0.92) 62.56%);
+  /* Фон убран - используется общий фон из .page-background */
+  background: transparent;
   padding: 40px 16px;
   padding-top: 60px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
@@ -13,6 +13,8 @@
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE и Edge */
   touch-action: pan-y; /* Разрешаем вертикальный скролл */
+  overscroll-behavior: none; /* Отключаем bounce эффект */
+  overscroll-behavior-y: none;
 }
 
 .draw-page::-webkit-scrollbar {

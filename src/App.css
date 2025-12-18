@@ -6,6 +6,7 @@
   flex-direction: column;
   padding-top: var(--safe-area-inset-top);
   padding-bottom: var(--safe-area-inset-bottom);
+  background: transparent; /* Прозрачный, чтобы был виден фон из body */
 }
 
 .app-content {
@@ -13,6 +14,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  background: transparent; /* Прозрачный, чтобы был виден фон */
 }
 
 /* Общий фон для всех страниц */

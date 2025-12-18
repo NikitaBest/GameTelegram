@@ -13,6 +13,8 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  overscroll-behavior: none; /* Отключаем bounce эффект */
+  overscroll-behavior-y: none;
   -ms-overflow-style: none;
   touch-action: pan-y;
 }
