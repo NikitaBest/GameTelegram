@@ -137,7 +137,7 @@
 /* Карточка розыгрыша */
 .draw-card {
   font-family: 'Rubik', Helvetica, sans-serif;
-  background: linear-gradient(0deg, rgba(100, 141, 234, 1) 0%, rgba(88, 127, 213, 1) 100%);
+  background: linear-gradient(180deg, #81B1F9 0%, #5B80E0 100%);
   border-radius: 16px;
   padding: 16px;
   cursor: pointer;
@@ -162,7 +162,7 @@
   inset: 0;
   padding: 2px;
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(65, 107, 200, 1) 0%, rgba(142, 183, 240, 1) 100%);
+  background: linear-gradient(180deg, #81B1F9 0%, #5B80E0 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
