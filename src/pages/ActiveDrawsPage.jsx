@@ -51,7 +51,7 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
 
   return (
     <div className="active-draws-page">
-      <BackgroundStars />
+      <BackgroundStars imageSrc="/Vector 17.svg" />
       <div className="active-draws-content">
         <div className="title-block">
           <h1 className="page-title">Активные розыгрыши</h1>

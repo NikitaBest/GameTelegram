@@ -31,8 +31,7 @@
   height: calc(100vh + var(--safe-area-inset-top) + var(--safe-area-inset-bottom));
   height: calc(100dvh + var(--safe-area-inset-top) + var(--safe-area-inset-bottom)); /* Динамический viewport height для мобильных */
   z-index: -1;
-  background: radial-gradient(169.2% 42.3% at 49.67% 7.24%, rgba(195, 235, 255, 0.4) 0%, rgba(0, 0, 0, 0.08) 100%),
-    linear-gradient(180deg, #4498FB 0.04%, #2C63DB 33.27%, rgba(25, 81, 183, 0.92) 62.56%);
+  background: linear-gradient(180deg, #8AB8FD 0%, #4C81CA 50%, #3D67AF 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

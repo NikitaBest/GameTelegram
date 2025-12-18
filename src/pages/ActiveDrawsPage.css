@@ -21,6 +21,23 @@
   display: none;
 }
 
+/* Уменьшаем размер вектора на странице активных розыгрышей и центрируем */
+.active-draws-page .background-stars .stars-pattern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.45; /* Увеличена прозрачность для большей заметности */
+}
+
+.active-draws-page .background-stars .stars-pattern-image {
+  width: 60%;
+  height: auto;
+  max-width: 300px;
+  object-fit: contain;
+  object-position: center;
+  margin: 0 auto;
+}
+
 .active-draws-content {
   position: relative;
   z-index: 1;
