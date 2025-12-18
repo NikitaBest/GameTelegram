@@ -18,9 +18,10 @@ import './App.css'
 function App() {
   const isTelegram = isTelegramWebApp()
 
-  // Если открыто не в Telegram и это продакшен — показываем заглушку
+  // Если открыто не в Telegram и это продакшен — сразу переводим в Telegram
   if (!isTelegram && import.meta.env.PROD) {
-    return <TelegramLanding />
+    window.location.href = 'https://t.me/chest_of_gold'
+    return null
   }
 
   // Парсим параметр при инициализации
