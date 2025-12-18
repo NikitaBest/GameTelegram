@@ -5,15 +5,24 @@ import GameResultsPage from './pages/GameResultsPage'
 import ActiveDrawsPage from './pages/ActiveDrawsPage'
 import DrawFinishedPage from './pages/DrawFinishedPage'
 import LoadingScreen from './components/LoadingScreen'
+import TelegramLanding from './components/TelegramLanding'
 import { GameContainer } from './game/game cosmos/GameContainer.tsx'
 import { useAuth } from './hooks/useAuth'
 import { getParsedStartParam } from './utils/urlParams'
 import { saveDrawId, getDrawId } from './utils/storage'
 import { checkPartnersSubscription } from './api/services/partnersService'
 import { startDraw } from './api/services/drawService'
+import { isTelegramWebApp } from './lib/telegram'
 import './App.css'
 
 function App() {
+  const isTelegram = isTelegramWebApp()
+
+  // Если открыто не в Telegram и это продакшен — показываем заглушку
+  if (!isTelegram && import.meta.env.PROD) {
+    return <TelegramLanding />
+  }
+
   // Парсим параметр при инициализации
   const parsedStartParam = getParsedStartParam();
   

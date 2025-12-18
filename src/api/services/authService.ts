@@ -54,9 +54,15 @@ export async function login(): Promise<AuthResponse> {
     userData = telegramData;
     console.log('Используются реальные данные из Telegram Web App');
   } else {
-    // Если Telegram Web App недоступен, используем мок-данные для разработки
-    userData = getMockTelegramUserData();
-    console.warn('Telegram Web App недоступен, используются мок-данные для разработки');
+    // Если Telegram Web App недоступен
+    // В DEV используем мок-данные, в PROD кидаем ошибку
+    // @ts-expect-error - Vite добавляет env в import.meta
+    if (import.meta.env.DEV) {
+      userData = getMockTelegramUserData();
+      console.warn('Telegram Web App недоступен, используются мок-данные для разработки');
+    } else {
+      throw new Error('Telegram Web App недоступен. Откройте игру через Telegram.');
+    }
   }
 
   if (!userData) {
