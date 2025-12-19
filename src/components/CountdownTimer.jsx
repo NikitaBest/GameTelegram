@@ -32,9 +32,9 @@ const CountdownTimer = ({ initialSeconds, onComplete }) => {
       <div className="countdown-label">ДО КОНЦА РОЗЫГРЫША</div>
       <div className="countdown-timer">
         <div className="countdown-box">{hours}</div>
-        <span className="countdown-separator">:</span>
+        <span className="countdown-separator"></span>
         <div className="countdown-box">{minutes}</div>
-        <span className="countdown-separator">:</span>
+        <span className="countdown-separator"></span>
         <div className="countdown-box">{seconds}</div>
       </div>
     </div>

@@ -26,7 +26,8 @@
 }
 
 .balance-text {
-  color: #333;
+  font-family: 'Rubik', Helvetica, sans-serif;
+  color: #3F5D8B;
   font-weight: 600;
   font-size: 13px;
 }
