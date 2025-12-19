@@ -2,8 +2,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: -8px;
   margin-bottom: 24px;
   position: relative;
+  overflow: visible;
 }
 
 .treasure-chest-wrapper {
@@ -12,19 +14,22 @@
   justify-content: center;
   gap: 16px;
   margin-bottom: 16px;
+  margin-top: 0;
   position: relative;
+  overflow: visible;
+  width: 100%;
 }
 
 .stars-background {
   position: absolute;
-  top: 50%;
+  top: 70%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 0;
-  width: 100%;
-  max-width: 300px;
+  z-index: -1;
+  width: 320px;
+  max-width: 320px;
   height: auto;
-  opacity: 0.6;
+  opacity: 0.85;
   pointer-events: none;
 }
 
@@ -43,7 +48,7 @@
 }
 
 .chest-image {
-  width: 200px;
+  width: 240px;
   max-width: 100%;
   height: auto;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
@@ -52,22 +57,24 @@
 /* Адаптация для маленьких экранов */
 @media (max-width: 375px) {
   .chest-image {
-    width: 180px;
+    width: 220px;
   }
   
   .stars-background {
-    max-width: 280px;
+    width: 340px;
+    max-width: 340px;
   }
 }
 
 /* Адаптация для очень маленьких экранов */
 @media (max-width: 320px) {
   .chest-image {
-    width: 160px;
+    width: 200px;
   }
   
   .stars-background {
-    max-width: 250px;
+    width: 310px;
+    max-width: 310px;
   }
   
   .treasure-chest-container {

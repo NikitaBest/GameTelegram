@@ -1,6 +1,6 @@
 .countdown-container {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 0px;
 }
 
 .countdown-label {
@@ -16,7 +16,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .countdown-timer {
@@ -68,7 +68,7 @@
   .countdown-label {
     font-size: 14px;
     line-height: 22px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
   }
   
   .countdown-box {
@@ -92,7 +92,7 @@
   .countdown-label {
     font-size: 13px;
     line-height: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
   }
   
   .countdown-box {
@@ -111,7 +111,7 @@
   }
   
   .countdown-container {
-    margin-bottom: 20px;
+    margin-bottom: 0px;
   }
 }
 

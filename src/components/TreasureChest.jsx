@@ -6,7 +6,7 @@ const TreasureChest = ({ prizeFund }) => {
       <div className="treasure-chest-wrapper">
         {/* Звезды за сундуком */}
         <div className="stars-background">
-          <img src="/Stars.svg" alt="Stars" className="stars-image" />
+          <img src="/Stars.png" alt="Stars" className="stars-image" />
         </div>
         
         <div className="treasure-chest">
