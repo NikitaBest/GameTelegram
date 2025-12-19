@@ -54,6 +54,7 @@
   width: calc(100% + 32px);
   max-width: calc(100% + 32px);
   margin: 24px -16px 0 -16px;
+  padding: 0;
 }
 
 .info-panel {
@@ -106,6 +107,7 @@
     width: calc(100% + 24px);
     max-width: calc(100% + 24px);
     margin: 24px -12px 0 -12px;
+    padding: 0;
   }
   
   .info-panel {
@@ -129,6 +131,7 @@
     width: calc(100% + 16px);
     max-width: calc(100% + 16px);
     margin: 20px -8px 0 -8px;
+    padding: 0;
   }
   
   .info-panel {
@@ -153,6 +156,7 @@
     width: calc(100% + 12px);
     max-width: calc(100% + 12px);
     margin: 16px -6px 0 -6px;
+    padding: 0;
   }
   
   .info-panel {

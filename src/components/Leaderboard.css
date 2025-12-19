@@ -8,8 +8,8 @@
 
 .leaderboard-header {
   background: linear-gradient(180deg, #749BFF 0%, #5D84E6 100%);
-  border-radius: 20px 20px 12px 12px;
-  padding: 14px 16px;
+  border-radius: 20px 20px 0 0;
+  padding: 10px 16px;
   margin: -24px -12px 16px -12px;
   display: flex;
   align-items: center;
@@ -33,7 +33,7 @@
 }
 
 .leaderboard-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #FFFFFF;
   margin: 0;
@@ -46,7 +46,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 14px;
   color: #FFFFFF;
   font-weight: 600;
   position: relative;
@@ -360,24 +360,8 @@
 @media (max-width: 480px) {
   .leaderboard-header {
     margin: -20px -10px 14px -10px;
-    padding: 12px 14px;
-    border-radius: 20px 20px 10px 10px;
-  }
-  
-  .leaderboard-title {
-    font-size: 20px;
-  }
-  
-  .leaderboard-count {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 375px) {
-  .leaderboard-header {
-    margin: -18px -8px 12px -8px;
-    padding: 10px 12px;
-    border-radius: 18px 18px 10px 10px;
+    padding: 8px 14px;
+    border-radius: 20px 20px 0 0;
   }
   
   .leaderboard-title {
@@ -386,6 +370,22 @@
   
   .leaderboard-count {
     font-size: 13px;
+  }
+}
+
+@media (max-width: 375px) {
+  .leaderboard-header {
+    margin: -18px -8px 12px -8px;
+    padding: 8px 12px;
+    border-radius: 18px 18px 0 0;
+  }
+  
+  .leaderboard-title {
+    font-size: 17px;
+  }
+  
+  .leaderboard-count {
+    font-size: 12px;
     gap: 6px;
   }
   
@@ -398,16 +398,16 @@
 @media (max-width: 320px) {
   .leaderboard-header {
     margin: -16px -6px 10px -6px;
-    padding: 10px 10px;
-    border-radius: 16px 16px 8px 8px;
+    padding: 7px 10px;
+    border-radius: 16px 16px 0 0;
   }
   
   .leaderboard-title {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .leaderboard-count {
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 
