@@ -8,7 +8,9 @@
   padding: 8px 16px;
   margin: 0 auto 16px;
   width: fit-content;
-  box-shadow: 0 2px 8px rgba(212, 225, 255, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(212, 225, 255, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .balance-icon {
@@ -26,7 +28,7 @@
 .balance-text {
   color: #333;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* Адаптация для маленьких экранов */
@@ -37,7 +39,7 @@
   }
   
   .balance-text {
-    font-size: 13px;
+    font-size: 12px;
   }
   
   .balance-icon-image {
@@ -54,7 +56,7 @@
   }
   
   .balance-text {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .balance-icon-image {
