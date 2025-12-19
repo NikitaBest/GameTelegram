@@ -63,7 +63,7 @@
 .leaderboard-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
   /* Оптимизация для плавной прокрутки */
   will-change: scroll-position;
@@ -77,12 +77,12 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
+  gap: 12px;
+  padding: 8px 14px;
   border-radius: 12px;
   transition: transform 0.2s ease, opacity 0.2s ease;
   width: 100%;
-  min-height: 48px;
+  min-height: 58px;
   box-sizing: border-box;
   /* Оптимизированные тени - используем box-shadow вместо множественных filter */
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1),
@@ -200,14 +200,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 42px;
-  height: 42px;
+  min-width: 50px;
+  height: 50px;
   flex-shrink: 0;
 }
 
 .leaderboard-cup-img {
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 
@@ -216,7 +216,7 @@
   top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   color: #8B7320;
   text-shadow: none;
@@ -243,8 +243,8 @@
 }
 
 .leaderboard-avatar {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -286,7 +286,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.7);
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -304,10 +304,10 @@
 
 .leaderboard-name {
   font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #45607D;
-  line-height: 140%;
+  line-height: 150%;
   letter-spacing: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -318,8 +318,8 @@
 .leaderboard-points-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 5px;
+  padding: 5px 12px;
   background: rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -327,13 +327,13 @@
 }
 
 .leaderboard-points-icon {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
 }
 
 .leaderboard-points-value {
   font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #45607D;
   line-height: 1;
@@ -373,13 +373,13 @@
   }
   
   .leaderboard-list {
-    gap: 8px;
+    gap: 10px;
   }
   
   .leaderboard-item {
-    gap: 8px;
-    padding: 5px 10px;
-    min-height: 44px;
+    gap: 10px;
+    padding: 6px 12px;
+    min-height: 53px;
     border-radius: 10px;
   }
   
@@ -394,45 +394,45 @@
   }
   
   .leaderboard-avatar {
-    width: 36px;
-    height: 36px;
+    width: 43px;
+    height: 43px;
   }
   
   .leaderboard-avatar-placeholder {
-    font-size: 16px;
+    font-size: 18px;
   }
   
   .leaderboard-cup {
-    min-width: 38px;
-    height: 38px;
+    min-width: 46px;
+    height: 46px;
   }
   
   .leaderboard-cup-img {
-    width: 38px;
-    height: 38px;
+    width: 46px;
+    height: 46px;
   }
   
   .leaderboard-cup-number {
-    font-size: 12px;
+    font-size: 13px;
   }
   
   .leaderboard-name {
-    font-size: 13px;
-    line-height: 130%;
+    font-size: 14px;
+    line-height: 140%;
   }
   
   .leaderboard-points-badge {
-    gap: 3px;
-    padding: 3px 8px;
+    gap: 4px;
+    padding: 4px 10px;
   }
   
   .leaderboard-points-icon {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
   }
   
   .leaderboard-points-value {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
@@ -458,13 +458,13 @@
   }
   
   .leaderboard-list {
-    gap: 7px;
+    gap: 8px;
   }
   
   .leaderboard-item {
-    gap: 7px;
-    padding: 4px 8px;
-    min-height: 40px;
+    gap: 8px;
+    padding: 5px 10px;
+    min-height: 48px;
     border-radius: 10px;
   }
   
@@ -479,45 +479,45 @@
   }
   
   .leaderboard-avatar {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
   }
   
   .leaderboard-avatar-placeholder {
-    font-size: 14px;
+    font-size: 16px;
   }
   
   .leaderboard-cup {
-    min-width: 34px;
-    height: 34px;
+    min-width: 41px;
+    height: 41px;
   }
   
   .leaderboard-cup-img {
-    width: 34px;
-    height: 34px;
+    width: 41px;
+    height: 41px;
   }
   
   .leaderboard-cup-number {
-    font-size: 11px;
+    font-size: 12px;
   }
   
   .leaderboard-name {
-    font-size: 12px;
-    line-height: 120%;
+    font-size: 13px;
+    line-height: 130%;
   }
   
   .leaderboard-points-badge {
-    gap: 3px;
-    padding: 2px 7px;
+    gap: 4px;
+    padding: 3px 8px;
   }
   
   .leaderboard-points-icon {
-    width: 12px;
-    height: 12px;
+    width: 13px;
+    height: 13px;
   }
   
   .leaderboard-points-value {
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 
@@ -537,13 +537,13 @@
   }
   
   .leaderboard-list {
-    gap: 6px;
+    gap: 7px;
   }
   
   .leaderboard-item {
-    gap: 6px;
-    padding: 4px 7px;
-    min-height: 38px;
+    gap: 7px;
+    padding: 5px 8px;
+    min-height: 46px;
     border-radius: 9px;
   }
   
@@ -558,45 +558,45 @@
   }
   
   .leaderboard-avatar {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
   }
   
   .leaderboard-avatar-placeholder {
-    font-size: 13px;
+    font-size: 15px;
   }
   
   .leaderboard-cup {
-    min-width: 32px;
-    height: 32px;
+    min-width: 38px;
+    height: 38px;
   }
   
   .leaderboard-cup-img {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
   }
   
   .leaderboard-cup-number {
-    font-size: 10px;
+    font-size: 11px;
   }
   
   .leaderboard-name {
-    font-size: 11px;
-    line-height: 120%;
+    font-size: 12px;
+    line-height: 130%;
   }
   
   .leaderboard-points-badge {
-    gap: 2px;
-    padding: 2px 6px;
+    gap: 3px;
+    padding: 3px 7px;
   }
   
   .leaderboard-points-icon {
-    width: 11px;
-    height: 11px;
+    width: 12px;
+    height: 12px;
   }
   
   .leaderboard-points-value {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
