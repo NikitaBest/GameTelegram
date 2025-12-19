@@ -11,7 +11,7 @@ const LoadingScreen = () => {
       {/* Анимированный логотип по центру */}
       <div className="loading-logo-container">
         <img 
-          src="/Зам.Скважина 1.svg" 
+          src="/Зам.Скважина 1.png" 
           alt="Загрузка..." 
           className="loading-logo"
         />
