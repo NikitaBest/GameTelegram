@@ -50,11 +50,36 @@
   white-space: nowrap;
 }
 
+/* Адаптация для средних экранов (до 414px) */
+@media (max-width: 414px) {
+  .user-rank {
+    padding: 6px 8px;
+    margin-top: 10px;
+  }
+  
+  .user-rank-content {
+    gap: 8px;
+  }
+  
+  .user-rank-text {
+    font-size: 11.5px;
+  }
+  
+  .user-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
 /* Адаптация для маленьких экранов */
 @media (max-width: 375px) {
   .user-rank {
     padding: 5px 6px;
     margin-top: 8px;
+  }
+  
+  .user-rank-content {
+    gap: 8px;
   }
   
   .user-rank-text {
@@ -73,6 +98,10 @@
     padding: 4px 5px;
     margin-top: 6px;
     border-radius: 10px;
+  }
+  
+  .user-rank-content {
+    gap: 6px;
   }
   
   .user-rank-text {

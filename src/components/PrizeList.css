@@ -214,10 +214,76 @@
   object-fit: contain;
 }
 
+/* Адаптация для средних экранов (до 414px) */
+@media (max-width: 414px) {
+  .prize-item {
+    padding: 6px 8px;
+  }
+  
+  .prize-item-content {
+    gap: 8px;
+  }
+  
+  .prize-label {
+    font-size: 11px;
+  }
+  
+  .prize-amount {
+    width: 40px;
+    padding: 3px;
+  }
+  
+  .prize-amount span {
+    font-size: 11px;
+  }
+  
+  .trophy-icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .trophy-4th-10th {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .stars-participants {
+    padding: 6px 8px;
+  }
+  
+  .stars-main-text {
+    font-size: 11px;
+  }
+  
+  .stars-note {
+    font-size: 9px;
+  }
+  
+  .stars-icon-image {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .stars-badge {
+    width: 38px;
+    height: 22px;
+    padding: 3px;
+  }
+  
+  .stars-badge-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
 /* Адаптация для маленьких экранов */
 @media (max-width: 375px) {
   .prize-item {
     padding: 5px 6px;
+  }
+  
+  .prize-item-content {
+    gap: 8px;
   }
   
   .prize-label {
@@ -283,6 +349,10 @@
     gap: 8px;
   }
   
+  .prize-item-content {
+    gap: 6px;
+  }
+  
   .prize-label {
     font-size: 10px;
   }
@@ -312,7 +382,7 @@
   }
   
   .stars-content {
-    gap: 8px;
+    gap: 6px;
   }
   
   .stars-main-text {

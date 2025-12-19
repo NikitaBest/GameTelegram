@@ -210,18 +210,20 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
           onComplete={handleCountdownComplete}
         />
         
-        <TreasureChest prizeFund={drawData.prizeFund} />
-        
-        <div className="info-panel-container">
-          <PrizeFundButton />
+        <div className="treasure-and-prize-container">
+          <TreasureChest prizeFund={drawData.prizeFund} />
           
-          <div className="info-panel">
-            <PrizeList 
-              prizes={drawData.prizes}
-              starsForParticipants={drawData.starsForParticipants}
-            />
+          <div className="info-panel-container">
+            <PrizeFundButton />
             
-            <UserRank userRank={drawData.userRank} userAvatar={drawData.userAvatar} />
+            <div className="info-panel">
+              <PrizeList 
+                prizes={drawData.prizes}
+                starsForParticipants={drawData.starsForParticipants}
+              />
+              
+              <UserRank userRank={drawData.userRank} userAvatar={drawData.userAvatar} />
+            </div>
           </div>
         </div>
         

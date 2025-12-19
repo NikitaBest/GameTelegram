@@ -1,14 +1,14 @@
 .prize-fund-button {
   display: flex;
-  width: 199px;
+  width: 220px;
   max-width: calc(100% - 32px);
-  height: 28px;
+  height: 32px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 2px 16px;
+  padding: 3px 18px;
   position: absolute;
-  top: -14px;
+  top: -16px;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 36px;
@@ -19,13 +19,51 @@
   box-sizing: border-box;
 }
 
+/* Адаптация для средних экранов (до 414px) */
+@media (max-width: 414px) {
+  .prize-fund-button {
+    width: 210px;
+    height: 30px;
+    padding: 3px 16px;
+    top: -15px;
+  }
+  
+  .prize-fund-button span {
+    font-size: 12.5px;
+  }
+  
+  .prize-fund-button .trophy-icon {
+    width: 17px;
+    height: 17px;
+  }
+}
+
 /* Адаптация для маленьких экранов */
 @media (max-width: 375px) {
   .prize-fund-button {
+    width: 200px;
+    height: 29px;
+    padding: 3px 14px;
+    top: -14.5px;
+  }
+  
+  .prize-fund-button span {
+    font-size: 12px;
+  }
+  
+  .prize-fund-button .trophy-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .prize-fund-button {
     width: 180px;
-    height: 26px;
-    padding: 2px 12px;
-    top: -13px;
+    height: 27px;
+    padding: 3px 12px;
+    top: -13.5px;
   }
   
   .prize-fund-button span {
@@ -33,27 +71,8 @@
   }
   
   .prize-fund-button .trophy-icon {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-/* Адаптация для очень маленьких экранов */
-@media (max-width: 320px) {
-  .prize-fund-button {
-    width: 160px;
-    height: 24px;
-    padding: 2px 10px;
-    top: -12px;
-  }
-  
-  .prize-fund-button span {
-    font-size: 10px;
-  }
-  
-  .prize-fund-button .trophy-icon {
-    width: 12px;
-    height: 12px;
+    width: 15px;
+    height: 15px;
   }
 }
 
@@ -72,8 +91,8 @@
 }
 
 .prize-fund-button .trophy-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   filter: brightness(0) invert(1);
   position: relative;
@@ -84,7 +103,7 @@
   font-family: 'Rubik', Helvetica, sans-serif;
   font-weight: 500;
   color: white;
-  font-size: 12px;
+  font-size: 13px;
   text-align: center;
   white-space: nowrap;
   position: relative;
