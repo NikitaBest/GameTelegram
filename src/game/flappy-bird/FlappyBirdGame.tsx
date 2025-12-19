@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getStableViewportHeight, isTelegramWebApp } from '../../lib/telegram';
 import './FlappyBirdGame.css';
 
 interface FlappyBirdGameProps {
@@ -237,10 +236,6 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     };
   }, [isPlaying, isGameOver, generatePipe, checkCollision, onGameOver]);
 
-  const viewportHeight = isTelegramWebApp()
-    ? getStableViewportHeight()
-    : typeof window !== 'undefined' ? window.innerHeight : 600;
-
   return (
     <div 
       className="flappy-bird-game-container"
@@ -295,7 +290,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
                 top: `${(bird.y / GAME_HEIGHT) * 100}%`,
                 width: `${(BIRD_SIZE / GAME_WIDTH) * 100}%`,
                 height: `${(BIRD_SIZE / GAME_HEIGHT) * 100}%`,
-                transform: `rotate(${Math.min(bird.velocity * 3, 30)}deg)`,
+                transform: `scaleX(-1) rotate(${Math.min(bird.velocity * 3, 30)}deg)`,
               }}
             >
               🐦
