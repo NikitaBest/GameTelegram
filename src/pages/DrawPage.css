@@ -5,7 +5,7 @@
   /* Фон убран - используется общий фон из .page-background */
   background: transparent;
   padding: 40px 16px;
-  padding-top: 60px;
+  padding-top: 30px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
   overflow-x: hidden;
   overflow-y: auto;
@@ -79,7 +79,7 @@
 @media (max-width: 480px) {
   .draw-page {
     padding: 40px 12px;
-    padding-top: 60px;
+    padding-top: 30px;
   }
   
   .info-panel-container {
@@ -102,7 +102,7 @@
 @media (max-width: 375px) {
   .draw-page {
     padding: 30px 8px;
-    padding-top: 50px;
+    padding-top: 25px;
   }
   
   .info-panel-container {
@@ -125,7 +125,7 @@
 @media (max-width: 320px) {
   .draw-page {
     padding: 25px 6px;
-    padding-top: 45px;
+    padding-top: 20px;
   }
   
   .info-panel-container {
