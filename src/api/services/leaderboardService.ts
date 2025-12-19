@@ -26,23 +26,23 @@ export interface LeaderboardResponse {
 }
 
 export interface LeaderboardRequest {
-  CountAfter: number;
-  CountBefore: number;
-  DrawId: string | number;
+  drawId: number;
+  fromNumber: number;
+  toNumber: number;
 }
 
 /**
- * Получение списка лидеров с пользователем в центре
+ * Получение списка лидеров по диапазону позиций
  * 
  * @param drawId - ID розыгрыша
- * @param countBefore - Количество лидеров до пользователя
- * @param countAfter - Количество лидеров после пользователя
+ * @param fromNumber - Начальный номер позиции (начинается с 1)
+ * @param toNumber - Конечный номер позиции (включительно)
  * @returns Список лидеров
  */
 export async function getLeaderboard(
   drawId: number | string,
-  countBefore: number = 10,
-  countAfter: number = 10
+  fromNumber: number = 1,
+  toNumber: number = 100
 ): Promise<LeaderboardResponse> {
   if (!drawId) {
     throw new Error('drawId обязателен для получения списка лидеров');
@@ -50,11 +50,11 @@ export async function getLeaderboard(
 
   try {
     const response = await apiClient.post<LeaderboardResponse>(
-      '/participating/top-list/with-user',
+      '/participating/top-list',
       {
-        CountAfter: countAfter,
-        CountBefore: countBefore,
-        DrawId: String(drawId),
+        drawId: Number(drawId),
+        fromNumber: fromNumber,
+        toNumber: toNumber,
       }
     );
     
@@ -69,35 +69,15 @@ export async function getLeaderboard(
  * Получение следующей порции лидеров (для ленивой загрузки)
  * 
  * @param drawId - ID розыгрыша
- * @param offset - Смещение от начала списка
- * @param limit - Количество записей для загрузки
+ * @param fromNumber - Начальный номер позиции
+ * @param toNumber - Конечный номер позиции
  * @returns Список лидеров
  */
 export async function getLeaderboardPage(
   drawId: number | string,
-  offset: number,
-  limit: number = 20
+  fromNumber: number,
+  toNumber: number
 ): Promise<LeaderboardResponse> {
-  if (!drawId) {
-    throw new Error('drawId обязателен для получения списка лидеров');
-  }
-
-  try {
-    // Используем тот же эндпоинт, но с другими параметрами
-    // Если бекенд поддерживает пагинацию, нужно будет уточнить параметры
-    const response = await apiClient.post<LeaderboardResponse>(
-      '/participating/top-list/with-user',
-      {
-        CountAfter: limit,
-        CountBefore: 0,
-        DrawId: String(drawId),
-      }
-    );
-    
-    return response;
-  } catch (error) {
-    console.error('Ошибка при получении списка лидеров:', error);
-    throw error;
-  }
+  return getLeaderboard(drawId, fromNumber, toNumber);
 }
 

@@ -82,13 +82,14 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
     loadingTimeoutRef.current = setTimeout(() => {
       setLoadingMore(true);
 
-      // Загружаем следующую порцию (увеличиваем CountAfter)
-      // CountBefore остается 10, CountAfter увеличиваем на 20
-      // Учитываем, что начальная загрузка теперь 20 элементов
-      const currentAfter = Math.max(20, leaders.length - 10); // Учитываем, что первые 20 уже загружены
-      const newAfter = currentAfter + 20;
+      // Вычисляем следующий диапазон: загружаем по 100 участников
+      // fromNumber = текущее количество + 1
+      // toNumber = fromNumber + 99 (всего 100 участников)
+      const currentCount = leaders.length;
+      const fromNumber = currentCount + 1;
+      const toNumber = fromNumber + 99;
       
-      getLeaderboard(drawId, 10, newAfter)
+      getLeaderboard(drawId, fromNumber, toNumber)
         .then((response) => {
           if (response.isSuccess && response.value) {
             const newItems = response.value.items || [];
@@ -101,7 +102,8 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
                 const updated = [...prev, ...uniqueNewItems];
                 const total = response.value.totalCount || totalCount;
                 setTotalCount(total);
-                if (updated.length >= total) {
+                // Если загрузили меньше 100 или достигли общего количества, значит больше нет данных
+                if (uniqueNewItems.length < 100 || updated.length >= total) {
                   setHasMore(false);
                 }
                 return updated;
@@ -157,10 +159,11 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   // Загружаем начальный список лидеров
   useEffect(() => {
     if (drawId) {
+      setIsLoading(true);
       setError(null);
 
-      // Загружаем больше элементов сразу для лучшей производительности
-      getLeaderboard(drawId, 10, 20)
+      // Загружаем первые 100 участников (с 1 по 100 место)
+      getLeaderboard(drawId, 1, 100)
         .then((response) => {
           if (response.isSuccess && response.value) {
             const items = response.value.items || [];
@@ -168,7 +171,8 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
             const total = response.value.totalCount || 0;
             setTotalCount(total);
             // Проверяем, есть ли еще данные для загрузки
-            setHasMore(items.length < total);
+            // Если загрузили меньше 100 или достигли общего количества, значит больше нет данных
+            setHasMore(items.length === 100 && items.length < total);
           } else {
             setError(response.error || 'Ошибка при загрузке списка лидеров');
           }
