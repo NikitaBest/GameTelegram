@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 343px;
   height: 55px;
-  margin: 24px auto 0;
+  margin: 4px auto 0;
   border: none;
   border-radius: 12px;
   padding: 0;
@@ -22,7 +22,7 @@
 @media (max-width: 375px) {
   .start-game-button {
     height: 50px;
-    margin-top: 20px;
+    margin-top: 4px;
     max-width: 100%;
   }
   
@@ -35,7 +35,7 @@
 @media (max-width: 320px) {
   .start-game-button {
     height: 48px;
-    margin-top: 16px;
+    margin-top: 2px;
   }
   
   .button-text {
