@@ -14,7 +14,7 @@ const BIRD_START_X = 100;
 const BIRD_START_Y = 250;
 // Упрощенная сложность:
 const GRAVITY = 0.4; // Уменьшена гравитация (было 0.5) - птица падает медленнее
-const JUMP_STRENGTH = -9; // Увеличена сила прыжка (было -8) - легче подниматься
+const JUMP_STRENGTH = -6.5; // Уменьшена сила прыжка (было -9) - птица прыгает ниже
 const PIPE_WIDTH = 60;
 const PIPE_GAP = 200; // Увеличен зазор между трубами (было 150) - больше места для пролета
 const PIPE_SPEED = 1.5; // Уменьшена скорость труб (было 2) - больше времени на реакцию
@@ -247,13 +247,6 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
       <div className="flappy-bird-game-wrapper">
         <div 
           className="flappy-bird-game-area"
-          style={{
-            width: '100%',
-            height: '100%',
-            maxWidth: '400px',
-            maxHeight: '600px',
-            aspectRatio: `${GAME_WIDTH} / ${GAME_HEIGHT}`,
-          }}
         >
           {/* Фон */}
           <div className="flappy-bird-background" />
