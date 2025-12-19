@@ -90,7 +90,7 @@ const ActiveDrawsPage = ({ onSelectDraw }) => {
               >
                 {/* Иконка слева по середине */}
                 <div className="draw-card-icon">
-                  <img src="/1many.svg" alt="" className="draw-card-icon-img" />
+                  <img src="/1many.png" alt="" className="draw-card-icon-img" />
                 </div>
                 
                 {/* Контент справа */}
