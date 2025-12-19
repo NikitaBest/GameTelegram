@@ -28,9 +28,9 @@
 
 .countdown-box {
   width: 49px;
-  min-height: 45px;
+  min-height: 35px;
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 5px 12px;
   border: 1px solid transparent;
   background: linear-gradient(180deg, #236CCA 0%, #3F7ED7 100%);
   background-clip: padding-box;
@@ -73,8 +73,8 @@
   
   .countdown-box {
     width: 44px;
-    min-height: 40px;
-    padding: 8px 10px;
+    min-height: 32px;
+    padding: 5px 10px;
     font-size: 20px;
   }
   
@@ -97,8 +97,8 @@
   
   .countdown-box {
     width: 40px;
-    min-height: 36px;
-    padding: 6px 8px;
+    min-height: 28px;
+    padding: 3px 8px;
     font-size: 18px;
   }
   
