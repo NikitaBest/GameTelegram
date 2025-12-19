@@ -10,8 +10,8 @@ interface GameRouterProps {
  * Роутер для выбора игры на основе gameId из бекенда
  * 
  * Игры:
- * - gameId: 1 (или по умолчанию) - Flappy Bird
- * - gameId: 2 - Космическая игра (game cosmos)
+ * - gameId: 1 - Flappy Bird
+ * - gameId: 2 (или по умолчанию) - Космическая игра (game cosmos)
  * 
  * Для добавления новой игры:
  * 1. Создайте папку с игрой в src/game/
@@ -19,8 +19,8 @@ interface GameRouterProps {
  * 3. Убедитесь, что игра принимает onGameOver(score: number)
  */
 export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
-  // Если gameId не указан, используем Flappy Bird по умолчанию
-  const selectedGameId = gameId || 1;
+  // Если gameId не указан, используем космическую игру по умолчанию
+  const selectedGameId = gameId || 2;
 
   // Отладка
   console.log('[GameRouter] Выбор игры:', {
@@ -35,13 +35,13 @@ export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
       return <FlappyBirdGame onGameOver={onGameOver} />;
     
     case 2:
-      // Космическая игра (вторая игра)
+      // Космическая игра (основная игра по умолчанию)
       return <CosmosGame onGameOver={onGameOver} />;
     
     default:
-      // Fallback на Flappy Bird
-      console.warn(`Неизвестный gameId: ${gameId}, используем игру по умолчанию (Flappy Bird)`);
-      return <FlappyBirdGame onGameOver={onGameOver} />;
+      // Fallback на космическую игру
+      console.warn(`Неизвестный gameId: ${gameId}, используем игру по умолчанию (Космическая игра)`);
+      return <CosmosGame onGameOver={onGameOver} />;
   }
 }
 
