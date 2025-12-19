@@ -16,9 +16,11 @@ const BIRD_START_Y = 250;
 const GRAVITY = 0.4; // Уменьшена гравитация (было 0.5) - птица падает медленнее
 const JUMP_STRENGTH = -6.5; // Уменьшена сила прыжка (было -9) - птица прыгает ниже
 const PIPE_WIDTH = 60;
-const PIPE_GAP = 200; // Увеличен зазор между трубами (было 150) - больше места для пролета
-const PIPE_SPEED = 1.5; // Уменьшена скорость труб (было 2) - больше времени на реакцию
-const PIPE_SPAWN_INTERVAL = 2500; // Увеличен интервал между трубами (было 2000) - больше времени между препятствиями
+const PIPE_GAP_BASE = 200; // Базовый зазор между трубами
+const PIPE_GAP_MIN = 130; // Минимальный зазор (птица 40px + запас 90px) - всегда можно пройти
+const PIPE_SPEED_BASE = 1.5; // Базовая скорость труб
+const PIPE_SPEED_MAX = 2.5; // Максимальная скорость труб
+const PIPE_SPAWN_INTERVAL = 2500; // Интервал между трубами
 
 interface Bird {
   x: number;
@@ -70,20 +72,37 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     scoreRef.current = score;
   }, [score]);
 
+  // Вычисление текущего зазора между трубами на основе счета
+  const getCurrentPipeGap = useCallback((): number => {
+    // Каждые 20 очков уменьшаем зазор на 10px
+    const gapReduction = Math.floor(score / 20) * 10;
+    const currentGap = Math.max(PIPE_GAP_MIN, PIPE_GAP_BASE - gapReduction);
+    return currentGap;
+  }, [score]);
+
+  // Вычисление текущей скорости труб на основе счета
+  const getCurrentPipeSpeed = useCallback((): number => {
+    // Каждые 20 очков увеличиваем скорость на 0.1
+    const speedIncrease = Math.floor(score / 20) * 0.1;
+    const currentSpeed = Math.min(PIPE_SPEED_MAX, PIPE_SPEED_BASE + speedIncrease);
+    return currentSpeed;
+  }, [score]);
+
   // Генерация случайной высоты трубы
   const generatePipe = useCallback((): Pipe => {
+    const currentGap = getCurrentPipeGap();
     const minTopHeight = 50;
-    const maxTopHeight = GAME_HEIGHT - PIPE_GAP - minTopHeight;
+    const maxTopHeight = GAME_HEIGHT - currentGap - minTopHeight;
     const topHeight = Math.random() * (maxTopHeight - minTopHeight) + minTopHeight;
     
     return {
       id: pipeIdCounterRef.current++,
       x: GAME_WIDTH,
       topHeight,
-      bottomY: topHeight + PIPE_GAP,
+      bottomY: topHeight + currentGap,
       passed: false,
     };
-  }, []);
+  }, [getCurrentPipeGap]);
 
   // Прыжок птицы
   const jump = useCallback(() => {
@@ -185,10 +204,11 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
 
       // Обновление труб
       setPipes(prev => {
+        const currentSpeed = getCurrentPipeSpeed();
         const updated = prev
           .map(pipe => ({
             ...pipe,
-            x: pipe.x - PIPE_SPEED,
+            x: pipe.x - currentSpeed,
             passed: pipe.passed || (pipe.x + PIPE_WIDTH < birdRef.current.x),
           }))
           .filter(pipe => pipe.x + PIPE_WIDTH > 0);
@@ -235,7 +255,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [isPlaying, isGameOver, generatePipe, checkCollision, onGameOver]);
+  }, [isPlaying, isGameOver, generatePipe, checkCollision, onGameOver, getCurrentPipeSpeed]);
 
   return (
     <div 
@@ -254,25 +274,49 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
           {/* Трубы */}
           {pipes.map(pipe => (
             <div key={pipe.id}>
-              {/* Верхняя труба */}
+              {/* Верхняя труба - основание вверху */}
               <div
-                className="flappy-bird-pipe pipe-top"
+                className="flappy-bird-pipe-container pipe-top"
                 style={{
                   left: `${(pipe.x / GAME_WIDTH) * 100}%`,
                   width: `${(PIPE_WIDTH / GAME_WIDTH) * 100}%`,
                   height: `${(pipe.topHeight / GAME_HEIGHT) * 100}%`,
                 }}
-              />
-              {/* Нижняя труба */}
+              >
+                <img 
+                  src="/Pipe (1).svg" 
+                  alt="Pipe top" 
+                  className="flappy-bird-pipe-svg pipe-top-svg"
+                  style={{
+                    height: '100%',
+                    width: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'top',
+                  }}
+                />
+              </div>
+              {/* Нижняя труба - основание внизу */}
               <div
-                className="flappy-bird-pipe pipe-bottom"
+                className="flappy-bird-pipe-container pipe-bottom"
                 style={{
                   left: `${(pipe.x / GAME_WIDTH) * 100}%`,
                   top: `${(pipe.bottomY / GAME_HEIGHT) * 100}%`,
                   width: `${(PIPE_WIDTH / GAME_WIDTH) * 100}%`,
                   height: `${((GAME_HEIGHT - pipe.bottomY) / GAME_HEIGHT) * 100}%`,
                 }}
-              />
+              >
+                <img 
+                  src="/Pipe.svg" 
+                  alt="Pipe bottom" 
+                  className="flappy-bird-pipe-svg pipe-bottom-svg"
+                  style={{
+                    height: '100%',
+                    width: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'bottom',
+                  }}
+                />
+              </div>
             </div>
           ))}
 
