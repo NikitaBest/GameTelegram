@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { FlappyBirdRulesScreen } from './FlappyBirdRulesScreen';
 import './FlappyBirdGame.css';
 
 interface FlappyBirdGameProps {
@@ -94,27 +95,27 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     }));
   }, [isPlaying, isGameOver]);
 
-  // Обработка клика/тапа
+  // Обработка клика/тапа (только для игры, не для правил)
   const handleClick = useCallback(() => {
-    if (showRules) {
-      startGame();
-    } else {
+    if (!showRules && isPlaying && !isGameOver) {
       jump();
     }
-  }, [showRules, jump]);
+  }, [showRules, isPlaying, isGameOver, jump]);
 
-  // Обработка клавиатуры
+  // Обработка клавиатуры (только во время игры)
   useEffect(() => {
+    if (showRules || !isPlaying || isGameOver) return;
+    
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.code === 'Space' || e.key === ' ') {
         e.preventDefault();
-        handleClick();
+        jump();
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleClick]);
+  }, [showRules, isPlaying, isGameOver, jump]);
 
   // Начало игры
   const startGame = useCallback(() => {
@@ -241,6 +242,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
       className="flappy-bird-game-container"
       onClick={handleClick}
       style={{ touchAction: 'none' }}
+      onTouchStart={handleClick}
     >
       <div className="flappy-bird-game-wrapper">
         <div 
@@ -306,14 +308,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
 
           {/* Экран правил */}
           {showRules && (
-            <div className="flappy-bird-rules">
-              <h2>Flappy Bird</h2>
-              <p>Нажимай, чтобы прыгать</p>
-              <p>Избегай труб!</p>
-              <button className="flappy-bird-start-button" onClick={startGame}>
-                Начать игру
-              </button>
-            </div>
+            <FlappyBirdRulesScreen onStart={startGame} />
           )}
 
           {/* Экран Game Over */}
