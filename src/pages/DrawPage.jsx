@@ -8,6 +8,7 @@ import UserRank from '../components/UserRank';
 import StartGameButton from '../components/StartGameButton';
 import Leaderboard from '../components/Leaderboard';
 import BackgroundStars from '../components/BackgroundStars';
+import LoadingScreen from '../components/LoadingScreen';
 import { startDraw } from '../api/services/drawService';
 import { getLeaderboard } from '../api/services/leaderboardService';
 import { useAuth } from '../hooks/useAuth';
@@ -180,20 +181,12 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
     onStartGame?.(drawData?.attemptsLeft);
   };
 
-  if (isLoading || authLoading) {
-    return (
-      <div className="draw-page">
-        <BackgroundStars />
-        <div className="draw-content">
-          <div style={{ padding: '40px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.7)' }}>
-            Загрузка данных розыгрыша...
-          </div>
-        </div>
-      </div>
-    );
+  // Показываем экран загрузки пока данные не загружены
+  if (isLoading || authLoading || !drawData) {
+    return <LoadingScreen />;
   }
 
-  if (error || !drawData) {
+  if (error) {
     return (
       <div className="draw-page">
         <BackgroundStars />

@@ -61,7 +61,7 @@ LeaderboardItem.displayName = 'LeaderboardItem';
 
 const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   const [leaders, setLeaders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -157,7 +157,6 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   // Загружаем начальный список лидеров
   useEffect(() => {
     if (drawId) {
-      setIsLoading(true);
       setError(null);
 
       // Загружаем больше элементов сразу для лучшей производительности
@@ -209,30 +208,6 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
     return 'Пользователь';
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="leaderboard-container">
-        <div className="leaderboard-loading">Загрузка списка лидеров...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="leaderboard-container">
-        <div className="leaderboard-error">{error}</div>
-      </div>
-    );
-  }
-
-  if (leaders.length === 0) {
-    return (
-      <div className="leaderboard-container">
-        <div className="leaderboard-empty">Список лидеров пуст</div>
-      </div>
-    );
-  }
-
   return (
     <div className="leaderboard-container">
       {!hideHeader && (
@@ -250,33 +225,37 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
           )}
         </div>
       )}
-      <div className="leaderboard-list">
-        {leaders.map((leader, index) => {
-          const isLast = index === leaders.length - 1;
-          const isCurrentUser = userId && leader.userId === userId;
+      {leaders.length > 0 ? (
+        <>
+          <div className="leaderboard-list">
+            {leaders.map((leader, index) => {
+              const isLast = index === leaders.length - 1;
+              const isCurrentUser = userId && leader.userId === userId;
+              
+              return (
+                <LeaderboardItem
+                  key={leader.participatingId}
+                  leader={leader}
+                  isLast={isLast}
+                  isCurrentUser={isCurrentUser}
+                  userId={userId}
+                  onLastItemRef={lastLeaderRef}
+                  getCupIcon={getCupIcon}
+                  getDisplayName={getDisplayName}
+                />
+              );
+            })}
+          </div>
           
-          return (
-            <LeaderboardItem
-              key={leader.participatingId}
-              leader={leader}
-              isLast={isLast}
-              isCurrentUser={isCurrentUser}
-              userId={userId}
-              onLastItemRef={lastLeaderRef}
-              getCupIcon={getCupIcon}
-              getDisplayName={getDisplayName}
-            />
-          );
-        })}
-      </div>
-      
-      {loadingMore && (
-        <div className="leaderboard-loading-more">Загрузка...</div>
-      )}
-      
-      {!hasMore && leaders.length > 0 && (
-        <div className="leaderboard-end">Все лидеры загружены</div>
-      )}
+          {loadingMore && (
+            <div className="leaderboard-loading-more">Загрузка...</div>
+          )}
+          
+          {!hasMore && leaders.length > 0 && (
+            <div className="leaderboard-end">Все лидеры загружены</div>
+          )}
+        </>
+      ) : null}
     </div>
   );
 };

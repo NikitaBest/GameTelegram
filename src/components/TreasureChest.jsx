@@ -10,7 +10,7 @@ const TreasureChest = ({ prizeFund }) => {
         </div>
         
         <div className="treasure-chest">
-          <img src="/1.svg" alt="Treasure Chest" className="chest-image" />
+          <img src="/Сундук.png" alt="Treasure Chest" className="chest-image" />
         </div>
       </div>
     </div>
