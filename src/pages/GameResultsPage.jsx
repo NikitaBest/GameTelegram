@@ -227,11 +227,9 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             {/* Карточка с таймером и ботом */}
             <div className="result-card">
               <div className="result-card-timer">
-                <Clock className="timer-icon" />
                 <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
               </div>
               <div className="result-card-bot">
-                <Bot className="bot-icon" />
                 <span>Результаты придут в бот @{botUsername}</span>
               </div>
             </div>
