@@ -32,9 +32,11 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         .then((response) => {
           if (response.isSuccess) {
             console.log('Результат успешно сохранен:', response);
-            if (response.value?.topNumber) {
-              setUserRank(response.value.topNumber);
-            }
+            // НЕ устанавливаем userRank из saveAttempt, так как это может быть неправильное значение
+            // Вместо этого используем значение из лидерборда, которое загружается отдельно
+            // if (response.value?.topNumber) {
+            //   setUserRank(response.value.topNumber);
+            // }
           } else {
             console.error('Ошибка сохранения результата:', response.error);
             setSaveError(response.error);
@@ -58,9 +60,10 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
       // Параллельно загружаем данные розыгрыша и место в рейтинге
       Promise.all([
         startDraw(drawId),
-        getLeaderboard(drawId, 1, 1) // Запрос с текущим пользователем и соседями
+        // Сначала пробуем запрос (0, 0) для получения текущего пользователя
+        getLeaderboard(drawId, 0, 0)
       ])
-        .then(([drawResponse, leaderboardResponse]) => {
+        .then(async ([drawResponse, leaderboardResponse]) => {
           // Обрабатываем данные розыгрыша
           if (drawResponse.isSuccess && drawResponse.value) {
             const data = drawResponse.value;
@@ -80,27 +83,76 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           }
           
           // Обрабатываем данные лидерборда для получения места
+          let currentUser = null;
           if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
             const items = leaderboardResponse.value.items || [];
-            // При запросе with-user первый элемент — текущий пользователь
-            // Но для надежности ищем по participatingId или userTelegramId
-            let currentUser = items.find(item => item.participatingId === participatingId);
+            
+            // Ищем текущего пользователя по participatingId (самый надежный способ)
+            // Учитываем, что participatingId может быть числом или строкой
+            if (participatingId) {
+              currentUser = items.find(item => 
+                item.participatingId === participatingId || 
+                String(item.participatingId) === String(participatingId) ||
+                Number(item.participatingId) === Number(participatingId)
+              );
+            }
             
             // Если не нашли по participatingId, ищем по userTelegramId
             if (!currentUser && user?.telegramId) {
               currentUser = items.find(item => item.userTelegramId === user.telegramId);
             }
-            
-            // Если всё ещё не нашли, берём первый элемент (API возвращает текущего пользователя первым)
-            if (!currentUser && items.length > 0) {
-              currentUser = items[0];
+          }
+          
+          // Если не нашли пользователя в запросе (0, 0), запрашиваем больший диапазон
+          if (!currentUser) {
+            if (import.meta.env.DEV) {
+              console.log('Пользователь не найден в запросе (0, 0), запрашиваем диапазон 1-100');
             }
             
-            if (currentUser && currentUser.topNumber) {
-              setUserRank(currentUser.topNumber);
-              if (import.meta.env.DEV) {
-                console.log('Место пользователя из лидерборда:', currentUser.topNumber, 'participatingId:', currentUser.participatingId);
+            try {
+              const widerLeaderboardResponse = await getLeaderboard(drawId, 1, 100);
+              if (widerLeaderboardResponse.isSuccess && widerLeaderboardResponse.value) {
+                const items = widerLeaderboardResponse.value.items || [];
+                
+                // Ищем текущего пользователя по participatingId
+                // Учитываем, что participatingId может быть числом или строкой
+                if (participatingId) {
+                  currentUser = items.find(item => 
+                    item.participatingId === participatingId || 
+                    String(item.participatingId) === String(participatingId) ||
+                    Number(item.participatingId) === Number(participatingId)
+                  );
+                }
+                
+                // Если не нашли по participatingId, ищем по userTelegramId
+                if (!currentUser && user?.telegramId) {
+                  currentUser = items.find(item => item.userTelegramId === user.telegramId);
+                }
               }
+            } catch (err) {
+              console.error('Ошибка при запросе расширенного лидерборда:', err);
+            }
+          }
+          
+          // Устанавливаем место пользователя, если нашли
+          if (currentUser && currentUser.topNumber) {
+            setUserRank(currentUser.topNumber);
+            if (import.meta.env.DEV) {
+              console.log('Место пользователя из лидерборда:', {
+                topNumber: currentUser.topNumber,
+                participatingId: currentUser.participatingId,
+                userTelegramId: currentUser.userTelegramId,
+                foundBy: participatingId && currentUser.participatingId === participatingId ? 'participatingId' : 'userTelegramId'
+              });
+            }
+          } else {
+            // Если не нашли пользователя, логируем для отладки
+            if (import.meta.env.DEV) {
+              console.warn('Текущий пользователь не найден в лидерборде:', {
+                participatingId,
+                userTelegramId: user?.telegramId,
+                drawId
+              });
             }
           }
         })

@@ -31,135 +31,190 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
         console.log(`Загрузка данных розыгрыша для ID: ${drawId}`);
       }
 
-      // Загружаем данные розыгрыша и место пользователя параллельно
-      Promise.all([
-        startDraw(drawId),
-        getLeaderboard(drawId, 0, 0) // Минимальный запрос для получения места текущего пользователя
-      ])
-        .then(([drawResponse, leaderboardResponse]) => {
+      // Загружаем данные розыгрыша и место пользователя
+      const loadData = async () => {
+        try {
+          // Загружаем данные розыгрыша
+          const drawResponse = await startDraw(drawId);
           console.log('Данные розыгрыша:', drawResponse);
-          console.log('Данные лидерборда:', leaderboardResponse);
           
-          if (drawResponse.isSuccess && drawResponse.value) {
-            const data = drawResponse.value;
-            const draw = data.draw;
-            const prizeList = draw.prizeList;
+          if (!drawResponse.isSuccess || !drawResponse.value) {
+            setError(drawResponse.error || 'Ошибка при загрузке данных розыгрыша');
+            return;
+          }
+          
+          const data = drawResponse.value;
+          const draw = data.draw;
+          const prizeList = draw.prizeList;
+          const participatingId = data.id; // Получаем participatingId для поиска пользователя
+          
+          // Передаём gameId в родительский компонент
+          if (draw.gameId) {
+            console.log('[DrawPage] GameId получен из бекенда:', draw.gameId);
+            onGameIdReceived?.(draw.gameId);
+          } else {
+            console.warn('[DrawPage] GameId не найден в ответе бекенда, будет использована игра по умолчанию');
+          }
+
+          // Вычисляем общий призовой фонд (сумма всех призов)
+          const totalPrizeFund = prizeList.items.reduce((sum, item) => {
+            const prizeValue = parseFloat(item.prize.value) || 0;
+            // Учитываем количество победителей для каждого приза
+            return sum + (prizeValue * item.countWinner);
+          }, 0);
+
+          // Преобразуем призы в формат для компонента
+          const prizes = prizeList.items.map((item) => {
+            let placeLabel = '';
+            let icon = 'silver';
             
-            // Передаём gameId в родительский компонент
-            if (draw.gameId) {
-              console.log('[DrawPage] GameId получен из бекенда:', draw.gameId);
-              onGameIdReceived?.(draw.gameId);
+            if (item.startPosition === 1 && item.endPosition === 1) {
+              placeLabel = 'Приз за 1 место';
+              icon = 'gold';
+            } else if (item.startPosition === 2 && item.endPosition === 2) {
+              placeLabel = 'Приз за 2 место';
+              icon = 'silver';
+            } else if (item.startPosition === 3 && item.endPosition === 3) {
+              placeLabel = 'Приз за 3 место';
+              icon = 'bronze';
             } else {
-              console.warn('[DrawPage] GameId не найден в ответе бекенда, будет использована игра по умолчанию');
+              placeLabel = `Приз за ${item.startPosition} - ${item.endPosition} места`;
+              icon = 'silver';
             }
 
-            // Вычисляем общий призовой фонд (сумма всех призов)
-            const totalPrizeFund = prizeList.items.reduce((sum, item) => {
-              const prizeValue = parseFloat(item.prize.value) || 0;
-              // Учитываем количество победителей для каждого приза
-              return sum + (prizeValue * item.countWinner);
-            }, 0);
+            return {
+              place: item.startPosition === item.endPosition ? item.startPosition : `${item.startPosition}-${item.endPosition}`,
+              label: placeLabel,
+              amount: item.prize.value,
+              currency: 'Р', // Рубли
+              icon: icon,
+            };
+          });
 
-            // Преобразуем призы в формат для компонента
-            const prizes = prizeList.items.map((item) => {
-              let placeLabel = '';
-              let icon = 'silver';
-              
-              if (item.startPosition === 1 && item.endPosition === 1) {
-                placeLabel = 'Приз за 1 место';
-                icon = 'gold';
-              } else if (item.startPosition === 2 && item.endPosition === 2) {
-                placeLabel = 'Приз за 2 место';
-                icon = 'silver';
-              } else if (item.startPosition === 3 && item.endPosition === 3) {
-                placeLabel = 'Приз за 3 место';
-                icon = 'bronze';
-              } else {
-                placeLabel = `Приз за ${item.startPosition} - ${item.endPosition} места`;
-                icon = 'silver';
-              }
+          // Функция для поиска текущего пользователя в списке
+          const findCurrentUser = (items) => {
+            if (!items || items.length === 0) return null;
+            
+            // Сначала ищем по participatingId (самый надежный способ)
+            if (participatingId) {
+              const found = items.find(item => 
+                item.participatingId === participatingId || 
+                String(item.participatingId) === String(participatingId) ||
+                Number(item.participatingId) === Number(participatingId)
+              );
+              if (found) return found;
+            }
+            
+            // Если не нашли по participatingId, ищем по userTelegramId
+            if (user?.telegramId) {
+              const found = items.find(item => item.userTelegramId === user.telegramId);
+              if (found) return found;
+            }
+            
+            return null;
+          };
 
-              return {
-                place: item.startPosition === item.endPosition ? item.startPosition : `${item.startPosition}-${item.endPosition}`,
-                label: placeLabel,
-                amount: item.prize.value,
-                currency: 'Р', // Рубли
-                icon: icon,
-              };
-            });
-
-            // Получаем место и аватар пользователя из лидерборда
-            let userPlace = null;
-            let userPhotoUrl = null;
+          // Получаем место и аватар пользователя из лидерборда
+          let userPlace = null;
+          let userPhotoUrl = null;
+          
+          // Сначала пробуем запрос (0, 0) для получения текущего пользователя
+          let leaderboardResponse = await getLeaderboard(drawId, 0, 0);
+          console.log('Данные лидерборда (0, 0):', leaderboardResponse);
+          
+          let currentUser = null;
+          if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
+            const items = leaderboardResponse.value.items || [];
+            currentUser = findCurrentUser(items);
+          }
+          
+          // Если не нашли пользователя в запросе (0, 0), запрашиваем больший диапазон
+          if (!currentUser) {
+            if (import.meta.env.DEV) {
+              console.log('[DrawPage] Пользователь не найден в запросе (0, 0), запрашиваем диапазон 1-100');
+            }
+            
+            leaderboardResponse = await getLeaderboard(drawId, 1, 100);
             if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
               const items = leaderboardResponse.value.items || [];
-              // API with-user возвращает текущего пользователя первым при countBefore=0
-              if (items.length > 0) {
-                // Ищем текущего пользователя по telegramId
-                const currentUser = items.find(item => 
-                  item.userTelegramId === user?.telegramId
-                ) || items[0]; // Fallback на первый элемент
-                
-                if (currentUser) {
-                  if (currentUser.topNumber) {
-                    userPlace = currentUser.topNumber;
-                  }
-                  if (currentUser.photoUrl) {
-                    userPhotoUrl = currentUser.photoUrl;
-                  }
-                }
-              }
+              currentUser = findCurrentUser(items);
             }
-
-            // Формируем данные для компонентов
-            const formattedData = {
-              balance: user?.starsAmount || 0,
-              timeUntilEnd: draw.secondsToEnd || 0,
-              prizeFund: {
-                total: totalPrizeFund,
-                currency: 'Р',
-              },
-              prizes: prizes,
-              starsForParticipants: {
-                minAmount: Math.floor(draw.starsDistributionAmount) || 10,
-                description: 'Всем участникам звёзды',
-                note: 'Чем выше место тем больше звёзд!',
-                iconCount: 2,
-              },
-              userRank: {
-                place: userPlace,
-                label: userPlace 
-                  ? `Ты на ${userPlace} месте` 
-                  : 'Твоё место будет определено после игры',
-              },
-              userAvatar: userPhotoUrl,
-              attemptsLeft: data.maxAttemptsCount - data.attemptsCount,
-              maxAttemptsCount: data.maxAttemptsCount,
-            };
-
-            setDrawData(formattedData);
-            
-            // Передаём participatingId (id из ответа) в родительский компонент
-            if (data.id) {
-              onParticipatingIdReceived?.(data.id);
-              if (import.meta.env.DEV) {
-                console.log('ParticipatingId:', data.id);
-              }
-            }
-            
-            // Передаём количество оставшихся попыток
-            onAttemptsReceived?.(formattedData.attemptsLeft);
-          } else {
-            setError(drawResponse.error || 'Ошибка при загрузке данных розыгрыша');
           }
-        })
-        .catch((err) => {
+          
+          // Устанавливаем место и аватар, если нашли пользователя
+          if (currentUser) {
+            if (currentUser.topNumber) {
+              userPlace = currentUser.topNumber;
+            }
+            if (currentUser.photoUrl) {
+              userPhotoUrl = currentUser.photoUrl;
+            }
+            
+            if (import.meta.env.DEV) {
+              console.log('[DrawPage] Место пользователя из лидерборда:', {
+                topNumber: currentUser.topNumber,
+                participatingId: currentUser.participatingId,
+                userTelegramId: currentUser.userTelegramId,
+                foundBy: participatingId && currentUser.participatingId === participatingId ? 'participatingId' : 'userTelegramId'
+              });
+            }
+          } else {
+            if (import.meta.env.DEV) {
+              console.warn('[DrawPage] Текущий пользователь не найден в лидерборде:', {
+                participatingId,
+                userTelegramId: user?.telegramId,
+                drawId
+              });
+            }
+          }
+
+          // Формируем данные для компонентов
+          const formattedData = {
+            balance: user?.starsAmount || 0,
+            timeUntilEnd: draw.secondsToEnd || 0,
+            prizeFund: {
+              total: totalPrizeFund,
+              currency: 'Р',
+            },
+            prizes: prizes,
+            starsForParticipants: {
+              minAmount: Math.floor(draw.starsDistributionAmount) || 10,
+              description: 'Всем участникам звёзды',
+              note: 'Чем выше место тем больше звёзд!',
+              iconCount: 2,
+            },
+            userRank: {
+              place: userPlace,
+              label: userPlace 
+                ? `Ты на ${userPlace} месте` 
+                : 'Твоё место будет определено после игры',
+            },
+            userAvatar: userPhotoUrl,
+            attemptsLeft: data.maxAttemptsCount - data.attemptsCount,
+            maxAttemptsCount: data.maxAttemptsCount,
+          };
+
+          setDrawData(formattedData);
+          
+          // Передаём participatingId (id из ответа) в родительский компонент
+          if (data.id) {
+            onParticipatingIdReceived?.(data.id);
+            if (import.meta.env.DEV) {
+              console.log('ParticipatingId:', data.id);
+            }
+          }
+          
+          // Передаём количество оставшихся попыток
+          onAttemptsReceived?.(formattedData.attemptsLeft);
+        } catch (err) {
           console.error('Ошибка при загрузке данных розыгрыша:', err);
           setError(err.message || 'Не удалось загрузить данные розыгрыша');
-        })
-        .finally(() => {
+        } finally {
           setIsLoading(false);
-        });
+        }
+      };
+      
+      loadData();
     } else {
       // Если нет drawId или пользователь не авторизован, показываем ошибку
       if (!drawId) {
