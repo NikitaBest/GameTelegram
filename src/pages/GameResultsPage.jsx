@@ -11,6 +11,7 @@ import './GameResultsPage.css';
 const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMain }) => {
   const [activeTab, setActiveTab] = useState('my-results'); // 'my-results' | 'rating'
   const [userRank, setUserRank] = useState(null);
+  const [userMaxPoints, setUserMaxPoints] = useState(null); // Максимальный счет пользователя из лидерборда
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,12 +135,23 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             }
           }
           
-          // Устанавливаем место пользователя, если нашли
-          if (currentUser && currentUser.topNumber) {
-            setUserRank(currentUser.topNumber);
+          // Устанавливаем место и максимальный счет пользователя, если нашли
+          if (currentUser) {
+            if (currentUser.topNumber) {
+              setUserRank(currentUser.topNumber);
+            }
+            // Сохраняем максимальный счет из лидерборда (это актуальный счет для рейтинга)
+            // maxPoints может быть 0, что валидно, поэтому проверяем только на undefined/null
+            if (currentUser.maxPoints !== undefined && currentUser.maxPoints !== null) {
+              setUserMaxPoints(currentUser.maxPoints);
+            } else {
+              // Если maxPoints не найден, сбрасываем состояние
+              setUserMaxPoints(null);
+            }
             if (import.meta.env.DEV) {
-              console.log('Место пользователя из лидерборда:', {
+              console.log('Данные пользователя из лидерборда:', {
                 topNumber: currentUser.topNumber,
+                maxPoints: currentUser.maxPoints,
                 participatingId: currentUser.participatingId,
                 userTelegramId: currentUser.userTelegramId,
                 foundBy: participatingId && currentUser.participatingId === participatingId ? 'participatingId' : 'userTelegramId'
@@ -270,7 +282,13 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
                 <div className="result-card-rank">
                   {isSaving ? '...' : (userRank || '—')}
                 </div>
-              <div className="result-card-score">{score} очков</div>
+              <div className="result-card-score">
+                {/* Показываем максимальный счет из лидерборда, если он есть, иначе текущий score */}
+                {/* maxPoints может быть 0, что валидно, поэтому проверяем на null/undefined */}
+                {(userMaxPoints !== null && userMaxPoints !== undefined) 
+                  ? `${userMaxPoints} очков` 
+                  : (score !== undefined && score !== null ? `${score} очков` : '0 очков')}
+              </div>
                 {saveError && (
                   <div className="result-card-error">Ошибка сохранения</div>
                 )}
