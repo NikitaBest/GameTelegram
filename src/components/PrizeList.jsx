@@ -10,20 +10,20 @@ const PrizeList = ({ prizes, starsForParticipants }) => {
               {prize.icon === 'gold' && (
                 <div className="trophy-icon trophy-gold" />
               )}
-              {prize.icon === 'silver' && prize.place !== '4-10' && (
+              {prize.icon === 'silver' && (
                 <div className="trophy-icon trophy-silver" />
               )}
               {prize.icon === 'bronze' && (
                 <div className="trophy-icon trophy-bronze" />
               )}
-              {prize.place === '4-10' && (
+              {prize.icon === '4th-10th' && (
                 <img 
                   src="/4rth-10th-1-7.png" 
-                  alt="4-10 place trophy" 
+                  alt="9-10 place trophy" 
                   className="trophy-icon trophy-4th-10th"
                 />
               )}
-              {!prize.icon && prize.place !== '4-10' && (
+              {!prize.icon && (
                 <div className="trophy-icon trophy-silver" />
               )}
             </div>
