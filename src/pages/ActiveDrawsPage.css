@@ -269,7 +269,7 @@
 .draw-card-time {
   font-family: 'Rubik', Helvetica, sans-serif;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 600;
   color: #C7DFFF; /* Цвет по умолчанию (светло-голубой) */
   white-space: nowrap;
   flex-shrink: 0;
