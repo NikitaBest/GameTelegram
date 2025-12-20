@@ -12,7 +12,7 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
         {/* Заголовок с изображением */}
         <div className="draw-finished-header">
           <img 
-            src="/конец розыгрыша.svg" 
+            src="/Frame 1171275395.png" 
             alt="Розыгрыш завершён" 
             className="draw-finished-image"
           />

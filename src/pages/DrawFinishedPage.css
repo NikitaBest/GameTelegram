@@ -2,8 +2,11 @@
   min-height: 100vh;
   min-height: 100dvh;
   width: 100%;
-  /* Фон убран - используется общий фон из .page-background */
-  background: transparent;
+  background-image: url('/Задник.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,12 +40,13 @@
 }
 
 .draw-finished-image {
-  width: 200px;
+  width: 320px;
   height: auto;
   margin-bottom: 12px;
 }
 
 .draw-finished-subtitle {
+  font-family: 'Rubik', Helvetica, sans-serif;
   color: #FFFFFF;
   font-size: 16px;
   font-weight: 500;
@@ -150,7 +154,7 @@
   }
   
   .draw-finished-image {
-    width: 160px;
+    width: 260px;
   }
   
   .draw-finished-subtitle {
@@ -169,7 +173,7 @@
   }
   
   .draw-finished-image {
-    width: 140px;
+    width: 220px;
   }
   
   .draw-finished-subtitle {
