@@ -244,11 +244,30 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
       <div className="results-content">
         {/* Заголовок */}
         <div className="results-title-container">
-          <img 
-            src={isFirstPlace ? "/winner.png" : "/Frame 1171275345.svg"}
-            alt={isFirstPlace ? "ПОБЕДИТЕЛЬ" : "ТВОЙ РЕЗУЛЬТАТ"}
-            className="results-title-image"
-          />
+          {isFirstPlace ? (
+            <img 
+              src="/winner.png"
+              alt="ПОБЕДИТЕЛЬ"
+              className="results-title-image"
+            />
+          ) : (
+            <h1 className="results-title-text">
+              <div className="results-title-line">
+                {'ТВОЙ'.split('').map((char, index) => (
+                  <span key={index} className="results-title-char" data-char={char}>
+                    {char}
+                  </span>
+                ))}
+              </div>
+              <div className="results-title-line">
+                {'РЕЗУЛЬТАТ'.split('').map((char, index) => (
+                  <span key={`result-${index}`} className="results-title-char" data-char={char}>
+                    {char}
+                  </span>
+                ))}
+              </div>
+            </h1>
+          )}
         </div>
         <p className="results-subtitle">
           {isFirstPlace 
