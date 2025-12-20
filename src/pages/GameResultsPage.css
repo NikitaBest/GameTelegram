@@ -22,18 +22,19 @@
 .back-to-main {
   position: absolute;
   top: 16px;
-  left: 16px;
+  left: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: none;
   border: none;
   color: white;
-  font-size: 16px;
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   z-index: 10;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
   transition: background 0.2s;
   width: auto;
@@ -48,8 +49,8 @@
 }
 
 .back-arrow {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   transform: rotate(180deg);
 }
 
@@ -78,21 +79,24 @@
   align-items: center;
   width: 100%;
   margin: 0;
+  margin-top: -50px;
 }
 
 .results-title-image {
   width: 100%;
-  max-width: 327px;
+  max-width: 250px;
   height: auto;
   display: block;
 }
 
 .results-subtitle {
+  font-family: 'Rubik', Helvetica, sans-serif;
   font-size: 16px;
+  font-weight: 500;
   color: #ffffff;
   text-align: center;
   margin: 0;
-  margin-top: -8px;
+  margin-top: -16px;
   opacity: 0.95;
 }
 
@@ -310,7 +314,7 @@
 /* Адаптация для мобильных */
 @media (max-width: 480px) {
   .results-title-image {
-    max-width: 280px;
+    max-width: 220px;
   }
 
   .result-card-rank {

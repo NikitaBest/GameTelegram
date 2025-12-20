@@ -181,7 +181,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         {/* Заголовок */}
         <div className="results-title-container">
           <img 
-            src={isFirstPlace ? "/winner.svg" : "/Frame 1171275345.svg"}
+            src={isFirstPlace ? "/winner.png" : "/Frame 1171275345.svg"}
             alt={isFirstPlace ? "ПОБЕДИТЕЛЬ" : "ТВОЙ РЕЗУЛЬТАТ"}
             className="results-title-image"
           />
