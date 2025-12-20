@@ -103,7 +103,8 @@
 /* Табы */
 .results-tabs {
   display: flex;
-  width: 100%;
+  width: 85%;
+  max-width: 320px;
   background: linear-gradient(180deg, #4679C0 0%, #4985D7 100%);
   border-radius: 24px;
   padding: 0;
@@ -115,10 +116,10 @@
 
 .tab-button {
   flex: 1;
-  padding: 16px 16px;
+  padding: 10px 16px;
   border: none;
   border-radius: 24px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
   background: transparent;
@@ -129,7 +130,7 @@
 .tab-button.active {
   background: linear-gradient(180deg, #FFAE3D 0%, #E89520 100%);
   color: #ffffff;
-  box-shadow: 0 4px 0 0 #C07A10;
+  box-shadow: none;
   border-radius: 24px;
 }
 
@@ -161,6 +162,7 @@
 }
 
 .result-card-label {
+  font-family: 'Rubik', Helvetica, sans-serif;
   font-size: 14px;
   color: #fbbf24;
   font-weight: 600;
@@ -177,13 +179,15 @@
 }
 
 .result-card-score {
+  font-family: 'Rubik', Helvetica, sans-serif;
   font-size: 18px;
   color: #ffffff;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* Таймер и бот */
 .result-card-timer {
+  font-family: 'Rubik', Helvetica, sans-serif;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -201,10 +205,12 @@
 }
 
 .result-card-bot {
+  font-family: 'Rubik', Helvetica, sans-serif;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   width: 100%;
   justify-content: center;

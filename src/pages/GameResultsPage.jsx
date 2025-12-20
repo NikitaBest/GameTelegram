@@ -198,7 +198,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             className={`tab-button ${activeTab === 'my-results' ? 'active' : ''}`}
             onClick={() => setActiveTab('my-results')}
           >
-            Мои итоги
+            {isFirstPlace ? 'Мой рекорд' : 'Мои итоги'}
           </button>
           <button
             className={`tab-button ${activeTab === 'rating' ? 'active' : ''}`}
