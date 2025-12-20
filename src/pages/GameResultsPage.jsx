@@ -245,11 +245,41 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         {/* Заголовок */}
         <div className="results-title-container">
           {isFirstPlace ? (
-            <img 
-              src="/winner.png"
-              alt="ПОБЕДИТЕЛЬ"
-              className="results-title-image"
-            />
+            <>
+              <img 
+                src="/Crown.png"
+                alt="Корона"
+                className="results-crown"
+              />
+              <div className="results-title-with-stars">
+                <img 
+                  src="/Stars12.png"
+                  alt="Звезды"
+                  className="results-stars results-stars-left"
+                />
+                <h1 className="results-title-text">
+                  <div className="results-title-line">
+                    {'ЦАРЬ'.split('').map((char, index) => (
+                      <span key={index} className="results-title-char" data-char={char}>
+                        {char}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="results-title-line">
+                    {'ГОРЫ'.split('').map((char, index) => (
+                      <span key={`mountain-${index}`} className="results-title-char" data-char={char}>
+                        {char}
+                      </span>
+                    ))}
+                  </div>
+                </h1>
+                <img 
+                  src="/Stars12.png"
+                  alt="Звезды"
+                  className="results-stars results-stars-right"
+                />
+              </div>
+            </>
           ) : (
             <h1 className="results-title-text">
               <div className="results-title-line">

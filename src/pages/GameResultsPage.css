@@ -75,6 +75,7 @@
 /* Заголовок */
 .results-title-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -82,11 +83,25 @@
   margin-top: -50px;
 }
 
+.results-crown {
+  width: 65px;
+  height: auto;
+  margin-bottom: -40px;
+  display: block;
+}
+
 .results-title-image {
   width: 100%;
   max-width: 250px;
   height: auto;
   display: block;
+}
+
+.results-title-with-stars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .results-title-text {
@@ -103,6 +118,17 @@
   align-items: center;
   letter-spacing: 0.5px;
   line-height: 1.2;
+}
+
+.results-stars {
+  width: 60px;
+  height: auto;
+  display: block;
+  margin-top: 35px;
+}
+
+.results-stars-left {
+  transform: scaleX(-1);
 }
 
 .results-title-line {
