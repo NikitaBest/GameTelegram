@@ -147,11 +147,11 @@
 }
 
 .draw-finished-button {
-  width: 100%;
-  max-width: 400px;
+  width: 287px;
   margin: 0 auto;
   display: block;
-  padding: 16px 32px;
+  height: 60px;
+  padding: 14px 24px;
   background: linear-gradient(180deg, #F5A623 0%, #E09000 100%);
   border: none;
   border-radius: 16px;
@@ -166,6 +166,9 @@
   transition: transform 0.1s, box-shadow 0.1s;
   text-transform: uppercase;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .draw-finished-button:active {
@@ -206,8 +209,9 @@
   }
   
   .draw-finished-button {
+    height: 55px;
     font-size: 20px;
-    padding: 14px 24px;
+    padding: 12px 24px;
   }
 }
 
@@ -232,6 +236,7 @@
   }
   
   .draw-finished-button {
+    height: 55px;
     font-size: 18px;
     padding: 12px 20px;
   }

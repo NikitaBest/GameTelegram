@@ -340,8 +340,8 @@
   left: 50%;
   transform: translateX(-50%);
   width: 287px;
-  height: 75px;
-  padding: 18px 24px;
+  height: 60px;
+  padding: 14px 24px;
   border: none;
   border-radius: 16px;
   background: linear-gradient(180deg, #FFAE3D 0%, #F59E20 100%);
@@ -365,6 +365,8 @@
   font-size: 24px;
   font-weight: 700;
   line-height: 1.1;
+  height: 60px;
+  padding: 14px 24px;
 }
 
 .play-again-button:active {
@@ -495,7 +497,13 @@
   }
 
   .play-again-button {
-    padding: 16px 20px;
+    height: 55px;
+    padding: 12px 20px;
+  }
+
+  .play-again-button.more-attempts {
+    height: 55px;
+    padding: 12px 20px;
   }
 
   /* Сохраняем размер 24px для всех вариантов кнопки (ОТЫГРАТЬСЯ!, ЗАКРЕПИТЬ!, ЕЩЁ ПОПЫТКИ) */
