@@ -208,7 +208,8 @@
   padding: 10px 16px;
   border: none;
   border-radius: 24px;
-  font-size: 14px;
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 16px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
   background: transparent;
