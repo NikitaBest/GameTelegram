@@ -230,6 +230,12 @@
   padding-bottom: 20px;
 }
 
+/* Убираем отступы для вкладки рейтинга */
+.results-content-area.rating-tab {
+  gap: 0;
+  padding-bottom: 0;
+}
+
 /* Скрытие неактивных вкладок (компоненты остаются в DOM для предзагрузки данных) */
 .results-content-area.hidden {
   display: none;
@@ -432,20 +438,78 @@
 
 /* Стили для Leaderboard на странице результатов */
 .results-content-area .leaderboard-container {
-  background: linear-gradient(180deg, rgba(143, 177, 255, 1) 0%, rgba(102, 138, 219, 1) 100%);
-  border-radius: 20px;
+  background: transparent;
+  border-radius: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
+  border: none;
 }
 
 .results-content-area .leaderboard-header {
   margin: 0;
   border-radius: 0;
   box-shadow: none;
+  display: none;
+}
+
+.results-content-area .leaderboard-title {
+  display: none;
+}
+
+.results-content-area .leaderboard-count {
+  display: none;
 }
 
 .results-content-area .leaderboard-list {
   padding: 12px;
+  background: linear-gradient(180deg, #4679C0 0%, #4985D7 100%);
+  border-radius: 16px;
+  border: 2px solid #3565A4;
+}
+
+/* Убираем боковые отступы для лидерборда во вкладке рейтинга */
+.rating-tab .leaderboard-list {
+  padding: 12px 12px;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #4679C0 0%, #4985D7 100%);
+  border-radius: 16px;
+  border: 2px solid #3565A4;
+}
+
+.rating-tab .leaderboard-container {
+  border-radius: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.rating-tab .leaderboard-header {
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 0;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* Убираем боковые отступы для вкладки рейтинга */
+.game-results-page.rating-active {
+  padding-left: 0;
+  padding-right: 0;
+  overflow-x: hidden;
+}
+
+.game-results-page.rating-active .results-content {
+  max-width: 100%;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+  box-sizing: border-box;
 }
 
 /* Адаптация для мобильных */

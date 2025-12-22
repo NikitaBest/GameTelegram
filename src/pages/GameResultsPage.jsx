@@ -217,7 +217,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
   const isFirstPlace = userRank === 1;
 
   return (
-    <div className="game-results-page">
+    <div className={`game-results-page ${activeTab === 'rating' ? 'rating-active' : ''}`}>
       {/* SVG фон за элементами */}
       <div 
         className="background-svg-layer"
@@ -371,7 +371,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         </div>
 
         {/* Вкладка "Рейтинг" - рендерится всегда для предзагрузки данных */}
-        <div className={`results-content-area ${activeTab === 'rating' ? '' : 'hidden'}`}>
+        <div className={`results-content-area rating-tab ${activeTab === 'rating' ? '' : 'hidden'}`}>
             {drawId ? (
               <Leaderboard drawId={drawId} userId={user?.id} />
             ) : (
