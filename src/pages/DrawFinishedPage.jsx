@@ -4,6 +4,7 @@ import BackgroundStars from '../components/BackgroundStars';
 import { getLeaderboard } from '../api/services/leaderboardService';
 import { startDraw } from '../api/services/drawService';
 import { useAuth } from '../hooks/useAuth';
+import '../styles/gradient-text.css';
 import './DrawFinishedPage.css';
 
 const DrawFinishedPage = ({ drawId, onNewDraws }) => {
@@ -164,7 +165,7 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
                     char === ' ' ? (
                       <span key={index} style={{ display: 'inline-block', width: '0.3em' }}> </span>
                     ) : (
-                      <span key={index} className="draw-finished-title-char" data-char={char}>
+                      <span key={index} className="gradient-text-char" data-char={char}>
                         {char}
                       </span>
                     )
@@ -172,7 +173,7 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
                 </div>
                 <div className="draw-finished-title-line">
                   {'ПРИЗЁРАХ!'.split('').map((char, index) => (
-                    <span key={`prize-${index}`} className="draw-finished-title-char" data-char={char}>
+                    <span key={`prize-${index}`} className="gradient-text-char" data-char={char}>
                       {char}
                     </span>
                   ))}
@@ -192,14 +193,14 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
               <h1 className="draw-finished-title-text">
                 <div className="draw-finished-title-line">
                   {'ХОРОШАЯ'.split('').map((char, index) => (
-                    <span key={index} className="draw-finished-title-char" data-char={char}>
+                    <span key={index} className="gradient-text-char" data-char={char}>
                       {char}
                     </span>
                   ))}
                 </div>
                 <div className="draw-finished-title-line">
                   {'ПОПЫТКА'.split('').map((char, index) => (
-                    <span key={`attempt-${index}`} className="draw-finished-title-char" data-char={char}>
+                    <span key={`attempt-${index}`} className="gradient-text-char" data-char={char}>
                       {char}
                     </span>
                   ))}
@@ -219,14 +220,14 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
               <h1 className="draw-finished-title-text">
                 <div className="draw-finished-title-line">
                   {'РОЗЫГРЫШ'.split('').map((char, index) => (
-                    <span key={index} className="draw-finished-title-char" data-char={char}>
+                    <span key={index} className="gradient-text-char" data-char={char}>
                       {char}
                     </span>
                   ))}
                 </div>
                 <div className="draw-finished-title-line">
                   {'ЗАВЕРШЁН'.split('').map((char, index) => (
-                    <span key={`finished-${index}`} className="draw-finished-title-char" data-char={char}>
+                    <span key={`finished-${index}`} className="gradient-text-char" data-char={char}>
                       {char}
                     </span>
                   ))}

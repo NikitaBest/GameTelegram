@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { saveAttempt } from '../api/services/attemptService';
 import { startDraw } from '../api/services/drawService';
 import { getLeaderboard } from '../api/services/leaderboardService';
+import '../styles/gradient-text.css';
 import './GameResultsPage.css';
 
 const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMain }) => {
@@ -261,14 +262,14 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
                 <h1 className="results-title-text">
                   <div className="results-title-line">
                     {'ЦАРЬ'.split('').map((char, index) => (
-                      <span key={index} className="results-title-char" data-char={char}>
+                      <span key={index} className="gradient-text-char" data-char={char}>
                         {char}
                       </span>
                     ))}
                   </div>
                   <div className="results-title-line">
                     {'ГОРЫ'.split('').map((char, index) => (
-                      <span key={`mountain-${index}`} className="results-title-char" data-char={char}>
+                      <span key={`mountain-${index}`} className="gradient-text-char" data-char={char}>
                         {char}
                       </span>
                     ))}
@@ -285,14 +286,14 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             <h1 className="results-title-text">
               <div className="results-title-line">
                 {'ТВОЙ'.split('').map((char, index) => (
-                  <span key={index} className="results-title-char" data-char={char}>
+                  <span key={index} className="gradient-text-char" data-char={char}>
                     {char}
                   </span>
                 ))}
               </div>
               <div className="results-title-line">
                 {'РЕЗУЛЬТАТ'.split('').map((char, index) => (
-                  <span key={`result-${index}`} className="results-title-char" data-char={char}>
+                  <span key={`result-${index}`} className="gradient-text-char" data-char={char}>
                     {char}
                   </span>
                 ))}
