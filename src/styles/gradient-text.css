@@ -1,10 +1,52 @@
-/* Градиентный текст - только градиент заливки */
-.gradient-text-char {
-  display: inline-block;
-  /* Градиент заливки для каждой буквы: rgba(250, 255, 91, 1) -> rgba(255, 72, 66, 1) */
-  background: linear-gradient(180deg, rgba(250, 255, 91, 1) 0%, rgba(255, 72, 66, 1) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+:root {
+  --variable-collection-color-3: rgba(102, 46, 231, 1);
+  --variable-collection-color-5: rgba(158, 255, 0, 1);
+  --variable-collection-color-green-2: rgba(172, 239, 33, 1);
 }
 
+.label {
+  height: 43px;
+  width: 192px;
+}
+
+.label .text-wrapper {
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px transparent;
+  background: linear-gradient(
+    180deg,
+    rgba(250, 255, 91, 1) 0%,
+    rgba(255, 72, 66, 1) 100%
+  );
+  background-clip: text;
+  background-image: linear-gradient(
+      180deg,
+      rgba(249, 229, 147, 1) 0%,
+      rgba(200, 37, 15, 1) 100%
+    );
+  color: transparent;
+  font-family: "Rubik-ExtraBold", Helvetica;
+  font-size: 36px;
+  font-weight: 800;
+  left: -4394px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: fixed;
+  text-fill-color: transparent;
+  top: 1320px;
+  white-space: nowrap;
+}
+
+/* Стили для градиентного текста */
+.gradient-text-char {
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background: linear-gradient(
+    180deg,
+    rgba(250, 255, 91, 1) 0%,
+    rgba(255, 72, 66, 1) 100%
+  ) !important;
+  background-clip: text !important;
+  color: transparent !important;
+  display: inline-block;
+}
