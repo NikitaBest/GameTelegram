@@ -233,7 +233,7 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
                 </div>
               </h1>
               <p className="draw-finished-subtitle">
-                 Загляни в новые — там тебя ждут призы.
+                В этот раз без тебя. Загляни в новые — там тебя ждут призы.
               </p>
             </>
           )}
