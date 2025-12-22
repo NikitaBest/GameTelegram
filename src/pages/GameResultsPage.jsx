@@ -349,7 +349,23 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
             </div>
             <div className="result-card-bot">
-              <span>Результаты придут в бот @{botUsername}</span>
+              <span>Результаты придут в бот{' '}
+                <a 
+                  href={`https://t.me/${botUsername}`}
+                  className="bot-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const tg = window.Telegram?.WebApp;
+                    if (tg?.openTelegramLink) {
+                      tg.openTelegramLink(`https://t.me/${botUsername}`);
+                    } else {
+                      window.open(`https://t.me/${botUsername}`, '_blank');
+                    }
+                  }}
+                >
+                  @{botUsername}
+                </a>
+              </span>
             </div>
           </div>
         </div>
