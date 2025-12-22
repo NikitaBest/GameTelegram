@@ -359,6 +359,14 @@
   z-index: 10;
 }
 
+/* Вариант кнопки "ЕЩЁ ПОПЫТКИ" (класс more-attempts) — крупный жирный заголовок Rubik 24px */
+.play-again-button.more-attempts {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
 .play-again-button:active {
   transform: translateX(-50%) translateY(4px);
   box-shadow: 0 2px 0 0 #C07A10, 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -432,8 +440,9 @@
     padding: 16px 20px;
   }
 
+  /* Сохраняем размер 24px для всех вариантов кнопки (ОТЫГРАТЬСЯ!, ЗАКРЕПИТЬ!, ЕЩЁ ПОПЫТКИ) */
   .play-again-main {
-    font-size: 16px;
+    font-size: 24px;
   }
 }
 
