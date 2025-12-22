@@ -153,6 +153,11 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
         <div className="draw-finished-header">
           {!isLoading && isInTop10 ? (
             <>
+              <img 
+                src="/призер.png" 
+                alt="Ты в призёрах" 
+                className="draw-finished-default-image"
+              />
               <h1 className="draw-finished-title-text">
                 <div className="draw-finished-title-line">
                   {'ТЫ'.split('').map((char, index) => (
@@ -175,6 +180,11 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
             </>
           ) : !isLoading && isNotInTop10 ? (
             <>
+              <img 
+                src="/попытка.png" 
+                alt="Хорошая попытка" 
+                className="draw-finished-default-image"
+              />
               <h1 className="draw-finished-title-text">
                 <div className="draw-finished-title-line">
                   {'ХОРОШАЯ'.split('').map((char, index) => (
