@@ -1,7 +1,7 @@
 .prize-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
 }
 
@@ -410,7 +410,7 @@
   }
   
   .prize-list {
-    gap: 8px;
+    gap: 5px;
   }
 }
 
