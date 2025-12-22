@@ -5,7 +5,7 @@ const LoadingScreen = () => {
     <div className="loading-screen">
       {/* Фоновое изображение */}
       <div className="loading-background">
-        <img src="/Задник.svg" alt="" className="loading-bg-image" />
+        <img src="/Задник.png" alt="" className="loading-bg-image" />
       </div>
       
       {/* Анимированный логотип по центру */}
