@@ -157,8 +157,10 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   }, [isLoading, loadingMore, hasMore, loadMore]);
 
   // Загружаем начальный список лидеров
+  // Запрос выполняется только один раз при монтировании компонента
   useEffect(() => {
-    if (drawId) {
+    if (drawId && leaders.length === 0) {
+      // Проверяем, не загружены ли уже данные, чтобы избежать двойного запроса
       setIsLoading(true);
       setError(null);
 

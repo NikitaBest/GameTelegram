@@ -4,7 +4,6 @@ import Leaderboard from '../components/Leaderboard';
 import MoreAttemptsModal from '../components/MoreAttemptsModal';
 import { useAuth } from '../hooks/useAuth';
 import { saveAttempt } from '../api/services/attemptService';
-import { startDraw } from '../api/services/drawService';
 import { getLeaderboard, getUserRank } from '../api/services/leaderboardService';
 import '../styles/gradient-text.css';
 import './GameResultsPage.css';
@@ -20,6 +19,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
   const [secondsToEnd, setSecondsToEnd] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [referralLink, setReferralLink] = useState(null);
+  const [isDataLoaded, setIsDataLoaded] = useState(false); // Флаг, что save и with-user выполнены
   const hasSavedRef = useRef(false);
   const { user } = useAuth();
 
@@ -35,17 +35,20 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           if (response.isSuccess) {
             console.log('Результат успешно сохранен:', response);
             
-            // Отображаем количество попыток из ответа saveAttempt (participating)
-            if (response.value?.participating) {
-              const participating = response.value.participating;
-              const remaining = (participating.maxAttemptsCount || 0) - (participating.attemptsCount || 0);
+            // Отображаем количество попыток из ответа saveAttempt
+            // Попытки могут быть в response.value или response.value.participating
+            const attemptsData = response.value?.participating || response.value;
+            if (attemptsData) {
+              const attemptsCount = attemptsData.attemptsCount || 0; // Растрачено попыток
+              const maxAttemptsCount = attemptsData.maxAttemptsCount || 0; // Доступно попыток
+              const remaining = maxAttemptsCount - attemptsCount; // Оставшиеся попытки
               setAttemptsLeft(remaining > 0 ? remaining : 0);
               
               if (import.meta.env.DEV) {
-                console.log('Данные participating из saveAttempt:', {
-                  attemptsCount: participating.attemptsCount,
-                  maxAttemptsCount: participating.maxAttemptsCount,
-                  remaining,
+                console.log('Данные попыток из saveAttempt:', {
+                  attemptsCount, // Растрачено
+                  maxAttemptsCount, // Доступно
+                  remaining, // Осталось (50 - 23 = 27)
                 });
               }
             }
@@ -85,55 +88,29 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
                 console.error('Ошибка при получении места пользователя:', err);
               }
             }
+            
+            // После выполнения save и with-user разрешаем загрузку Leaderboard
+            setIsDataLoaded(true);
           } else {
             console.error('Ошибка сохранения результата:', response.error);
             setSaveError(response.error);
+            setIsDataLoaded(true); // Разрешаем загрузку даже при ошибке
           }
         })
         .catch((err) => {
           console.error('Ошибка при сохранении результата:', err);
           setSaveError(err.message);
+          setIsDataLoaded(true); // Разрешаем загрузку даже при ошибке
         })
         .finally(() => {
           setIsSaving(false);
+          setIsLoading(false); // Завершаем загрузку после всех запросов
         });
     }
   }, [participatingId, score, drawId]);
 
-  // Загружаем данные о розыгрыше для получения времени и попыток
   // Запрос 3: top-list используется только для отображения рейтинга в компоненте Leaderboard
-  useEffect(() => {
-    if (drawId) {
-      setIsLoading(true);
-      
-      // Загружаем только данные розыгрыша (попытки, время и т.д.)
-      startDraw(drawId)
-        .then((drawResponse) => {
-          if (drawResponse.isSuccess && drawResponse.value) {
-            const data = drawResponse.value;
-            const remaining = data.maxAttemptsCount - data.attemptsCount;
-            setAttemptsLeft(remaining > 0 ? remaining : 0);
-            setSecondsToEnd(data.draw?.secondsToEnd || 0);
-            setReferralLink(data.referralLink || null);
-            
-            if (import.meta.env.DEV) {
-              console.log('Данные результатов:', {
-                attemptsCount: data.attemptsCount,
-                maxAttemptsCount: data.maxAttemptsCount,
-                remaining,
-                secondsToEnd: data.draw?.secondsToEnd,
-              });
-            }
-          }
-        })
-        .catch((err) => {
-          console.error('Ошибка загрузки данных результатов:', err);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [drawId]);
+  // Все данные (попытки, время, referralLink) получаем из saveAttempt
 
   // Таймер обратного отсчёта
   useEffect(() => {
@@ -329,14 +306,18 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           </div>
         </div>
 
-        {/* Вкладка "Рейтинг" - рендерится всегда для предзагрузки данных */}
+        {/* Вкладка "Рейтинг" - загружаем только после выполнения save и with-user */}
         <div className={`results-content-area rating-tab ${activeTab === 'rating' ? '' : 'hidden'}`}>
-            {drawId ? (
+            {drawId && isDataLoaded ? (
               <Leaderboard drawId={drawId} userId={user?.id} />
+            ) : drawId ? (
+              <div className="rating-placeholder">
+                <p>Загрузка рейтинга...</p>
+              </div>
             ) : (
-          <div className="rating-placeholder">
-            <p>Рейтинг будет доступен после финала</p>
-          </div>
+              <div className="rating-placeholder">
+                <p>Рейтинг будет доступен после финала</p>
+              </div>
             )}
         </div>
         </div>
