@@ -123,20 +123,32 @@ function App() {
 
     try {
       // Сначала проверяем активен ли розыгрыш
+      console.log(`[checkAndNavigate] Проверка активности розыгрыша с ID: ${currentDrawId}`);
       const drawResponse = await startDraw(currentDrawId);
       
       if (drawResponse.isSuccess && drawResponse.value) {
         const isActive = drawResponse.value.draw?.isActive;
+        console.log(`[checkAndNavigate] Статус активности розыгрыша: ${isActive}`);
         
-        if (!isActive) {
-          // Розыгрыш завершён - показываем страницу завершения
-          console.log('Розыгрыш завершён, переход на draw-finished');
+        // Если розыгрыш явно неактивен (false) - показываем страницу завершения
+        if (isActive === false) {
+          console.log('[checkAndNavigate] Розыгрыш завершён, переход на draw-finished');
           setCurrentPage('draw-finished');
+          setDrawId(currentDrawId); // Сохраняем drawId для страницы завершения
           return;
         }
+        
+        // Если isActive === true или undefined/null (по умолчанию считаем активным)
+        console.log('[checkAndNavigate] Розыгрыш активен, проверяем подписки');
+        // Продолжаем проверку подписок
+      } else {
+        // Если запрос не удался, но есть drawId - пробуем открыть страницу партнёров
+        // (может быть проблема с авторизацией или сетью)
+        console.warn('[checkAndNavigate] Не удалось получить данные розыгрыша:', drawResponse.error);
+        console.warn('[checkAndNavigate] Пробуем открыть страницу партнёров');
       }
 
-      // Розыгрыш активен - проверяем подписки
+      // Розыгрыш активен (или статус неизвестен) - проверяем подписки
       const response = await checkPartnersSubscription(currentDrawId);
       
       if (response.isSuccess && response.value) {

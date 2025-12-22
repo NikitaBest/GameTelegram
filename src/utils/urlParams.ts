@@ -9,7 +9,7 @@ export interface ParsedStartParam {
 }
 
 /**
- * Получение параметра tgWebAppStartParam из URL
+ * Получение параметра tgWebAppStartParam или startapp из URL
  * Параметр может быть в формате: "33_utm-channel" или просто "33"
  * Где число в начале - это ID розыгрыша
  * 
@@ -19,7 +19,8 @@ export function getStartParamFromURL(): string | null {
   if (typeof window === 'undefined') return null;
   
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('tgWebAppStartParam');
+  // Проверяем оба варианта параметра: tgWebAppStartParam (Telegram) и startapp (для тестирования)
+  return urlParams.get('tgWebAppStartParam') || urlParams.get('startapp');
 }
 
 /**
