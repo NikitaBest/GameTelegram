@@ -160,14 +160,18 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
               />
               <h1 className="draw-finished-title-text">
                 <div className="draw-finished-title-line">
-                  {'ТЫ'.split('').map((char, index) => (
-                    <span key={index} className="draw-finished-title-char" data-char={char}>
-                      {char}
-                    </span>
-                  ))}
+                  {'ТЫ В'.split('').map((char, index) => 
+                    char === ' ' ? (
+                      <span key={index} style={{ display: 'inline-block', width: '0.3em' }}> </span>
+                    ) : (
+                      <span key={index} className="draw-finished-title-char" data-char={char}>
+                        {char}
+                      </span>
+                    )
+                  )}
                 </div>
                 <div className="draw-finished-title-line">
-                  {'В ПРИЗЁРАХ!'.split('').map((char, index) => (
+                  {'ПРИЗЁРАХ!'.split('').map((char, index) => (
                     <span key={`prize-${index}`} className="draw-finished-title-char" data-char={char}>
                       {char}
                     </span>
