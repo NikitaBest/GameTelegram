@@ -230,6 +230,11 @@
   padding-bottom: 20px;
 }
 
+/* Скрытие неактивных вкладок (компоненты остаются в DOM для предзагрузки данных) */
+.results-content-area.hidden {
+  display: none;
+}
+
 /* Карточки результатов */
 .result-card {
   width: 100%;

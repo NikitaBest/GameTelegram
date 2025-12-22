@@ -323,49 +323,47 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
 
         {/* Контент табов */}
         <div className="results-scrollable-content">
-        {activeTab === 'my-results' && (
-          <div className="results-content-area">
-            {/* Карточка с местом и очками */}
-            <div className="result-card">
-              <div className="result-card-label">Твоё место</div>
-                <div className="result-card-rank">
-                  {isSaving ? '...' : (userRank || '—')}
-                </div>
-              <div className="result-card-score">
-                {/* Показываем максимальный счет из лидерборда, если он есть, иначе текущий score */}
-                {/* maxPoints может быть 0, что валидно, поэтому проверяем на null/undefined */}
-                {(userMaxPoints !== null && userMaxPoints !== undefined) 
-                  ? `${userMaxPoints} очков` 
-                  : (score !== undefined && score !== null ? `${score} очков` : '0 очков')}
+        {/* Вкладка "Мои итоги" */}
+        <div className={`results-content-area ${activeTab === 'my-results' ? '' : 'hidden'}`}>
+          {/* Карточка с местом и очками */}
+          <div className="result-card">
+            <div className="result-card-label">Твоё место</div>
+              <div className="result-card-rank">
+                {isSaving ? '...' : (userRank || '—')}
               </div>
-                {saveError && (
-                  <div className="result-card-error">Ошибка сохранения</div>
-                )}
+            <div className="result-card-score">
+              {/* Показываем максимальный счет из лидерборда, если он есть, иначе текущий score */}
+              {/* maxPoints может быть 0, что валидно, поэтому проверяем на null/undefined */}
+              {(userMaxPoints !== null && userMaxPoints !== undefined) 
+                ? `${userMaxPoints} очков` 
+                : (score !== undefined && score !== null ? `${score} очков` : '0 очков')}
             </div>
-
-            {/* Карточка с таймером и ботом */}
-            <div className="result-card">
-              <div className="result-card-timer">
-                <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
-              </div>
-              <div className="result-card-bot">
-                <span>Результаты придут в бот @{botUsername}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'rating' && (
-          <div className="results-content-area">
-              {drawId ? (
-                <Leaderboard drawId={drawId} userId={user?.id} />
-              ) : (
-            <div className="rating-placeholder">
-              <p>Рейтинг будет доступен после финала</p>
-            </div>
+              {saveError && (
+                <div className="result-card-error">Ошибка сохранения</div>
               )}
           </div>
-        )}
+
+          {/* Карточка с таймером и ботом */}
+          <div className="result-card">
+            <div className="result-card-timer">
+              <span>ДО ФИНАЛА ОСТАЛОСЬ: {timeUntilFinal}</span>
+            </div>
+            <div className="result-card-bot">
+              <span>Результаты придут в бот @{botUsername}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Вкладка "Рейтинг" - рендерится всегда для предзагрузки данных */}
+        <div className={`results-content-area ${activeTab === 'rating' ? '' : 'hidden'}`}>
+            {drawId ? (
+              <Leaderboard drawId={drawId} userId={user?.id} />
+            ) : (
+          <div className="rating-placeholder">
+            <p>Рейтинг будет доступен после финала</p>
+          </div>
+            )}
+        </div>
         </div>
       </div>
 
