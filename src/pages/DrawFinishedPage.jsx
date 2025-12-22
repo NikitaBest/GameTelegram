@@ -197,6 +197,11 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
             </>
           ) : (
             <>
+              <img 
+                src="/звершен.png" 
+                alt="Розыгрыш завершён" 
+                className="draw-finished-default-image"
+              />
               <h1 className="draw-finished-title-text">
                 <div className="draw-finished-title-line">
                   {'РОЗЫГРЫШ'.split('').map((char, index) => (
