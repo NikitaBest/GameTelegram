@@ -200,7 +200,7 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   // Мемоизируем функции для предотвращения лишних ре-рендеров
   const getCupIcon = useCallback((position) => {
     if (position === 1) return '/1st-1.png';
-    if (position === 2) return '/Component 32.svg';
+    if (position === 2) return '/2nd-1.png';
     if (position === 3) return '/3rd-1.png';
     return '/4rth-10th-1-7.png';
   }, []);

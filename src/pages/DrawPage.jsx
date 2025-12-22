@@ -72,17 +72,17 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
               // 1 место - золотой кубок
               placeLabel = 'Приз за 1 место';
               icon = 'gold';
-            } else if ((item.startPosition === 2 && item.endPosition === 2) || 
-                       (item.startPosition === 2 && item.endPosition === 3) ||
-                       (item.startPosition === 3 && item.endPosition === 3)) {
-              // 2-3 места - серебряный кубок
-              if (item.startPosition === 2 && item.endPosition === 2) {
-                placeLabel = 'Приз за 2 место';
-              } else if (item.startPosition === 3 && item.endPosition === 3) {
-                placeLabel = 'Приз за 3 место';
-              } else {
-                placeLabel = `Приз за ${item.startPosition} - ${item.endPosition} места`;
-              }
+            } else if (item.startPosition === 2 && item.endPosition === 2) {
+              // 2 место - серебряный кубок
+              placeLabel = 'Приз за 2 место';
+              icon = 'silver';
+            } else if (item.startPosition === 3 && item.endPosition === 3) {
+              // 3 место - бронзовый кубок
+              placeLabel = 'Приз за 3 место';
+              icon = 'bronze';
+            } else if (item.startPosition === 2 && item.endPosition === 3) {
+              // Диапазон 2-3 места - серебряный кубок
+              placeLabel = `Приз за ${item.startPosition} - ${item.endPosition} места`;
               icon = 'silver';
             } else if (item.startPosition >= 4 && item.endPosition <= 8) {
               // 4-8 места - бронзовый кубок
