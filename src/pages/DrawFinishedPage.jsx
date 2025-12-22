@@ -11,7 +11,37 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
   const [userRank, setUserRank] = useState(null);
   const [userPoints, setUserPoints] = useState(null);
   const [pointsToTop10, setPointsToTop10] = useState(null);
+  const [awardDateTime, setAwardDateTime] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Форматирование даты на русском языке
+  const formatAwardDate = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      
+      // Проверяем валидность даты
+      if (isNaN(date.getTime())) {
+        return '';
+      }
+      
+      const day = date.getDate();
+      // Массив месяцев в родительном падеже
+      const monthsGenitive = [
+        'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+        'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+      ];
+      const month = monthsGenitive[date.getMonth()];
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `до ${day} ${month} в ${hours}:${minutes}`;
+    } catch (error) {
+      console.error('Ошибка форматирования даты:', error);
+      return '';
+    }
+  };
 
   // Загружаем данные пользователя и вычисляем разницу с 10-м местом
   useEffect(() => {
@@ -22,11 +52,16 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
 
     const loadUserData = async () => {
       try {
-        // Получаем participatingId из startDraw
+        // Получаем participatingId и awardDateTime из startDraw
         const drawResponse = await startDraw(drawId);
         const participatingId = drawResponse.isSuccess && drawResponse.value 
           ? drawResponse.value.id 
           : null;
+        
+        // Сохраняем дату начисления приза
+        if (drawResponse.isSuccess && drawResponse.value?.draw?.awardDateTime) {
+          setAwardDateTime(drawResponse.value.draw.awardDateTime);
+        }
 
         // Загружаем лидерборд (первые 10 мест и данные пользователя)
         const [top10Response, userResponse] = await Promise.all([
@@ -105,8 +140,9 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
     loadUserData();
   }, [drawId, user]);
 
-  // Определяем, показывать ли альтернативный заголовок
-  const showAlternativeTitle = userRank && userRank > 10 && pointsToTop10 !== null;
+  // Определяем, какой заголовок показывать
+  const isInTop10 = userRank && userRank <= 10;
+  const isNotInTop10 = userRank && userRank > 10 && pointsToTop10 !== null;
 
   return (
     <div className="draw-finished-page">
@@ -115,7 +151,29 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
       <div className="draw-finished-content">
         {/* Заголовок с текстом */}
         <div className="draw-finished-header">
-          {!isLoading && showAlternativeTitle ? (
+          {!isLoading && isInTop10 ? (
+            <>
+              <h1 className="draw-finished-title-text">
+                <div className="draw-finished-title-line">
+                  {'ТЫ'.split('').map((char, index) => (
+                    <span key={index} className="draw-finished-title-char" data-char={char}>
+                      {char}
+                    </span>
+                  ))}
+                </div>
+                <div className="draw-finished-title-line">
+                  {'В ПРИЗЁРАХ!'.split('').map((char, index) => (
+                    <span key={`prize-${index}`} className="draw-finished-title-char" data-char={char}>
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              </h1>
+              <p className="draw-finished-subtitle">
+                Приз начисляется {formatAwardDate(awardDateTime)}
+              </p>
+            </>
+          ) : !isLoading && isNotInTop10 ? (
             <>
               <h1 className="draw-finished-title-text">
                 <div className="draw-finished-title-line">
