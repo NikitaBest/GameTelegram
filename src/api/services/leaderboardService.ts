@@ -66,6 +66,34 @@ export async function getLeaderboard(
 }
 
 /**
+ * Получение места текущего пользователя
+ * 
+ * @param drawId - ID розыгрыша
+ * @returns Данные пользователя с его местом в рейтинге
+ */
+export async function getUserRank(
+  drawId: number | string
+): Promise<LeaderboardResponse> {
+  if (!drawId) {
+    throw new Error('drawId обязателен для получения места пользователя');
+  }
+
+  try {
+    const response = await apiClient.post<LeaderboardResponse>(
+      '/participating/top-list/with-user',
+      {
+        drawId: Number(drawId),
+      }
+    );
+    
+    return response;
+  } catch (error) {
+    console.error('Ошибка при получении места пользователя:', error);
+    throw error;
+  }
+}
+
+/**
  * Получение следующей порции лидеров (для ленивой загрузки)
  * 
  * @param drawId - ID розыгрыша

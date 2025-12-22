@@ -5,7 +5,7 @@ import MoreAttemptsModal from '../components/MoreAttemptsModal';
 import { useAuth } from '../hooks/useAuth';
 import { saveAttempt } from '../api/services/attemptService';
 import { startDraw } from '../api/services/drawService';
-import { getLeaderboard } from '../api/services/leaderboardService';
+import { getLeaderboard, getUserRank } from '../api/services/leaderboardService';
 import '../styles/gradient-text.css';
 import './GameResultsPage.css';
 
@@ -23,7 +23,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
   const hasSavedRef = useRef(false);
   const { user } = useAuth();
 
-  // Отправляем результат на бекенд при монтировании
+  // Запрос 1: Сохраняем попытку и получаем participating, отображаем сколько попыток осталось
   useEffect(() => {
     if (participatingId && score !== undefined && !hasSavedRef.current) {
       hasSavedRef.current = true;
@@ -31,14 +31,60 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
       setSaveError(null);
 
       saveAttempt(participatingId, score)
-        .then((response) => {
+        .then(async (response) => {
           if (response.isSuccess) {
             console.log('Результат успешно сохранен:', response);
-            // НЕ устанавливаем userRank из saveAttempt, так как это может быть неправильное значение
-            // Вместо этого используем значение из лидерборда, которое загружается отдельно
-            // if (response.value?.topNumber) {
-            //   setUserRank(response.value.topNumber);
-            // }
+            
+            // Отображаем количество попыток из ответа saveAttempt (participating)
+            if (response.value?.participating) {
+              const participating = response.value.participating;
+              const remaining = (participating.maxAttemptsCount || 0) - (participating.attemptsCount || 0);
+              setAttemptsLeft(remaining > 0 ? remaining : 0);
+              
+              if (import.meta.env.DEV) {
+                console.log('Данные participating из saveAttempt:', {
+                  attemptsCount: participating.attemptsCount,
+                  maxAttemptsCount: participating.maxAttemptsCount,
+                  remaining,
+                });
+              }
+            }
+            
+            // Запрос 2: Запрашиваем место через with-user сразу после сохранения попытки
+            if (drawId) {
+              try {
+                const userRankResponse = await getUserRank(drawId);
+                if (userRankResponse.isSuccess && userRankResponse.value) {
+                  const items = userRankResponse.value.items || [];
+                  // Ищем текущего пользователя по participatingId
+                  if (participatingId) {
+                    const currentUser = items.find(item => 
+                      item.participatingId === participatingId || 
+                      String(item.participatingId) === String(participatingId) ||
+                      Number(item.participatingId) === Number(participatingId)
+                    );
+                    
+                    if (currentUser) {
+                      if (currentUser.topNumber) {
+                        setUserRank(currentUser.topNumber);
+                      }
+                      if (currentUser.maxPoints !== undefined && currentUser.maxPoints !== null) {
+                        setUserMaxPoints(currentUser.maxPoints);
+                      }
+                      if (import.meta.env.DEV) {
+                        console.log('Место пользователя получено через with-user:', {
+                          topNumber: currentUser.topNumber,
+                          maxPoints: currentUser.maxPoints,
+                          participatingId: currentUser.participatingId,
+                        });
+                      }
+                    }
+                  }
+                }
+              } catch (err) {
+                console.error('Ошибка при получении места пользователя:', err);
+              }
+            }
           } else {
             console.error('Ошибка сохранения результата:', response.error);
             setSaveError(response.error);
@@ -52,21 +98,17 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           setIsSaving(false);
         });
     }
-  }, [participatingId, score]);
+  }, [participatingId, score, drawId]);
 
   // Загружаем данные о розыгрыше для получения времени и попыток
+  // Запрос 3: top-list используется только для отображения рейтинга в компоненте Leaderboard
   useEffect(() => {
     if (drawId) {
       setIsLoading(true);
       
-      // Параллельно загружаем данные розыгрыша и место в рейтинге
-      Promise.all([
-        startDraw(drawId),
-        // Сначала пробуем запрос (0, 0) для получения текущего пользователя
-        getLeaderboard(drawId, 0, 0)
-      ])
-        .then(async ([drawResponse, leaderboardResponse]) => {
-          // Обрабатываем данные розыгрыша
+      // Загружаем только данные розыгрыша (попытки, время и т.д.)
+      startDraw(drawId)
+        .then((drawResponse) => {
           if (drawResponse.isSuccess && drawResponse.value) {
             const data = drawResponse.value;
             const remaining = data.maxAttemptsCount - data.attemptsCount;
@@ -83,91 +125,6 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               });
             }
           }
-          
-          // Обрабатываем данные лидерборда для получения места
-          let currentUser = null;
-          if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
-            const items = leaderboardResponse.value.items || [];
-            
-            // Ищем текущего пользователя по participatingId (самый надежный способ)
-            // Учитываем, что participatingId может быть числом или строкой
-            if (participatingId) {
-              currentUser = items.find(item => 
-                item.participatingId === participatingId || 
-                String(item.participatingId) === String(participatingId) ||
-                Number(item.participatingId) === Number(participatingId)
-              );
-            }
-            
-            // Если не нашли по participatingId, ищем по userTelegramId
-            if (!currentUser && user?.telegramId) {
-              currentUser = items.find(item => item.userTelegramId === user.telegramId);
-            }
-          }
-          
-          // Если не нашли пользователя в запросе (0, 0), запрашиваем больший диапазон
-          if (!currentUser) {
-            if (import.meta.env.DEV) {
-              console.log('Пользователь не найден в запросе (0, 0), запрашиваем диапазон 1-100');
-            }
-            
-            try {
-              const widerLeaderboardResponse = await getLeaderboard(drawId, 1, 100);
-              if (widerLeaderboardResponse.isSuccess && widerLeaderboardResponse.value) {
-                const items = widerLeaderboardResponse.value.items || [];
-                
-                // Ищем текущего пользователя по participatingId
-                // Учитываем, что participatingId может быть числом или строкой
-                if (participatingId) {
-                  currentUser = items.find(item => 
-                    item.participatingId === participatingId || 
-                    String(item.participatingId) === String(participatingId) ||
-                    Number(item.participatingId) === Number(participatingId)
-                  );
-                }
-                
-                // Если не нашли по participatingId, ищем по userTelegramId
-                if (!currentUser && user?.telegramId) {
-                  currentUser = items.find(item => item.userTelegramId === user.telegramId);
-                }
-              }
-            } catch (err) {
-              console.error('Ошибка при запросе расширенного лидерборда:', err);
-            }
-          }
-          
-          // Устанавливаем место и максимальный счет пользователя, если нашли
-          if (currentUser) {
-            if (currentUser.topNumber) {
-              setUserRank(currentUser.topNumber);
-            }
-            // Сохраняем максимальный счет из лидерборда (это актуальный счет для рейтинга)
-            // maxPoints может быть 0, что валидно, поэтому проверяем только на undefined/null
-            if (currentUser.maxPoints !== undefined && currentUser.maxPoints !== null) {
-              setUserMaxPoints(currentUser.maxPoints);
-            } else {
-              // Если maxPoints не найден, сбрасываем состояние
-              setUserMaxPoints(null);
-            }
-            if (import.meta.env.DEV) {
-              console.log('Данные пользователя из лидерборда:', {
-                topNumber: currentUser.topNumber,
-                maxPoints: currentUser.maxPoints,
-                participatingId: currentUser.participatingId,
-                userTelegramId: currentUser.userTelegramId,
-                foundBy: participatingId && currentUser.participatingId === participatingId ? 'participatingId' : 'userTelegramId'
-              });
-            }
-          } else {
-            // Если не нашли пользователя, логируем для отладки
-            if (import.meta.env.DEV) {
-              console.warn('Текущий пользователь не найден в лидерборде:', {
-                participatingId,
-                userTelegramId: user?.telegramId,
-                drawId
-              });
-            }
-          }
         })
         .catch((err) => {
           console.error('Ошибка загрузки данных результатов:', err);
@@ -176,7 +133,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           setIsLoading(false);
         });
     }
-  }, [drawId, participatingId]);
+  }, [drawId]);
 
   // Таймер обратного отсчёта
   useEffect(() => {
