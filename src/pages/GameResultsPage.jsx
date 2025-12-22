@@ -218,20 +218,21 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
 
   return (
     <div className={`game-results-page ${activeTab === 'rating' ? 'rating-active' : ''}`}>
-      {/* SVG фон за элементами */}
+      {/* Фон за элементами */}
       <div 
         className="background-svg-layer"
         style={{
-          position: 'absolute',
+          position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: 0,
-          backgroundImage: 'url(/Задник.svg)',
+          zIndex: -1,
+          backgroundImage: 'url(/Задник.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
+          pointerEvents: 'none',
         }}
       />
       

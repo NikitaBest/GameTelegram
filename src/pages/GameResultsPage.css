@@ -65,6 +65,11 @@
   flex: 1;
 }
 
+/* Уменьшаем отступ между табами и контентом для вкладки рейтинга */
+.game-results-page.rating-active .results-content {
+  gap: 12px;
+}
+
 .results-scrollable-content {
   width: 100%;
   flex: 1;
