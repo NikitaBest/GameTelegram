@@ -65,9 +65,9 @@
   flex: 1;
 }
 
-/* Уменьшаем отступ между табами и контентом для вкладки рейтинга */
-.game-results-page.rating-active .results-content {
-  gap: 12px;
+/* Уменьшаем отступ между табами и контентом для обеих вкладок */
+.results-scrollable-content {
+  margin-top: -12px;
 }
 
 .results-scrollable-content {
@@ -185,6 +185,7 @@
   text-align: center;
   margin: 0;
   margin-top: -16px;
+  margin-bottom: -8px;
   opacity: 0.95;
 }
 
