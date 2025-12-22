@@ -1,24 +1,165 @@
 import { useState, useEffect } from 'react';
 import Leaderboard from '../components/Leaderboard';
 import BackgroundStars from '../components/BackgroundStars';
+import { getLeaderboard } from '../api/services/leaderboardService';
+import { startDraw } from '../api/services/drawService';
+import { useAuth } from '../hooks/useAuth';
 import './DrawFinishedPage.css';
 
 const DrawFinishedPage = ({ drawId, onNewDraws }) => {
+  const { user } = useAuth();
+  const [userRank, setUserRank] = useState(null);
+  const [userPoints, setUserPoints] = useState(null);
+  const [pointsToTop10, setPointsToTop10] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Загружаем данные пользователя и вычисляем разницу с 10-м местом
+  useEffect(() => {
+    if (!drawId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const loadUserData = async () => {
+      try {
+        // Получаем participatingId из startDraw
+        const drawResponse = await startDraw(drawId);
+        const participatingId = drawResponse.isSuccess && drawResponse.value 
+          ? drawResponse.value.id 
+          : null;
+
+        // Загружаем лидерборд (первые 10 мест и данные пользователя)
+        const [top10Response, userResponse] = await Promise.all([
+          getLeaderboard(drawId, 1, 10), // Первые 10 мест
+          getLeaderboard(drawId, 0, 0) // Данные текущего пользователя
+        ]);
+
+        let currentUser = null;
+
+        // Ищем пользователя в ответе (0, 0)
+        if (userResponse.isSuccess && userResponse.value) {
+          const items = userResponse.value.items || [];
+          
+          // Ищем по participatingId
+          if (participatingId) {
+            currentUser = items.find(item => 
+              item.participatingId === participatingId || 
+              String(item.participatingId) === String(participatingId) ||
+              Number(item.participatingId) === Number(participatingId)
+            );
+          }
+          
+          // Если не нашли, ищем по userTelegramId
+          if (!currentUser && user?.telegramId) {
+            currentUser = items.find(item => item.userTelegramId === user.telegramId);
+          }
+        }
+
+        // Если не нашли в (0, 0), ищем в большем диапазоне
+        if (!currentUser) {
+          const widerResponse = await getLeaderboard(drawId, 1, 100);
+          if (widerResponse.isSuccess && widerResponse.value) {
+            const items = widerResponse.value.items || [];
+            
+            if (participatingId) {
+              currentUser = items.find(item => 
+                item.participatingId === participatingId || 
+                String(item.participatingId) === String(participatingId) ||
+                Number(item.participatingId) === Number(participatingId)
+              );
+            }
+            
+            if (!currentUser && user?.telegramId) {
+              currentUser = items.find(item => item.userTelegramId === user.telegramId);
+            }
+          }
+        }
+
+        if (currentUser) {
+          setUserRank(currentUser.topNumber);
+          setUserPoints(currentUser.maxPoints || 0);
+
+          // Если пользователь не в топ-10, вычисляем разницу с 10-м местом
+          if (currentUser.topNumber > 10 && top10Response.isSuccess && top10Response.value) {
+            const top10Items = top10Response.value.items || [];
+            if (top10Items.length > 0) {
+              // Берем последнее место из топ-10 (10-е место)
+              const tenthPlace = top10Items[top10Items.length - 1];
+              const tenthPlacePoints = tenthPlace.maxPoints || 0;
+              const userPointsValue = currentUser.maxPoints || 0;
+              const difference = tenthPlacePoints - userPointsValue;
+              
+              if (difference > 0) {
+                setPointsToTop10(difference);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке данных пользователя:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [drawId, user]);
+
+  // Определяем, показывать ли альтернативный заголовок
+  const showAlternativeTitle = userRank && userRank > 10 && pointsToTop10 !== null;
+
   return (
     <div className="draw-finished-page">
       <BackgroundStars />
       
       <div className="draw-finished-content">
-        {/* Заголовок с изображением */}
+        {/* Заголовок с текстом */}
         <div className="draw-finished-header">
-          <img 
-            src="/Frame 1171275395.png" 
-            alt="Розыгрыш завершён" 
-            className="draw-finished-image"
-          />
-          <p className="draw-finished-subtitle">
-             Загляни в новые — там тебя ждут призы.
-          </p>
+          {!isLoading && showAlternativeTitle ? (
+            <>
+              <h1 className="draw-finished-title-text">
+                <div className="draw-finished-title-line">
+                  {'ХОРОШАЯ'.split('').map((char, index) => (
+                    <span key={index} className="draw-finished-title-char" data-char={char}>
+                      {char}
+                    </span>
+                  ))}
+                </div>
+                <div className="draw-finished-title-line">
+                  {'ПОПЫТКА'.split('').map((char, index) => (
+                    <span key={`attempt-${index}`} className="draw-finished-title-char" data-char={char}>
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              </h1>
+              <p className="draw-finished-subtitle">
+                До призов не хватило {pointsToTop10} очков. Новый розыгрыш уже ждёт.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="draw-finished-title-text">
+                <div className="draw-finished-title-line">
+                  {'РОЗЫГРЫШ'.split('').map((char, index) => (
+                    <span key={index} className="draw-finished-title-char" data-char={char}>
+                      {char}
+                    </span>
+                  ))}
+                </div>
+                <div className="draw-finished-title-line">
+                  {'ЗАВЕРШЁН'.split('').map((char, index) => (
+                    <span key={`finished-${index}`} className="draw-finished-title-char" data-char={char}>
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              </h1>
+              <p className="draw-finished-subtitle">
+                 Загляни в новые — там тебя ждут призы.
+              </p>
+            </>
+          )}
         </div>
 
         {/* Список участников */}
