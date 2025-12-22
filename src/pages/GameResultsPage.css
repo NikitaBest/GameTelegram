@@ -10,8 +10,7 @@
   padding: 20px 16px;
   padding-top: 60px;
   padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* Отступ для фиксированной кнопки */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
   /* Фон убран - используется общий фон из .page-background */
   background: transparent;
   overscroll-behavior: none; /* Отключаем bounce эффект */
@@ -73,8 +72,7 @@
 .results-scrollable-content {
   width: 100%;
   flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
 }
 
 /* Заголовок */
@@ -336,7 +334,7 @@
 /* Кнопка "ОТЫГРАТЬСЯ!" - фиксированная внизу */
 .play-again-button {
   position: fixed;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: 287px;
@@ -356,7 +354,7 @@
   gap: 12px;
   filter: drop-shadow(0px 13px 5px rgba(0, 0, 0, 0.01)) drop-shadow(0px 7px 4px rgba(0, 0, 0, 0.05)) drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.09)) drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1));
   transition: all 0.3s ease;
-  z-index: 10;
+  z-index: 1000;
 }
 
 /* Вариант кнопки "ЕЩЁ ПОПЫТКИ" (класс more-attempts) — крупный жирный заголовок Rubik 24px */
@@ -499,6 +497,7 @@
   .play-again-button {
     height: 55px;
     padding: 12px 20px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
   .play-again-button.more-attempts {
