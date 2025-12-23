@@ -332,44 +332,25 @@
 }
 
 /* Кнопка "ОТЫГРАТЬСЯ!" - фиксированная внизу */
+/* Базовые стили в src/styles/action-button.css */
 .play-again-button {
   position: fixed;
   bottom: calc(16px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  width: 287px;
-  height: 60px;
-  padding: 14px 24px;
-  border: none;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #FFAE3D 0%, #F59E20 100%);
-  box-shadow: 0 6px 0 0 #C07A10, 0 8px 12px rgba(0, 0, 0, 0.15);
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 12px;
-  filter: drop-shadow(0px 13px 5px rgba(0, 0, 0, 0.01)) drop-shadow(0px 7px 4px rgba(0, 0, 0, 0.05)) drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.09)) drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1));
-  transition: all 0.3s ease;
   z-index: 1000;
+  font-size: 18px; /* Для варианта с подтекстом */
 }
 
 /* Вариант кнопки "ЕЩЁ ПОПЫТКИ" (класс more-attempts) — крупный жирный заголовок Rubik 24px */
 .play-again-button.more-attempts {
-  font-family: 'Rubik', Helvetica, sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.1;
-  height: 60px;
-  padding: 14px 24px;
+  font-size: 24px; /* Размер шрифта как в базовом классе */
 }
 
 .play-again-button:active {
   transform: translateX(-50%) translateY(4px);
-  box-shadow: 0 2px 0 0 #C07A10, 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Базовые стили :active в src/styles/action-button.css */
 }
 
 .play-again-icon {
@@ -495,13 +476,13 @@
   }
 
   .play-again-button {
-    height: 55px;
+    /* Высота из action-button.css (55px для мобильных) */
     padding: 12px 20px;
     bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
   .play-again-button.more-attempts {
-    height: 55px;
+    /* Высота из action-button.css (55px для мобильных) */
     padding: 12px 20px;
   }
 

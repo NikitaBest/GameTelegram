@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { saveAttempt } from '../api/services/attemptService';
 import { getLeaderboard, getUserRank } from '../api/services/leaderboardService';
 import '../styles/gradient-text.css';
+import '../styles/action-button.css';
 import './GameResultsPage.css';
 
 const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMain }) => {
@@ -326,7 +327,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
       {/* Кнопка - фиксированная внизу */}
       {attemptsLeft > 0 ? (
         <button 
-          className="play-again-button" 
+          className="play-again-button action-button-base" 
           onClick={onPlayAgain}
         >
           <img src="/Vector.svg" alt="" className="play-again-icon" />

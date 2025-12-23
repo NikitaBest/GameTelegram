@@ -5,6 +5,7 @@ import { getLeaderboard } from '../api/services/leaderboardService';
 import { startDraw } from '../api/services/drawService';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/gradient-text.css';
+import '../styles/action-button.css';
 import './DrawFinishedPage.css';
 
 const DrawFinishedPage = ({ drawId, onNewDraws }) => {
@@ -249,7 +250,7 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
 
       {/* Кнопка к новым розыгрышам - фиксированная внизу */}
       <div className="draw-finished-button-container">
-        <button className="draw-finished-button" onClick={onNewDraws}>
+        <button className="draw-finished-button action-button-base" onClick={onNewDraws}>
           К новым победам!
         </button>
       </div>
