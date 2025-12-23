@@ -59,7 +59,7 @@ const LeaderboardItem = memo(({ leader, isLast, isCurrentUser, userId, onLastIte
 
 LeaderboardItem.displayName = 'LeaderboardItem';
 
-const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
+const Leaderboard = ({ drawId, userId, hideHeader = false, onInitialLoad }) => {
   const [leaders, setLeaders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -68,6 +68,7 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
   const [totalCount, setTotalCount] = useState(0);
   const observerRef = useRef(null);
   const loadingTimeoutRef = useRef(null);
+  const hasCalledInitialLoadRef = useRef(false);
   
   // Загрузка дополнительных данных при прокрутке с оптимизацией
   const loadMore = useCallback(() => {
@@ -185,6 +186,11 @@ const Leaderboard = ({ drawId, userId, hideHeader = false }) => {
         })
         .finally(() => {
           setIsLoading(false);
+          // Сообщаем родителю, что первый запрос завершён (успех или ошибка)
+          if (!hasCalledInitialLoadRef.current && typeof onInitialLoad === 'function') {
+            hasCalledInitialLoadRef.current = true;
+            onInitialLoad();
+          }
         });
     }
 

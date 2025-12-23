@@ -20,6 +20,7 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
   const [drawData, setDrawData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isLeaderboardLoaded, setIsLeaderboardLoaded] = useState(false);
 
   // Загружаем данные о розыгрыше
   useEffect(() => {
@@ -252,7 +253,8 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
     onStartGame?.(drawData?.attemptsLeft);
   };
 
-  // Показываем экран загрузки пока данные не загружены
+  // Показываем экран загрузки пока данные розыгрыша не загружены
+  // Лидерборд догружаем "под капотом", пока поверх висит оверлей
   if (isLoading || authLoading || !drawData) {
     return <LoadingScreen />;
   }
@@ -272,6 +274,9 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
 
   return (
     <div className="draw-page">
+      {/* Оверлей загрузки, пока лидерборд не подгрузился */}
+      {!isLeaderboardLoaded && <LoadingScreen />}
+
       <BackgroundStars />
       <div className="draw-content">
         <BalanceIndicator balance={drawData.balance} />
@@ -302,7 +307,11 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
         
         <div className="info-panel-container leaderboard-panel-container">
           <div className="info-panel">
-            <Leaderboard drawId={drawId} userId={user?.id} />
+            <Leaderboard 
+              drawId={drawId} 
+              userId={user?.id} 
+              onInitialLoad={() => setIsLeaderboardLoaded(true)}
+            />
           </div>
         </div>
       </div>
