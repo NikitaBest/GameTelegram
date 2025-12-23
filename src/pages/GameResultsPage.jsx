@@ -208,7 +208,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             </>
           ) : (
             <img
-              src="/Твой_результат.png"
+              src="/resultat.png"
               alt="Твой результат"
               className="results-title-image results-title-image-result"
             />
