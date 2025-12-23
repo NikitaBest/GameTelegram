@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Leaderboard from '../components/Leaderboard';
-import BackgroundStars from '../components/BackgroundStars';
 import { getLeaderboard } from '../api/services/leaderboardService';
 import { startDraw } from '../api/services/drawService';
 import { useAuth } from '../hooks/useAuth';
@@ -148,7 +147,23 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
 
   return (
     <div className="draw-finished-page">
-      <BackgroundStars />
+      {/* Фон за элементами - тот же, что и на странице результатов */}
+      <div 
+        className="background-svg-layer"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1,
+          backgroundImage: 'url(/Задник.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          pointerEvents: 'none',
+        }}
+      />
       
       <div className="draw-finished-content">
         {/* Заголовок с текстом */}

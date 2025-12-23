@@ -21,6 +21,14 @@
   overscroll-behavior-y: none;
 }
 
+/* Адаптация фонового изображения под мобильные устройства */
+@media (max-width: 768px) {
+  .draw-finished-page {
+    background-attachment: scroll; /* fixed даёт артефакты в мобильных браузерах и Telegram WebView */
+    background-position: center top;
+  }
+}
+
 .draw-finished-content {
   width: 100%;
   max-width: 400px;
