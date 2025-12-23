@@ -95,9 +95,20 @@
 
 .results-title-image {
   width: 100%;
-  max-width: 250px;
+  max-width: 270px;
   height: auto;
   display: block;
+}
+
+/* Специальный отступ для картинки "ЦАРЬ ГОРЫ" */
+.results-title-image-king {
+  max-width: 120px;
+  margin-top: 46px;
+}
+
+/* Специальный отступ для картинки "ТВОЙ РЕЗУЛЬТАТ" */
+.results-title-image-result {
+  margin-top: 40px;
 }
 
 .results-title-with-stars {
@@ -468,7 +479,12 @@
 /* Адаптация для мобильных */
 @media (max-width: 480px) {
   .results-title-image {
-    max-width: 220px;
+    max-width: 230px;
+  }
+
+  /* На мобильных сохраняем меньший размер для "ЦАРЬ ГОРЫ" */
+  .results-title-image-king {
+    max-width: 120px;
   }
 
   .result-card-rank {

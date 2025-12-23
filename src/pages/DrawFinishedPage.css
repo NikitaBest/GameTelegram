@@ -48,6 +48,16 @@
   object-fit: contain;
 }
 
+/* Изображение заголовка (текстовые плашки) */
+.draw-finished-title-image {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  display: block;
+  margin-bottom: 8px;
+  object-fit: contain;
+}
+
 /* Заголовок в стиле страницы результатов */
 .draw-finished-title-text {
   font-family: 'Rubik', Helvetica, sans-serif;
@@ -165,6 +175,10 @@
     margin-bottom: 5px;
   }
   
+  .draw-finished-title-image {
+    max-width: 220px;
+  }
+  
   .draw-finished-title-text {
     font-size: 32px;
     margin-top: 0;
@@ -179,6 +193,10 @@
   .draw-finished-default-image {
     width: 180px;
     margin-bottom: 4px;
+  }
+  
+  .draw-finished-title-image {
+    max-width: 200px;
   }
   
   .draw-finished-title-text {
@@ -201,6 +219,10 @@
   .draw-finished-default-image {
     width: 160px;
     margin-bottom: 3px;
+  }
+  
+  .draw-finished-title-image {
+    max-width: 180px;
   }
   
   .draw-finished-title-text {

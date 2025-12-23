@@ -194,22 +194,11 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
                   alt="Звезды"
                   className="results-stars results-stars-left"
                 />
-                <h1 className="results-title-text">
-                  <div className="results-title-line">
-                    {'ЦАРЬ'.split('').map((char, index) => (
-                      <span key={index} className="gradient-text-char" data-char={char}>
-                        {char}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="results-title-line">
-                    {'ГОРЫ'.split('').map((char, index) => (
-                      <span key={`mountain-${index}`} className="gradient-text-char" data-char={char}>
-                        {char}
-                      </span>
-                    ))}
-                  </div>
-                </h1>
+                <img 
+                  src="/царь_горы.png"
+                  alt="Царь горы"
+                  className="results-title-image results-title-image-king"
+                />
                 <img 
                   src="/Stars12.png"
                   alt="Звезды"
@@ -218,22 +207,11 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               </div>
             </>
           ) : (
-            <h1 className="results-title-text">
-              <div className="results-title-line">
-                {'ТВОЙ'.split('').map((char, index) => (
-                  <span key={index} className="gradient-text-char" data-char={char}>
-                    {char}
-                  </span>
-                ))}
-              </div>
-              <div className="results-title-line">
-                {'РЕЗУЛЬТАТ'.split('').map((char, index) => (
-                  <span key={`result-${index}`} className="gradient-text-char" data-char={char}>
-                    {char}
-                  </span>
-                ))}
-              </div>
-            </h1>
+            <img
+              src="/Твой_результат.png"
+              alt="Твой результат"
+              className="results-title-image results-title-image-result"
+            />
           )}
         </div>
         <p className="results-subtitle">
@@ -342,7 +320,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         </button>
       ) : (
         <button 
-          className="play-again-button more-attempts" 
+          className="play-again-button more-attempts action-button-base" 
           onClick={() => setIsModalOpen(true)}
         >
           <div className="play-again-text">

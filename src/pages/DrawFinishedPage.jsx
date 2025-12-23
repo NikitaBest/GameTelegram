@@ -160,26 +160,11 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
                 alt="Ты в призёрах" 
                 className="draw-finished-default-image"
               />
-              <h1 className="draw-finished-title-text">
-                <div className="draw-finished-title-line">
-                  {'ТЫ В'.split('').map((char, index) => 
-                    char === ' ' ? (
-                      <span key={index} style={{ display: 'inline-block', width: '0.3em' }}> </span>
-                    ) : (
-                      <span key={index} className="gradient-text-char" data-char={char}>
-                        {char}
-                      </span>
-                    )
-                  )}
-                </div>
-                <div className="draw-finished-title-line">
-                  {'ПРИЗЁРАХ!'.split('').map((char, index) => (
-                    <span key={`prize-${index}`} className="gradient-text-char" data-char={char}>
-                      {char}
-                    </span>
-                  ))}
-                </div>
-              </h1>
+              <img 
+                src="/в_призерах.png" 
+                alt="Ты в призёрах" 
+                className="draw-finished-title-image"
+              />
               <p className="draw-finished-subtitle">
                 Приз начисляется {formatAwardDate(awardDateTime)}
               </p>
@@ -191,22 +176,11 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
                 alt="Хорошая попытка" 
                 className="draw-finished-default-image"
               />
-              <h1 className="draw-finished-title-text">
-                <div className="draw-finished-title-line">
-                  {'ХОРОШАЯ'.split('').map((char, index) => (
-                    <span key={index} className="gradient-text-char" data-char={char}>
-                      {char}
-                    </span>
-                  ))}
-                </div>
-                <div className="draw-finished-title-line">
-                  {'ПОПЫТКА'.split('').map((char, index) => (
-                    <span key={`attempt-${index}`} className="gradient-text-char" data-char={char}>
-                      {char}
-                    </span>
-                  ))}
-                </div>
-              </h1>
+              <img 
+                src="/хорошая_попытка.png" 
+                alt="Хорошая попытка" 
+                className="draw-finished-title-image"
+              />
               <p className="draw-finished-subtitle">
                 До призов не хватило {pointsToTop10} очков. Новый розыгрыш уже ждёт.
               </p>
@@ -218,22 +192,11 @@ const DrawFinishedPage = ({ drawId, onNewDraws }) => {
                 alt="Розыгрыш завершён" 
                 className="draw-finished-default-image"
               />
-              <h1 className="draw-finished-title-text">
-                <div className="draw-finished-title-line">
-                  {'РОЗЫГРЫШ'.split('').map((char, index) => (
-                    <span key={index} className="gradient-text-char" data-char={char}>
-                      {char}
-                    </span>
-                  ))}
-                </div>
-                <div className="draw-finished-title-line">
-                  {'ЗАВЕРШЁН'.split('').map((char, index) => (
-                    <span key={`finished-${index}`} className="gradient-text-char" data-char={char}>
-                      {char}
-                    </span>
-                  ))}
-                </div>
-              </h1>
+              <img 
+                src="/завершен.png" 
+                alt="Розыгрыш завершён" 
+                className="draw-finished-title-image"
+              />
               <p className="draw-finished-subtitle">
                 В этот раз без тебя. Загляни в новые — там тебя ждут призы.
               </p>
