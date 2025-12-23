@@ -129,19 +129,21 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
 
         <div className="modal-inner">
           {/* Пригласить друзей */}
-          <button className="attempt-option invite-friends" onClick={onInviteFriends}>
-            <div className="attempt-option-left">
-              <div className="attempt-bonus">+2 попытки</div>
-              <div className="attempt-action">
-                <img src="/fa-solid_user-friends.svg" alt="Друзья" className="attempt-icon" />
-                <span>Пригласить друзей</span>
+          <div className="attempt-group">
+            <button className="attempt-option invite-friends" onClick={onInviteFriends}>
+              <div className="attempt-option-left">
+                <div className="attempt-bonus">+2 попытки</div>
+                <div className="attempt-action">
+                  <img src="/fa-solid_user-friends.svg" alt="Друзья" className="attempt-icon" />
+                  <span>Пригласить друзей</span>
+                </div>
               </div>
-            </div>
-            <div className="attempt-option-arrow">
-              <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
-            </div>
-          </button>
-          <p className="attempt-note">*Начисляется после перехода и старта игры</p>
+              <div className="attempt-option-arrow">
+                <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
+              </div>
+            </button>
+            <p className="attempt-note">*Начисляется после перехода и старта игры</p>
+          </div>
 
           {/* Посмотреть рекламу */}
           <button 
