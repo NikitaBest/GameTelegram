@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { FlappyBirdRulesScreen } from './FlappyBirdRulesScreen';
+import { soundManager } from '../../utils/soundManager';
 import './FlappyBirdGame.css';
 
 interface FlappyBirdGameProps {
@@ -144,6 +145,9 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const jump = useCallback(() => {
     if (!isPlaying || isGameOver) return;
     
+    // Воспроизводим звук прыжка
+    soundManager.play('jump');
+    
     setBird(prev => ({
       ...prev,
       velocity: JUMP_STRENGTH,
@@ -174,6 +178,9 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
 
   // Начало игры
   const startGame = useCallback(() => {
+    // Воспроизводим звук начала игры
+    soundManager.play('start');
+    
     setBird({ x: BIRD_START_X, y: BIRD_START_Y, velocity: 0 });
     setPipes([]);
     setScore(0);
@@ -304,6 +311,8 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
           if (!scoredPipesRef.current.has(pipe.id)) {
             scoredPipesRef.current.add(pipe.id);
             setScore(prevScore => prevScore + 1);
+            // Воспроизводим звук получения очка
+            soundManager.play('score');
           }
         });
 
@@ -337,6 +346,11 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
         if (checkCollision(currentBird, currentPipes) && !gameOverHandledRef.current) {
           console.log('[FlappyBirdGame] Столкновение обнаружено!');
           gameOverHandledRef.current = true;
+          
+          // Воспроизводим звук столкновения и окончания игры
+          soundManager.play('hit');
+          soundManager.play('gameOver');
+          
           setIsGameOver(true);
           setIsPlaying(false);
           setTimeout(() => {
