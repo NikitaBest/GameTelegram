@@ -433,7 +433,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
                 className="flappy-bird-pipe-container pipe-bottom"
                 style={{
                   left: `${(pipe.x / GAME_WIDTH) * 100}%`,
-                  top: `${(pipe.bottomY / GAME_HEIGHT) * 100}%`,
+                  bottom: 0, // Прижимаем к самому низу
                   width: `${(PIPE_WIDTH / GAME_WIDTH) * 100}%`,
                   height: `${((GAME_HEIGHT - pipe.bottomY) / GAME_HEIGHT) * 100}%`,
                 }}
