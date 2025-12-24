@@ -12,11 +12,11 @@ const GAME_HEIGHT = 600;
 const BIRD_SIZE = 40;
 const BIRD_START_X = 100;
 const BIRD_START_Y = 250;
-// Упрощенная сложность с плавной физикой:
-const GRAVITY = 0.12; // Очень плавная гравитация для медленного падения
-const JUMP_STRENGTH = -4.5; // Сила прыжка для умеренного подъема с сохранением плавности
-const MAX_FALL_VELOCITY = 4; // Максимальная скорость падения (терминальная скорость) - очень медленная для плавности
-const AIR_RESISTANCE = 0.03; // Сопротивление воздуха при подъеме для более плавного движения
+// Физика игры - более отзывчивая и менее плавная:
+const GRAVITY = 0.35; // Гравитация для падения
+const JUMP_STRENGTH = -6.5; // Сила прыжка для быстрого подъема
+const MAX_FALL_VELOCITY = 7; // Максимальная скорость падения (терминальная скорость)
+const AIR_RESISTANCE = 0.01; // Минимальное сопротивление воздуха при подъеме
 const PIPE_WIDTH = 60;
 const PIPE_GAP_BASE = 200; // Базовый зазор между трубами
 const PIPE_GAP_MIN = 130; // Минимальный зазор (птица 40px + запас 90px) - всегда можно пройти
@@ -54,6 +54,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const [showRules, setShowRules] = useState(true);
   
   const gameLoopRef = useRef<number | null>(null);
+  const lastFrameTimeRef = useRef<number | null>(null);
   const lastPipeSpawnRef = useRef<number>(0);
   const pipeIdCounterRef = useRef<number>(1);
   const birdRef = useRef(bird);
@@ -148,6 +149,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     setIsGameOver(false);
     setShowRules(false);
     lastPipeSpawnRef.current = Date.now();
+    lastFrameTimeRef.current = null; // Сбрасываем время кадра
     pipeIdCounterRef.current = 1;
     gameOverHandledRef.current = false;
     scoredPipesRef.current.clear(); // Очищаем отслеживание начисленных очков
@@ -185,25 +187,39 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
       return;
     }
 
-    const gameLoop = () => {
+    const gameLoop = (currentTime: number) => {
+      // Расчет delta time для независимости от FPS
+      if (lastFrameTimeRef.current === null) {
+        lastFrameTimeRef.current = currentTime;
+        gameLoopRef.current = requestAnimationFrame(gameLoop);
+        return;
+      }
+
+      const deltaTime = currentTime - lastFrameTimeRef.current;
+      lastFrameTimeRef.current = currentTime;
+      
+      // Нормализуем delta time к 60 FPS (16.67ms на кадр)
+      // Это обеспечивает одинаковую скорость на всех устройствах
+      const normalizedDelta = deltaTime / 16.67;
       const now = Date.now();
 
-      // Обновление птицы с плавной физикой
+      // Обновление птицы с плавной физикой (с учетом delta time)
       setBird(prev => {
         let newVelocity = prev.velocity;
         
         // Применяем сопротивление воздуха при подъеме (когда velocity отрицательная)
         if (newVelocity < 0) {
-          newVelocity += AIR_RESISTANCE; // Замедляем подъем для плавности
+          newVelocity += AIR_RESISTANCE * normalizedDelta; // Замедляем подъем для плавности
         }
         
-        // Применяем гравитацию
-        newVelocity += GRAVITY;
+        // Применяем гравитацию (с учетом delta time)
+        newVelocity += GRAVITY * normalizedDelta;
         
         // Ограничиваем максимальную скорость падения для плавности
         newVelocity = Math.min(newVelocity, MAX_FALL_VELOCITY);
         
-        const newY = Math.max(0, Math.min(GAME_HEIGHT - BIRD_SIZE, prev.y + newVelocity));
+        // Применяем скорость с учетом delta time
+        const newY = Math.max(0, Math.min(GAME_HEIGHT - BIRD_SIZE, prev.y + newVelocity * normalizedDelta));
         
         return {
           ...prev,
@@ -218,13 +234,13 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
         lastPipeSpawnRef.current = now;
       }
 
-      // Обновление труб
+      // Обновление труб (с учетом delta time)
       setPipes(prev => {
         const currentSpeed = getCurrentPipeSpeed();
         const updated = prev
           .map(pipe => ({
             ...pipe,
-            x: pipe.x - currentSpeed,
+            x: pipe.x - currentSpeed * normalizedDelta, // Применяем delta time
             passed: pipe.passed || (pipe.x + PIPE_WIDTH < birdRef.current.x),
           }))
           .filter(pipe => pipe.x + PIPE_WIDTH > 0);
@@ -248,22 +264,20 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
 
       // Проверка столкновений (только если есть трубы)
       if (pipesRef.current.length > 0) {
-        setTimeout(() => {
-          const currentBird = birdRef.current;
-          const currentPipes = pipesRef.current;
-          
-          if (checkCollision(currentBird, currentPipes) && !gameOverHandledRef.current) {
-            console.log('[FlappyBirdGame] Столкновение обнаружено!');
-            gameOverHandledRef.current = true;
-            setIsGameOver(true);
-            setIsPlaying(false);
-            setTimeout(() => {
-              console.log('[FlappyBirdGame] Вызываем onGameOver с очками:', scoreRef.current);
-              onGameOver(scoreRef.current);
-            }, 500);
-            return;
-          }
-        }, 0);
+        const currentBird = birdRef.current;
+        const currentPipes = pipesRef.current;
+        
+        if (checkCollision(currentBird, currentPipes) && !gameOverHandledRef.current) {
+          console.log('[FlappyBirdGame] Столкновение обнаружено!');
+          gameOverHandledRef.current = true;
+          setIsGameOver(true);
+          setIsPlaying(false);
+          setTimeout(() => {
+            console.log('[FlappyBirdGame] Вызываем onGameOver с очками:', scoreRef.current);
+            onGameOver(scoreRef.current);
+          }, 500);
+          return;
+        }
       }
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
@@ -275,6 +289,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
+      lastFrameTimeRef.current = null; // Сбрасываем время кадра при размонтировании
     };
   }, [isPlaying, isGameOver, generatePipe, checkCollision, onGameOver, getCurrentPipeSpeed]);
 
