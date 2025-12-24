@@ -38,10 +38,18 @@ class SoundManager {
   private sounds: Map<SoundType, HTMLAudioElement> = new Map();
   private enabled: boolean = true;
   private masterVolume: number = 1.0;
+  private activeClones: Set<HTMLAudioElement> = new Set(); // Отслеживаем активные клоны
+  private maxConcurrentSounds: number = 5; // Максимальное количество одновременных звуков
+  private failedLoads: Set<SoundType> = new Set(); // Отслеживаем неудачные загрузки
 
   constructor() {
-    // Предзагрузка звуков
-    this.preloadSounds();
+    // Предзагрузка звуков асинхронно, чтобы не блокировать
+    // Используем setTimeout для отложенной загрузки
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        this.preloadSounds();
+      }, 0);
+    }
   }
 
   /**
@@ -49,14 +57,41 @@ class SoundManager {
    */
   private preloadSounds(): void {
     Object.entries(SOUNDS).forEach(([type, config]) => {
-      const audio = new Audio(config.path);
-      audio.volume = config.volume * this.masterVolume;
-      audio.preload = 'auto';
-      // Обработка ошибок загрузки
-      audio.addEventListener('error', () => {
-        console.warn(`[SoundManager] Не удалось загрузить звук: ${type}`);
-      });
-      this.sounds.set(type as SoundType, audio);
+      try {
+        const audio = new Audio(config.path);
+        audio.volume = config.volume * this.masterVolume;
+        audio.preload = 'auto';
+        
+        // Обработка ошибок загрузки - не блокируем выполнение
+        audio.addEventListener('error', () => {
+          this.failedLoads.add(type as SoundType);
+          // Если все звуки не загрузились, отключаем звуки автоматически
+          if (this.failedLoads.size === Object.keys(SOUNDS).length) {
+            this.enabled = false;
+          }
+        }, { once: true });
+        
+        // Добавляем только при успешной загрузке
+        audio.addEventListener('canplaythrough', () => {
+          this.sounds.set(type as SoundType, audio);
+        }, { once: true });
+        
+        // Таймаут для случаев, когда событие не сработает
+        // Если через 2 секунды звук не загрузился, считаем его недоступным
+        setTimeout(() => {
+          if (!this.sounds.has(type as SoundType) && !this.failedLoads.has(type as SoundType)) {
+            // Пробуем проверить готовность
+            if (audio.readyState >= 2) { // HAVE_CURRENT_DATA или выше
+              this.sounds.set(type as SoundType, audio);
+            } else {
+              this.failedLoads.add(type as SoundType);
+            }
+          }
+        }, 2000);
+      } catch (error) {
+        // Игнорируем ошибки создания Audio элемента
+        this.failedLoads.add(type as SoundType);
+      }
     });
   }
 
@@ -65,38 +100,85 @@ class SoundManager {
    */
   play(type: SoundType, options?: { volume?: number; loop?: boolean }): void {
     if (!this.enabled) return;
+    
+    // Если звук не загрузился, не пытаемся воспроизвести
+    if (this.failedLoads.has(type)) {
+      return;
+    }
+
+    // Ограничиваем количество одновременных звуков
+    if (this.activeClones.size >= this.maxConcurrentSounds) {
+      // Очищаем завершенные звуки перед добавлением нового
+      this.cleanupFinishedSounds();
+      if (this.activeClones.size >= this.maxConcurrentSounds) {
+        return; // Пропускаем, если все еще слишком много
+      }
+    }
 
     const audio = this.sounds.get(type);
     if (!audio) {
-      console.warn(`[SoundManager] Звук не найден: ${type}`);
+      // Не логируем в продакшене, чтобы не засорять консоль
       return;
     }
 
     try {
-      // Клонируем аудио для возможности одновременного воспроизведения
-      const audioClone = audio.cloneNode() as HTMLAudioElement;
+      // Используем оригинальный элемент, если он не играет, иначе клонируем
+      let audioToPlay: HTMLAudioElement;
+      
+      if (audio.paused || audio.ended) {
+        // Используем оригинальный элемент
+        audioToPlay = audio;
+        audioToPlay.currentTime = 0; // Сбрасываем на начало
+      } else {
+        // Клонируем только если оригинал уже играет
+        audioToPlay = audio.cloneNode() as HTMLAudioElement;
+        this.activeClones.add(audioToPlay);
+        
+        // Автоматическая очистка после окончания
+        audioToPlay.addEventListener('ended', () => {
+          this.activeClones.delete(audioToPlay);
+          // Удаляем ссылку для сборки мусора
+          audioToPlay.src = '';
+        }, { once: true });
+      }
       
       if (options?.volume !== undefined) {
-        audioClone.volume = options.volume * this.masterVolume;
+        audioToPlay.volume = options.volume * this.masterVolume;
       } else {
-        audioClone.volume = SOUNDS[type].volume * this.masterVolume;
+        audioToPlay.volume = SOUNDS[type].volume * this.masterVolume;
       }
 
       if (options?.loop) {
-        audioClone.loop = true;
+        audioToPlay.loop = true;
       }
 
       // Воспроизведение с обработкой ошибок
-      const playPromise = audioClone.play();
+      const playPromise = audioToPlay.play();
       if (playPromise !== undefined) {
         playPromise.catch((error) => {
           // Игнорируем ошибки автовоспроизведения (политики браузера)
-          console.debug(`[SoundManager] Не удалось воспроизвести звук ${type}:`, error);
+          // Удаляем из активных, если не удалось воспроизвести
+          if (audioToPlay !== audio) {
+            this.activeClones.delete(audioToPlay);
+          }
         });
       }
     } catch (error) {
-      console.warn(`[SoundManager] Ошибка воспроизведения звука ${type}:`, error);
+      // Игнорируем ошибки в продакшене
+      console.debug(`[SoundManager] Ошибка воспроизведения звука ${type}`);
     }
+  }
+
+  /**
+   * Очистка завершенных звуков
+   */
+  private cleanupFinishedSounds(): void {
+    this.activeClones.forEach((clone) => {
+      if (clone.ended || clone.paused) {
+        this.activeClones.delete(clone);
+        clone.src = ''; // Освобождаем память
+      }
+    });
   }
 
   /**
@@ -118,6 +200,14 @@ class SoundManager {
       audio.pause();
       audio.currentTime = 0;
     });
+    
+    // Останавливаем и очищаем все клоны
+    this.activeClones.forEach((clone) => {
+      clone.pause();
+      clone.currentTime = 0;
+      clone.src = '';
+    });
+    this.activeClones.clear();
   }
 
   /**
