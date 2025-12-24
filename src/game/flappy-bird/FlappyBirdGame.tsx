@@ -372,14 +372,6 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
           {showRules && (
             <FlappyBirdRulesScreen onStart={startGame} />
           )}
-
-          {/* Экран Game Over */}
-          {isGameOver && !showRules && (
-            <div className="flappy-bird-game-over">
-              <h2>Игра окончена!</h2>
-              <p>Очки: {score}</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
