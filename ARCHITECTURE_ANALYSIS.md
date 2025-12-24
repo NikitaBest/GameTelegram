@@ -32,8 +32,8 @@ src/
 │   └── PathToTreasuresPage # Страница подписок на партнеров
 ├── game/                  # Игровая логика
 │   ├── GameRouter.tsx    # Роутер для выбора игры
-│   ├── flappy-bird/      # Игра Flappy Bird (gameId: 1)
-│   └── game cosmos/      # Космическая игра (gameId: 2)
+│   ├── flappy-bird/      # Игра Flappy Bird (gameId: 2)
+│   └── game cosmos/      # Космическая игра (gameId: 1)
 ├── hooks/                 # React хуки
 │   ├── useAuth.ts        # Авторизация
 │   └── useGameLogic.ts   # Логика космической игры
@@ -77,7 +77,7 @@ src/
 
 ### Текущие игры
 
-#### 1. Flappy Bird (gameId: 1)
+#### 1. Flappy Bird (gameId: 2)
 - **Путь**: `src/game/flappy-bird/`
 - **Компонент**: `FlappyBirdGame.tsx`
 - **Описание**: Классическая игра - птица пролетает между трубами
@@ -89,7 +89,7 @@ src/
   - Динамическая сложность (зазор уменьшается, скорость растет)
   - Экран правил перед началом
 
-#### 2. Космическая игра (gameId: 2)
+#### 2. Космическая игра (gameId: 1)
 - **Путь**: `src/game/game cosmos/`
 - **Компонент**: `GameContainer.tsx`
 - **Описание**: Космический корабль собирает звезды и избегает астероидов
@@ -113,8 +113,8 @@ interface GameRouterProps {
 }
 
 // Логика выбора:
-// - gameId: 1 → Flappy Bird (по умолчанию)
-// - gameId: 2 → Космическая игра
+// - gameId: 1 → Космическая игра
+// - gameId: 2 → Flappy Bird (по умолчанию)
 // - gameId: null → Flappy Bird (fallback)
 ```
 
@@ -426,14 +426,14 @@ export function MyNewGameRulesScreen({ onStart }: MyNewGameRulesScreenProps) {
 import { MyNewGame } from './my-new-game/MyNewGame';
 
 export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
-  const selectedGameId = gameId || 1; // Flappy Bird по умолчанию
+  const selectedGameId = gameId || 2; // Flappy Bird по умолчанию
 
   switch (selectedGameId) {
     case 1:
-      return <FlappyBirdGame onGameOver={onGameOver} />;
+      return <CosmosGame onGameOver={onGameOver} />;
     
     case 2:
-      return <CosmosGame onGameOver={onGameOver} />;
+      return <FlappyBirdGame onGameOver={onGameOver} />;
     
     case 3: // Новый gameId для вашей игры
       return <MyNewGame onGameOver={onGameOver} />;
@@ -541,9 +541,9 @@ export interface GameState {
 1. Запустите dev-сервер: `npm run dev`
 2. В `App.jsx` есть тестовый режим:
    ```typescript
-   const [gameId, setGameId] = useState(import.meta.env.DEV ? 1 : null);
+   const [gameId, setGameId] = useState(import.meta.env.DEV ? 2 : null);
    ```
-   В DEV режиме используется `gameId = 1` для тестирования.
+   В DEV режиме используется `gameId = 2` (Flappy Bird) для тестирования.
 
 3. Для тестирования новой игры временно измените:
    ```typescript

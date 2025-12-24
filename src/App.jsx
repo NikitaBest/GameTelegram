@@ -77,9 +77,9 @@ function App() {
   const [gameKey, setGameKey] = useState(0); // Для пересоздания компонента игры
   const [participatingId, setParticipatingId] = useState(null); // ID участия из /start
   const [attemptsLeft, setAttemptsLeft] = useState(0); // Оставшиеся попытки
-  // ВРЕМЕННО для тестирования: в DEV режиме используем gameId = 1 (Flappy Bird)
+  // ВРЕМЕННО для тестирования: в DEV режиме используем gameId = 2 (Flappy Bird)
   // В продакшене должно быть: useState(null)
-  const [gameId, setGameId] = useState(import.meta.env.DEV ? 1 : null); // ID игры из бекенда
+  const [gameId, setGameId] = useState(import.meta.env.DEV ? 2 : null); // ID игры из бекенда
   const [isAppReady, setIsAppReady] = useState(false); // Флаг готовности приложения
   
   // Авторизация
@@ -257,7 +257,7 @@ function App() {
             onGameIdReceived={(id) => {
               // В DEV режиме игнорируем gameId из бекенда, используем тестовое значение
               if (import.meta.env.DEV) {
-                console.log('[App] В DEV режиме игнорируем gameId из бекенда:', id, ', используем тестовое значение: 1');
+                console.log('[App] В DEV режиме игнорируем gameId из бекенда:', id, ', используем тестовое значение: 2');
                 return;
               }
               setGameId(id);
