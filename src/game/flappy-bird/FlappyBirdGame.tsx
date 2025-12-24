@@ -12,9 +12,11 @@ const GAME_HEIGHT = 600;
 const BIRD_SIZE = 40;
 const BIRD_START_X = 100;
 const BIRD_START_Y = 250;
-// Упрощенная сложность:
-const GRAVITY = 0.4; // Уменьшена гравитация (было 0.5) - птица падает медленнее
-const JUMP_STRENGTH = -6.5; // Уменьшена сила прыжка (было -9) - птица прыгает ниже
+// Упрощенная сложность с плавной физикой:
+const GRAVITY = 0.12; // Очень плавная гравитация для медленного падения
+const JUMP_STRENGTH = -4.5; // Сила прыжка для умеренного подъема с сохранением плавности
+const MAX_FALL_VELOCITY = 4; // Максимальная скорость падения (терминальная скорость) - очень медленная для плавности
+const AIR_RESISTANCE = 0.03; // Сопротивление воздуха при подъеме для более плавного движения
 const PIPE_WIDTH = 60;
 const PIPE_GAP_BASE = 200; // Базовый зазор между трубами
 const PIPE_GAP_MIN = 130; // Минимальный зазор (птица 40px + запас 90px) - всегда можно пройти
@@ -58,6 +60,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const pipesRef = useRef(pipes);
   const scoreRef = useRef(score);
   const gameOverHandledRef = useRef(false);
+  const scoredPipesRef = useRef<Set<number>>(new Set()); // Отслеживаем трубы, за которые уже начислены очки
 
   // Синхронизация refs
   useEffect(() => {
@@ -147,6 +150,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     lastPipeSpawnRef.current = Date.now();
     pipeIdCounterRef.current = 1;
     gameOverHandledRef.current = false;
+    scoredPipesRef.current.clear(); // Очищаем отслеживание начисленных очков
   }, []);
 
   // Проверка столкновений
@@ -184,9 +188,21 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     const gameLoop = () => {
       const now = Date.now();
 
-      // Обновление птицы
+      // Обновление птицы с плавной физикой
       setBird(prev => {
-        const newVelocity = prev.velocity + GRAVITY;
+        let newVelocity = prev.velocity;
+        
+        // Применяем сопротивление воздуха при подъеме (когда velocity отрицательная)
+        if (newVelocity < 0) {
+          newVelocity += AIR_RESISTANCE; // Замедляем подъем для плавности
+        }
+        
+        // Применяем гравитацию
+        newVelocity += GRAVITY;
+        
+        // Ограничиваем максимальную скорость падения для плавности
+        newVelocity = Math.min(newVelocity, MAX_FALL_VELOCITY);
+        
         const newY = Math.max(0, Math.min(GAME_HEIGHT - BIRD_SIZE, prev.y + newVelocity));
         
         return {
@@ -213,14 +229,19 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
           }))
           .filter(pipe => pipe.x + PIPE_WIDTH > 0);
 
-        // Подсчет очков
+        // Подсчет очков - за каждую пройденную пару труб начисляется одно очко
         const newPassedPipes = updated.filter(
           pipe => pipe.passed && !prev.find(p => p.id === pipe.id && p.passed)
         );
         
-        if (newPassedPipes.length > 0) {
-          setScore(prevScore => prevScore + newPassedPipes.length);
-        }
+        // Начисляем только одно очко за каждую пройденную пару труб
+        // Используем Set для гарантии, что за каждую пару труб начисляется только одно очко
+        newPassedPipes.forEach(pipe => {
+          if (!scoredPipesRef.current.has(pipe.id)) {
+            scoredPipesRef.current.add(pipe.id);
+            setScore(prevScore => prevScore + 1);
+          }
+        });
 
         return updated;
       });
@@ -329,10 +350,14 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
                 top: `${(bird.y / GAME_HEIGHT) * 100}%`,
                 width: `${(BIRD_SIZE / GAME_WIDTH) * 100}%`,
                 height: `${(BIRD_SIZE / GAME_HEIGHT) * 100}%`,
-                transform: `scaleX(-1) rotate(${Math.min(bird.velocity * 3, 30)}deg)`,
+                transform: `rotate(${Math.min(bird.velocity * 3, 30)}deg)`,
               }}
             >
-              🐦
+              <img 
+                src="/Flappy Bird.png" 
+                alt="Птица" 
+                className="flappy-bird-bird-image"
+              />
             </div>
           )}
 
