@@ -305,7 +305,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
                 }}
               >
                 <img 
-                  src="/Pipe (1).svg" 
+                  src="/pipe green.png" 
                   alt="Pipe top" 
                   className="flappy-bird-pipe-svg pipe-top-svg"
                   style={{
@@ -327,7 +327,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
                 }}
               >
                 <img 
-                  src="/Pipe.svg" 
+                  src="/pipe green (1).png" 
                   alt="Pipe bottom" 
                   className="flappy-bird-pipe-svg pipe-bottom-svg"
                   style={{
