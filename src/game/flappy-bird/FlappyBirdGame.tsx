@@ -38,6 +38,15 @@ interface Pipe {
   passed: boolean;
 }
 
+interface Cloud {
+  id: number;
+  x: number;
+  y: number;
+  image: string; // Путь к изображению облака
+  speed: number; // Скорость движения облака
+  size: number; // Размер облака (в процентах от высоты экрана)
+}
+
 export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   console.log('[FlappyBirdGame] Компонент монтирован');
   
@@ -48,6 +57,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   });
   
   const [pipes, setPipes] = useState<Pipe[]>([]);
+  const [clouds, setClouds] = useState<Cloud[]>([]);
   const [score, setScore] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -56,12 +66,17 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const gameLoopRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number | null>(null);
   const lastPipeSpawnRef = useRef<number>(0);
+  const lastCloudSpawnRef = useRef<number>(0);
   const pipeIdCounterRef = useRef<number>(1);
+  const cloudIdCounterRef = useRef<number>(1);
   const birdRef = useRef(bird);
   const pipesRef = useRef(pipes);
   const scoreRef = useRef(score);
   const gameOverHandledRef = useRef(false);
   const scoredPipesRef = useRef<Set<number>>(new Set()); // Отслеживаем трубы, за которые уже начислены очки
+  
+  // Массив изображений облаков
+  const cloudImages = ['/Облако1.png', '/Облако2.png', '/Облако3.png'];
 
   // Синхронизация refs
   useEffect(() => {
@@ -108,6 +123,23 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     };
   }, [getCurrentPipeGap]);
 
+  // Генерация нового облака
+  const generateCloud = useCallback((): Cloud => {
+    const randomImage = cloudImages[Math.floor(Math.random() * cloudImages.length)];
+    const randomY = Math.random() * (GAME_HEIGHT * 0.6); // Облака в верхних 60% экрана
+    const randomSize = 8 + Math.random() * 12; // Размер от 8% до 20% высоты экрана
+    const randomSpeed = 0.3 + Math.random() * 0.4; // Скорость от 0.3 до 0.7
+    
+    return {
+      id: cloudIdCounterRef.current++,
+      x: GAME_WIDTH + 50, // Начинаем справа за экраном
+      y: randomY,
+      image: randomImage,
+      speed: randomSpeed,
+      size: randomSize,
+    };
+  }, []);
+
   // Прыжок птицы
   const jump = useCallback(() => {
     if (!isPlaying || isGameOver) return;
@@ -149,10 +181,26 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     setIsGameOver(false);
     setShowRules(false);
     lastPipeSpawnRef.current = Date.now();
+    lastCloudSpawnRef.current = Date.now();
     lastFrameTimeRef.current = null; // Сбрасываем время кадра
     pipeIdCounterRef.current = 1;
+    cloudIdCounterRef.current = 1;
     gameOverHandledRef.current = false;
     scoredPipesRef.current.clear(); // Очищаем отслеживание начисленных очков
+    
+    // Создаем начальные облака
+    const initialClouds: Cloud[] = [];
+    for (let i = 0; i < 3; i++) {
+      initialClouds.push({
+        id: cloudIdCounterRef.current++,
+        x: Math.random() * GAME_WIDTH,
+        y: Math.random() * (GAME_HEIGHT * 0.6),
+        image: cloudImages[Math.floor(Math.random() * cloudImages.length)],
+        speed: 0.3 + Math.random() * 0.4,
+        size: 8 + Math.random() * 12,
+      });
+    }
+    setClouds(initialClouds);
   }, []);
 
   // Проверка столкновений
@@ -262,6 +310,25 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
         return updated;
       });
 
+      // Обновление облаков
+      setClouds(prev => {
+        const updated = prev
+          .map(cloud => ({
+            ...cloud,
+            x: cloud.x - cloud.speed * normalizedDelta * 2, // Движение облаков медленнее труб
+          }))
+          .filter(cloud => cloud.x + (GAME_WIDTH * cloud.size / 100) > -100); // Удаляем облака, которые ушли за экран
+
+        // Спавним новые облака примерно раз в 4-6 секунд
+        const cloudSpawnInterval = 4000 + Math.random() * 2000; // 4-6 секунд
+        if (now - lastCloudSpawnRef.current > cloudSpawnInterval && updated.length < 5) {
+          updated.push(generateCloud());
+          lastCloudSpawnRef.current = now;
+        }
+
+        return updated;
+      });
+
       // Проверка столкновений (только если есть трубы)
       if (pipesRef.current.length > 0) {
         const currentBird = birdRef.current;
@@ -291,7 +358,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
       }
       lastFrameTimeRef.current = null; // Сбрасываем время кадра при размонтировании
     };
-  }, [isPlaying, isGameOver, generatePipe, checkCollision, onGameOver, getCurrentPipeSpeed]);
+  }, [isPlaying, isGameOver, generatePipe, generateCloud, checkCollision, onGameOver, getCurrentPipeSpeed]);
 
   return (
     <div 
@@ -306,6 +373,36 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
         >
           {/* Фон */}
           <div className="flappy-bird-background" />
+
+          {/* Облака */}
+          {clouds.map(cloud => (
+            <div
+              key={cloud.id}
+              className="flappy-bird-cloud"
+              style={{
+                position: 'absolute',
+                left: `${(cloud.x / GAME_WIDTH) * 100}%`,
+                top: `${(cloud.y / GAME_HEIGHT) * 100}%`,
+                width: `${cloud.size}%`,
+                height: 'auto',
+                zIndex: 0,
+                pointerEvents: 'none',
+                opacity: 0.7,
+              }}
+            >
+              <img
+                src={cloud.image}
+                alt="Облако"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  imageRendering: 'auto',
+                  userSelect: 'none',
+                }}
+              />
+            </div>
+          ))}
 
           {/* Трубы */}
           {pipes.map(pipe => (

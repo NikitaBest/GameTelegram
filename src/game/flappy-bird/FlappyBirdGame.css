@@ -66,29 +66,10 @@
   z-index: 0;
 }
 
-/* Облака на фоне */
-.flappy-bird-background::before {
-  content: '';
-  position: absolute;
-  width: clamp(60px, 15vw, 100px);
-  height: clamp(30px, 7.5vw, 50px);
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50px;
-  top: 20%;
-  left: 20%;
-  box-shadow: 
-    clamp(80px, 20vw, 120px) clamp(50px, 12vw, 80px) 0 rgba(255, 255, 255, 0.2),
-    clamp(150px, 35vw, 250px) clamp(25px, 6vw, 40px) 0 rgba(255, 255, 255, 0.25);
-  animation: cloudMove 20s linear infinite;
-}
-
-@keyframes cloudMove {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(100vw);
-  }
+/* Облака на фоне - теперь используются изображения через JSX */
+.flappy-bird-cloud {
+  will-change: transform;
+  transition: none;
 }
 
 .flappy-bird-pipe-container {
