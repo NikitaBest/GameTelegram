@@ -48,6 +48,9 @@ interface Spike {
   y: number;
   side: "left" | "right";
   active: boolean;
+  offsetX: number; // Смещение для анимации выезда/заезда (0-1)
+  state: "entering" | "visible" | "exiting"; // Состояние анимации
+  animationTime: number; // Время начала анимации
 }
 
 interface Particle {
@@ -106,6 +109,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     setIsPlaying(true);
     setBgColor(BG_COLORS[0]);
     gameOverHandledRef.current = false;
+    // Создаем начальные шипы
+    spawnSpikes(height);
   }, []);
 
   const spawnSpikes = (canvasHeight: number) => {
@@ -113,13 +118,21 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     // Difficulty scaling: more spikes as score increases
     const spikeCount = Math.min(1 + Math.floor(scoreRef.current / 5), 5);
     const newSpikes: Spike[] = [];
+    const now = Date.now();
     
     // Avoid spawning spikes too close to each other or where the ball just bounced?
     // For simplicity, random positions on both walls
     for (let i = 0; i < spikeCount; i++) {
       const side = Math.random() > 0.5 ? "left" : "right";
       const y = Math.random() * (canvasHeight - 100) + 50; // Keep away from extreme edges
-      newSpikes.push({ y, side, active: true });
+      newSpikes.push({ 
+        y, 
+        side, 
+        active: true,
+        offsetX: 0, // Начинаем с выезда
+        state: "entering",
+        animationTime: now
+      });
     }
     spikes.current = newSpikes;
   };
@@ -165,17 +178,22 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     const currentBallColor = colorIndex >= 0 ? BALL_COLORS[colorIndex] : BALL_COLORS[0];
     const currentSpikeColor = colorIndex >= 0 ? SPIKE_COLORS[colorIndex] : SPIKE_COLORS[0];
 
-    // Draw Spikes
+    // Draw Spikes with animation
     ctx.fillStyle = currentSpikeColor;
     spikes.current.forEach(spike => {
+      // Вычисляем текущую ширину шипа на основе анимации (от 0 до SPIKE_WIDTH)
+      const currentWidth = spike.offsetX * SPIKE_WIDTH;
+      
       ctx.beginPath();
       if (spike.side === "left") {
+        // Всегда начинаем от стены (x = 0), анимируем только ширину
         ctx.moveTo(0, spike.y - SPIKE_HEIGHT/2);
-        ctx.lineTo(SPIKE_WIDTH, spike.y);
+        ctx.lineTo(currentWidth, spike.y);
         ctx.lineTo(0, spike.y + SPIKE_HEIGHT/2);
       } else {
+        // Всегда начинаем от стены (x = width), анимируем только ширину
         ctx.moveTo(width, spike.y - SPIKE_HEIGHT/2);
-        ctx.lineTo(width - SPIKE_WIDTH, spike.y);
+        ctx.lineTo(width - currentWidth, spike.y);
         ctx.lineTo(width, spike.y + SPIKE_HEIGHT/2);
       }
       ctx.closePath();
@@ -289,6 +307,43 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       }))
       .filter(particle => particle.life > 0);
 
+    // 2.6. Update Spikes Animation
+    const now = Date.now();
+    const ENTER_DURATION = 400; // Время выезда (мс)
+    const VISIBLE_DURATION = 2000; // Время видимости (мс)
+    const EXIT_DURATION = 400; // Время заезда (мс)
+    
+    spikes.current = spikes.current.map(spike => {
+      const elapsed = now - spike.animationTime;
+      
+      if (spike.state === "entering") {
+        const progress = Math.min(1, elapsed / ENTER_DURATION);
+        spike.offsetX = progress; // От 0 до 1
+        
+        if (progress >= 1) {
+          spike.state = "visible";
+          spike.animationTime = now;
+        }
+      } else if (spike.state === "visible") {
+        spike.offsetX = 1; // Полностью выехали
+        
+        if (elapsed >= VISIBLE_DURATION) {
+          spike.state = "exiting";
+          spike.animationTime = now;
+        }
+      } else if (spike.state === "exiting") {
+        const progress = Math.min(1, elapsed / EXIT_DURATION);
+        spike.offsetX = 1 - progress; // От 1 до 0
+        
+        if (progress >= 1) {
+          // Шип полностью заехал, помечаем как неактивный
+          spike.active = false;
+        }
+      }
+      
+      return spike;
+    }).filter(spike => spike.active || spike.offsetX > 0); // Удаляем только полностью заехавшие
+
     // 3. Floor/Ceiling Collisions (Bounce)
     if (ballPos.current.y + BALL_RADIUS >= height) {
       ballPos.current.y = height - BALL_RADIUS;
@@ -322,8 +377,11 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       createParticles(ballPos.current.x, ballPos.current.y, 12, 1.5);
       
       // Logic when hitting a wall:
-      // a. Check if hit a spike
+      // a. Check if hit a spike (только если шип полностью выехал)
       const hitSpike = spikes.current.some(spike => {
+        // Проверяем только если шип полностью выехал (offsetX >= 0.9 для небольшого допуска)
+        if (spike.offsetX < 0.9) return false;
+        
         if (spike.side === "left" && ballPos.current.x <= BALL_RADIUS + SPIKE_WIDTH) {
            return Math.abs(ballPos.current.y - spike.y) < (SPIKE_HEIGHT + BALL_RADIUS);
         }
