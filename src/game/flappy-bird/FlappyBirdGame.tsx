@@ -75,6 +75,8 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const scoreRef = useRef(score);
   const gameOverHandledRef = useRef(false);
   const scoredPipesRef = useRef<Set<number>>(new Set()); // Отслеживаем трубы, за которые уже начислены очки
+  const lastJumpTimeRef = useRef<number>(0); // Время последнего прыжка для предотвращения двойного срабатывания
+  const isTouchDeviceRef = useRef<boolean>(false); // Флаг для определения touch устройства
   
   // Массив изображений облаков
   const cloudImages = ['/Облако1.png', '/Облако2.png', '/Облако3.png'];
@@ -145,6 +147,13 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const jump = useCallback(() => {
     if (!isPlaying || isGameOver) return;
     
+    // Защита от двойного срабатывания: проверяем, не было ли прыжка в последние 200ms
+    const now = Date.now();
+    if (now - lastJumpTimeRef.current < 200) {
+      return; // Игнорируем, если прыжок был недавно
+    }
+    lastJumpTimeRef.current = now;
+    
     // Воспроизводим звук прыжка
     soundManager.play('jump');
     
@@ -154,8 +163,26 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     }));
   }, [isPlaying, isGameOver]);
 
-  // Обработка клика/тапа (только для игры, не для правил)
-  const handleClick = useCallback(() => {
+  // Обработка touch события (для мобильных)
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!showRules && isPlaying && !isGameOver) {
+      e.preventDefault(); // Предотвращаем эмуляцию click события
+      isTouchDeviceRef.current = true; // Помечаем, что это touch устройство
+      jump();
+    }
+  }, [showRules, isPlaying, isGameOver, jump]);
+
+  // Обработка клика (только для десктопа, не для touch устройств)
+  const handleClick = useCallback((_e: React.MouseEvent) => {
+    // Игнорируем click события на touch устройствах (они уже обработаны через touch)
+    if (isTouchDeviceRef.current) {
+      // Сбрасываем флаг через небольшую задержку, чтобы не блокировать настоящие клики мыши
+      setTimeout(() => {
+        isTouchDeviceRef.current = false;
+      }, 300);
+      return;
+    }
+    
     if (!showRules && isPlaying && !isGameOver) {
       jump();
     }
@@ -193,10 +220,12 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     lastPipeSpawnRef.current = Date.now();
     lastCloudSpawnRef.current = Date.now();
     lastFrameTimeRef.current = null; // Сбрасываем время кадра
+    lastJumpTimeRef.current = 0; // Сбрасываем время последнего прыжка
     pipeIdCounterRef.current = 1;
     cloudIdCounterRef.current = 1;
     gameOverHandledRef.current = false;
     scoredPipesRef.current.clear(); // Очищаем отслеживание начисленных очков
+    isTouchDeviceRef.current = false; // Сбрасываем флаг touch устройства
     
     // Создаем начальные облака
     const initialClouds: Cloud[] = [];
@@ -381,8 +410,8 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
     <div 
       className="flappy-bird-game-container"
       onClick={handleClick}
+      onTouchStart={handleTouchStart}
       style={{ touchAction: 'none' }}
-      onTouchStart={handleClick}
     >
       <div className="flappy-bird-game-wrapper">
         <div 
