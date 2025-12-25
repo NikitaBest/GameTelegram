@@ -133,7 +133,7 @@
 
 .flappy-bird-hud {
   position: absolute;
-  top: clamp(10px, 3vh, 20px);
+  top: clamp(30px, 6vh, 50px); /* Увеличено для размещения ниже */
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
@@ -242,7 +242,7 @@
 
   .flappy-bird-hud {
     font-size: 16px;
-    top: 8px;
+    top: 25px; /* Увеличено для размещения ниже */
   }
 
   .flappy-bird-score {
@@ -258,7 +258,7 @@
 
   .flappy-bird-hud {
     font-size: 18px;
-    top: 12px;
+    top: 30px; /* Увеличено для размещения ниже */
   }
 }
 
@@ -324,7 +324,7 @@
 
   .flappy-bird-hud {
     font-size: clamp(14px, 4vh, 18px);
-    top: 5px;
+    top: 20px; /* Увеличено для размещения ниже */
   }
 }
 
