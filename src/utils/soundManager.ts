@@ -1,7 +1,9 @@
 /**
  * Менеджер звуков для игр
- * Оптимизирован для устранения подвисаний и поддержки системного уровня звука
+ * Оптимизирован для Telegram Web App и устранения подвисаний
  */
+
+import { isTelegramWebApp } from '../lib/telegram';
 
 export type SoundType = 'jump' | 'hit' | 'score' | 'start' | 'gameOver';
 
@@ -44,8 +46,16 @@ class SoundManager {
   private audioContextUnlocked: boolean = false; // Флаг разблокировки аудиоконтекста
   private initStarted: boolean = false; // Флаг начала инициализации
   private systemSoundEnabled: boolean = true; // Флаг системного уровня звука
+  private isTelegram: boolean = false; // Флаг работы в Telegram Web App
+  private lastSystemSoundCheck: number = 0; // Время последней проверки системного звука
+  private systemSoundCheckInterval: number = 2000; // Интервал проверки системного звука (2 секунды)
+  private systemSoundFailCount: number = 0; // Счетчик неудачных попыток воспроизведения
+  private systemSoundFailThreshold: number = 3; // Порог для отключения звука (3 неудачные попытки)
 
   constructor() {
+    // Проверяем, работаем ли в Telegram Web App
+    this.isTelegram = isTelegramWebApp();
+    
     // Не загружаем звуки сразу, ждем первого взаимодействия пользователя
     if (typeof window !== 'undefined') {
       // Добавляем обработчики для разблокировки аудиоконтекста
@@ -100,22 +110,78 @@ class SoundManager {
 
   /**
    * Проверка системного уровня звука на мобильных устройствах
-   * На мобильных устройствах, если звук выключен на системном уровне,
-   * звук не будет воспроизводиться даже при успешном вызове play()
+   * В Telegram Web App проверка работает по-другому из-за WebView
    */
   private checkSystemSound(): void {
     // Устанавливаем начальное значение в true (предполагаем, что звук включен)
     this.systemSoundEnabled = true;
     
-    // Проверяем при изменении видимости страницы (когда пользователь возвращается)
-    if (typeof window !== 'undefined') {
+    // В Telegram Web App проверяем более агрессивно
+    if (this.isTelegram) {
+      // Проверяем при изменении видимости страницы
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
           // Страница стала видимой - сбрасываем флаг для повторной проверки
           this.systemSoundEnabled = true;
+          this.lastSystemSoundCheck = 0; // Сбрасываем таймер проверки
+          this.systemSoundFailCount = 0; // Сбрасываем счетчик неудач
+        }
+      }, { passive: true });
+    } else {
+      // В обычном браузере проверяем реже
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          this.systemSoundEnabled = true;
         }
       }, { passive: true });
     }
+  }
+
+  /**
+   * Проверка системного уровня звука через реальное воспроизведение
+   * В Telegram WebView это более надежный способ
+   */
+  private verifySystemSoundWithPlay(audio: HTMLAudioElement): void {
+    const now = Date.now();
+    
+    // Проверяем не чаще чем раз в интервал
+    if (now - this.lastSystemSoundCheck < this.systemSoundCheckInterval) {
+      return;
+    }
+    
+    this.lastSystemSoundCheck = now;
+    
+    // Проверяем через задержку, действительно ли звук воспроизводится
+    setTimeout(() => {
+      if (!audio) return;
+      
+      // В WebView звук может быть "воспроизведен", но не слышен
+      // Проверяем несколько условий
+      const isActuallyPlaying = !audio.paused && audio.currentTime > 0;
+      const wasPlayingButStopped = audio.ended || (audio.paused && audio.currentTime > 0.1);
+      
+      if (isActuallyPlaying || wasPlayingButStopped) {
+        // Звук воспроизводится - системный уровень звука включен
+        this.systemSoundEnabled = true;
+        this.systemSoundFailCount = 0; // Сбрасываем счетчик неудач
+      } else {
+        // Звук не воспроизводится - возможно, устройство в беззвучном режиме
+        // В Telegram Web App увеличиваем счетчик неудач
+        if (this.isTelegram) {
+          this.systemSoundFailCount++;
+          
+          // Если несколько попыток подряд неудачны - отключаем звук
+          if (this.systemSoundFailCount >= this.systemSoundFailThreshold) {
+            this.systemSoundEnabled = false;
+            console.log('[SoundManager] Системный звук отключен - устройство в беззвучном режиме');
+          }
+        } else {
+          // В обычном браузере отключаем сразу после первой неудачи
+          // (в обычном браузере проверка более надежна)
+          this.systemSoundEnabled = false;
+        }
+      }
+    }, this.isTelegram ? 200 : 100); // Больше задержка для WebView
   }
 
   /**
@@ -211,9 +277,9 @@ class SoundManager {
       audioToPlay = pool[0];
     }
 
-    // Воспроизводим звук асинхронно, не блокируя основной поток
-    // Используем requestAnimationFrame для неблокирующего воспроизведения
-    requestAnimationFrame(() => {
+    // В Telegram Web App не используем requestAnimationFrame - он может вызывать подвисания
+    // Вместо этого используем прямой асинхронный вызов через Promise
+    const playSound = () => {
       try {
         if (!audioToPlay) return;
         
@@ -224,32 +290,30 @@ class SoundManager {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              // Проверяем, действительно ли звук воспроизводится
-              // На мобильных устройствах, если звук выключен на системном уровне,
-              // play() может успешно выполниться, но звук не будет воспроизводиться
-              setTimeout(() => {
-                if (audioToPlay) {
-                  // Если звук должен воспроизводиться, но он на паузе и не продвинулся,
-                  // значит устройство в беззвучном режиме
-                  if (audioToPlay.paused && audioToPlay.currentTime === 0) {
-                    // Звук не воспроизводится - устройство в беззвучном режиме
-                    this.systemSoundEnabled = false;
-                  } else if (!audioToPlay.paused || audioToPlay.currentTime > 0) {
-                    // Звук воспроизводится - системный уровень звука включен
-                    this.systemSoundEnabled = true;
-                  }
-                }
-              }, 100);
+              // Проверяем системный уровень звука
+              this.verifySystemSoundWithPlay(audioToPlay!);
             })
             .catch(() => {
               // Игнорируем ошибки автоплея (политики браузера)
               // На мобильных устройствах это нормально, если пользователь еще не взаимодействовал
             });
+        } else {
+          // Если play() не вернул Promise, проверяем сразу
+          this.verifySystemSoundWithPlay(audioToPlay);
         }
       } catch (error) {
         // Игнорируем ошибки
       }
-    });
+    };
+
+    // В Telegram Web App используем прямой вызов, в обычном браузере - через микротаск
+    if (this.isTelegram) {
+      // Прямой вызов для WebView - более надежно
+      playSound();
+    } else {
+      // В обычном браузере используем микротаск для неблокирующего выполнения
+      Promise.resolve().then(playSound);
+    }
   }
 
   /**
