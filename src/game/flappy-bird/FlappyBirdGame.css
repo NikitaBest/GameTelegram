@@ -10,17 +10,16 @@
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
-  align-items: center;
+  align-items: stretch; /* Растягиваем на всю высоту вместо center */
   justify-content: center;
   background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 50%, #B0E0E6 100%);
   padding: 0;
   touch-action: none;
   user-select: none;
-  /* Учитываем safe area для iOS только сверху и по бокам */
-  padding-top: env(safe-area-inset-top, 0px);
+  /* Учитываем safe area для iOS только по бокам (не сверху, чтобы трубы доходили до верха) */
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
-  /* Не добавляем padding-bottom, чтобы трубы доходили до самого низа */
+  /* Не добавляем padding-top и padding-bottom, чтобы трубы доходили до верха и низа */
   box-sizing: border-box;
   z-index: 10;
 }
