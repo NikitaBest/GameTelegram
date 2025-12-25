@@ -65,7 +65,6 @@ interface Particle {
 }
 
 export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
-  console.log('[BallAndWallGame] Компонент монтирован');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number | undefined>(undefined);
@@ -235,14 +234,18 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     });
 
     // Draw Ball with effects
+    // Используем один вызов Date.now() для оптимизации
     const now = Date.now();
     
     // Вычисляем прогресс растворения trail во время разрушения
     let trailFadeProgress = 1; // Множитель прозрачности для trail
+    let destroyElapsed = 0;
+    let destroyProgress = 0;
     if (isDestroying) {
-      const destroyElapsed = now - destroyStartTimeRef.current;
+      destroyElapsed = now - destroyStartTimeRef.current;
       const DESTROY_DURATION = 800;
-      trailFadeProgress = 1 - Math.min(1, destroyElapsed / DESTROY_DURATION); // От 1 до 0
+      destroyProgress = Math.min(1, destroyElapsed / DESTROY_DURATION);
+      trailFadeProgress = 1 - destroyProgress; // От 1 до 0
     }
     
     // Draw Trail (белая тень) - рисуем после вычисления now
@@ -268,13 +271,11 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     const wallHitEffectProgress = Math.max(0, 1 - (wallHitEffectElapsed / WALL_HIT_EFFECT_DURATION));
     const wallHitScale = 1 + (wallHitEffectProgress * 0.5); // Увеличение до 50%
     
-    // Эффект разрушения
+    // Эффект разрушения (используем уже вычисленные значения)
     let destroyScale = 1;
     let destroyOpacity = 1;
     if (isDestroying) {
-      const destroyElapsed = now - destroyStartTimeRef.current;
-      const DESTROY_DURATION = 800; // Увеличена длительность для более плавной анимации
-      const destroyProgress = Math.min(1, destroyElapsed / DESTROY_DURATION);
+      // destroyElapsed и destroyProgress уже вычислены выше
       
       // Мячик уменьшается и становится прозрачным
       destroyScale = 1 - destroyProgress * 0.7; // Уменьшается до 30% (более заметно)
@@ -446,7 +447,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       }
     }
 
-    // 2.5. Update Particles
+    // 2.5. Update Particles (с ограничением количества для производительности)
     particles.current = particles.current
       .map(particle => ({
         ...particle,
@@ -456,6 +457,11 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         vy: particle.vy + 0.1, // Гравитация для частиц
       }))
       .filter(particle => particle.life > 0);
+    
+    // Ограничиваем количество частиц для производительности (максимум 50)
+    if (particles.current.length > 50) {
+      particles.current = particles.current.slice(-50);
+    }
 
     // 2.6. Update Spikes Animation
     const now = Date.now();
@@ -610,14 +616,17 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
 
   // --- Effects ---
 
-  // Resize Handler и инициализация canvas
+  // Resize Handler и инициализация canvas (с debounce для производительности)
   useEffect(() => {
+    let resizeTimeout: number | undefined;
+    let initTimeout1: number | undefined;
+    let initTimeout2: number | undefined;
+    
     const handleResize = () => {
       if (canvasRef.current) {
         // Use visible window size
         const width = window.innerWidth;
         const height = window.innerHeight;
-        console.log('[BallAndWallGame] Инициализация canvas:', { width, height });
         canvasRef.current.width = width;
         canvasRef.current.height = height;
         // Center ball only if game is not playing (initial state)
@@ -626,24 +635,29 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         }
         // Draw current state (draw стабильна, не пересоздается)
         draw();
-      } else {
-        console.warn('[BallAndWallGame] canvasRef.current is null');
       }
     };
     
-    window.addEventListener('resize', handleResize);
+    // Debounced resize handler для производительности
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 150);
+    };
+    
+    window.addEventListener('resize', debouncedResize, { passive: true });
     // Initial setup - пробуем несколько раз для гарантии
-    const timeoutId1 = setTimeout(() => {
+    initTimeout1 = setTimeout(() => {
       handleResize();
     }, 50);
-    const timeoutId2 = setTimeout(() => {
+    initTimeout2 = setTimeout(() => {
       handleResize();
     }, 200);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timeoutId1);
-      clearTimeout(timeoutId2);
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(resizeTimeout);
+      clearTimeout(initTimeout1);
+      clearTimeout(initTimeout2);
     };
   }, [isPlaying, gameOver, draw]); // draw стабильна (пустые зависимости), можно безопасно добавить
 

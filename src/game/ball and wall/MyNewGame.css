@@ -11,6 +11,16 @@
   overflow: hidden;
   touch-action: none;
   z-index: 10;
+  /* Учитываем safe area для iOS */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+  /* Оптимизация производительности */
+  will-change: background-color;
+  transform: translateZ(0); /* Аппаратное ускорение */
+  -webkit-overflow-scrolling: touch;
 }
 
 .game-canvas {
@@ -22,6 +32,11 @@
   height: 100%;
   z-index: 1;
   pointer-events: none;
+  /* Оптимизация производительности canvas */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: contents;
+  transform: translateZ(0); /* Аппаратное ускорение */
 }
 
 .game-score-overlay {
@@ -30,11 +45,42 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: var(--font-game);
-  font-size: 8rem;
+  font-size: clamp(3rem, 15vw, 8rem); /* Адаптивный размер шрифта */
   color: rgba(255, 255, 255, 0.25);
   pointer-events: none;
   z-index: 10;
   user-select: none;
+  /* Улучшаем производительность рендеринга */
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 320px) {
+  .game-score-overlay {
+    font-size: 3rem;
+  }
+}
+
+/* Адаптивность для средних экранов */
+@media (min-width: 321px) and (max-width: 375px) {
+  .game-score-overlay {
+    font-size: 4rem;
+  }
+}
+
+/* Адаптивность для больших мобильных */
+@media (min-width: 376px) and (max-width: 414px) {
+  .game-score-overlay {
+    font-size: 5rem;
+  }
+}
+
+/* Ландшафтная ориентация */
+@media (orientation: landscape) and (max-height: 500px) {
+  .game-score-overlay {
+    font-size: clamp(2.5rem, 8vh, 4rem);
+  }
 }
 
 .game-ui-layer {
