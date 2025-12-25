@@ -38,11 +38,9 @@ class SoundManager {
   private sounds: Map<SoundType, HTMLAudioElement> = new Map();
   private enabled: boolean = true;
   private masterVolume: number = 1.0;
-  private activeClones: Set<HTMLAudioElement> = new Set(); // Отслеживаем активные клоны
-  private maxConcurrentSounds: number = 3; // Уменьшено для производительности
   private failedLoads: Set<SoundType> = new Set(); // Отслеживаем неудачные загрузки
-  private lastCleanupTime: number = 0; // Время последней очистки
-  private cleanupInterval: number = 500; // Очистка не чаще раза в 500мс
+  private lastPlayTime: Map<SoundType, number> = new Map(); // Время последнего воспроизведения
+  private minPlayInterval: number = 50; // Минимальный интервал между воспроизведениями одного звука (50мс)
 
   constructor() {
     // Предзагрузка звуков асинхронно, чтобы не блокировать
@@ -105,6 +103,7 @@ class SoundManager {
 
   /**
    * Воспроизведение звука
+   * Упрощенная версия без клонирования для максимальной производительности
    */
   play(type: SoundType, options?: { volume?: number; loop?: boolean }): void {
     if (!this.enabled) return;
@@ -119,104 +118,52 @@ class SoundManager {
       return;
     }
 
-    // Периодическая очистка (не чаще раза в cleanupInterval)
+    // Дебаунсинг - ограничиваем частоту воспроизведения одного звука
     const now = Date.now();
-    if (now - this.lastCleanupTime > this.cleanupInterval) {
-      this.cleanupFinishedSounds();
-      this.lastCleanupTime = now;
+    const lastPlay = this.lastPlayTime.get(type) || 0;
+    if (now - lastPlay < this.minPlayInterval) {
+      return; // Пропускаем, если звук воспроизводился недавно
     }
-
-    // Ограничиваем количество одновременных звуков
-    if (this.activeClones.size >= this.maxConcurrentSounds) {
-      return; // Пропускаем, если слишком много звуков
-    }
+    this.lastPlayTime.set(type, now);
 
     try {
-      // Используем оригинальный элемент, если он не играет (быстрее чем клонирование)
-      let audioToPlay: HTMLAudioElement;
-      const isOriginalPlaying = !audio.paused && !audio.ended && audio.currentTime > 0;
-      
-      if (isOriginalPlaying) {
-        // Клонируем только если оригинал уже играет
-        audioToPlay = audio.cloneNode(false) as HTMLAudioElement; // false = не глубокое клонирование (быстрее)
-        this.activeClones.add(audioToPlay);
-      } else {
-        // Используем оригинальный элемент
-        audioToPlay = audio;
-        audioToPlay.currentTime = 0;
+      // Используем только оригинальный элемент - максимально просто и быстро
+      // Если звук уже играет, просто перезапускаем его
+      if (!audio.paused && audio.currentTime > 0) {
+        // Если звук играет, останавливаем и перезапускаем
+        audio.pause();
+        audio.currentTime = 0;
       }
-      
+
       // Настройка громкости
       if (options?.volume !== undefined) {
-        audioToPlay.volume = options.volume * this.masterVolume;
+        audio.volume = options.volume * this.masterVolume;
       } else {
-        audioToPlay.volume = SOUNDS[type].volume * this.masterVolume;
+        audio.volume = SOUNDS[type].volume * this.masterVolume;
       }
 
       // Настройка зацикливания
       if (options?.loop) {
-        audioToPlay.loop = true;
+        audio.loop = true;
+      } else {
+        audio.loop = false;
       }
 
-      // Сбрасываем на начало только если это клон
-      if (isOriginalPlaying) {
-        audioToPlay.currentTime = 0;
-        
-        // Автоматическая очистка после окончания (только для клонов)
-        const cleanup = () => {
-          this.activeClones.delete(audioToPlay);
-          // Не вызываем remove() - это дорогая DOM операция
-          audioToPlay.src = '';
-        };
-        
-        audioToPlay.addEventListener('ended', cleanup, { once: true });
-        audioToPlay.addEventListener('error', cleanup, { once: true });
-      }
+      // Сбрасываем на начало
+      audio.currentTime = 0;
 
-      // Воспроизведение с обработкой ошибок
-      const playPromise = audioToPlay.play();
+      // Воспроизведение с обработкой ошибок (асинхронно, не блокируем)
+      const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
-          // Игнорируем ошибки автовоспроизведения
-          if (isOriginalPlaying) {
-            this.activeClones.delete(audioToPlay);
-            audioToPlay.src = '';
-          }
+          // Игнорируем ошибки автовоспроизведения (политики браузера)
         });
       }
     } catch (error) {
-      // Игнорируем ошибки в продакшене
+      // Игнорируем все ошибки в продакшене
     }
   }
 
-  /**
-   * Очистка завершенных звуков
-   */
-  private cleanupFinishedSounds(): void {
-    // Используем итератор для безопасного удаления
-    const toRemove: HTMLAudioElement[] = [];
-    this.activeClones.forEach((clone) => {
-      // Проверяем состояние без обращения к DOM свойствам если возможно
-      try {
-        if (clone.ended || (clone.paused && clone.currentTime === 0)) {
-          toRemove.push(clone);
-        }
-      } catch (e) {
-        // Если элемент уже удален из DOM, добавляем в список на удаление
-        toRemove.push(clone);
-      }
-    });
-    
-    // Удаляем завершенные звуки
-    toRemove.forEach((clone) => {
-      this.activeClones.delete(clone);
-      try {
-        clone.src = '';
-      } catch (e) {
-        // Игнорируем ошибки при очистке
-      }
-    });
-  }
 
   /**
    * Остановка звука
@@ -234,17 +181,13 @@ class SoundManager {
    */
   stopAll(): void {
     this.sounds.forEach((audio) => {
-      audio.pause();
-      audio.currentTime = 0;
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch (e) {
+        // Игнорируем ошибки
+      }
     });
-    
-    // Останавливаем и очищаем все клоны
-    this.activeClones.forEach((clone) => {
-      clone.pause();
-      clone.currentTime = 0;
-      clone.src = '';
-    });
-    this.activeClones.clear();
   }
 
   /**
@@ -285,4 +228,5 @@ class SoundManager {
 
 // Создаем единственный экземпляр менеджера звуков
 export const soundManager = new SoundManager();
+
 
