@@ -502,10 +502,16 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
 
     // 3. Floor/Ceiling Collisions (Bounce) - только если не разрушается
     if (!isDestroying) {
+      // Столкновение с полом
       if (ballPos.current.y + BALL_RADIUS >= height) {
         ballPos.current.y = height - BALL_RADIUS;
-        ballVel.current.y = -ballVel.current.y * 0.85; // Bounce with slight damping
+        // Отталкиваем шарик вверх с более сильным отскоком
+        const bounceVelocity = -Math.abs(ballVel.current.y) * 1.1; // Увеличен коэффициент отскока
+        // Минимальная скорость отскока увеличена для более сильного отталкивания
+        const minBounceVelocity = -6;
+        ballVel.current.y = Math.min(bounceVelocity, minBounceVelocity);
       }
+      // Столкновение с потолком
       if (ballPos.current.y - BALL_RADIUS <= 0) {
         ballPos.current.y = BALL_RADIUS;
         ballVel.current.y = -ballVel.current.y * 0.85; // Bounce with slight damping

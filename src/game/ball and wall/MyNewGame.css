@@ -41,11 +41,11 @@
 
 .game-score-overlay {
   position: absolute;
-  top: 50%;
+  top: clamp(20px, 8vh, 40px); /* Позиция вверху экрана с адаптивностью */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   font-family: var(--font-game);
-  font-size: clamp(3rem, 15vw, 8rem); /* Адаптивный размер шрифта */
+  font-size: clamp(2.5rem, 12vw, 6rem); /* Уменьшенный адаптивный размер шрифта */
   color: rgba(255, 255, 255, 0.25);
   pointer-events: none;
   z-index: 10;
@@ -58,28 +58,32 @@
 /* Адаптивность для маленьких экранов */
 @media (max-width: 320px) {
   .game-score-overlay {
-    font-size: 3rem;
+    font-size: 2.5rem;
+    top: 20px;
   }
 }
 
 /* Адаптивность для средних экранов */
 @media (min-width: 321px) and (max-width: 375px) {
   .game-score-overlay {
-    font-size: 4rem;
+    font-size: 3rem;
+    top: 25px;
   }
 }
 
 /* Адаптивность для больших мобильных */
 @media (min-width: 376px) and (max-width: 414px) {
   .game-score-overlay {
-    font-size: 5rem;
+    font-size: 3.5rem;
+    top: 30px;
   }
 }
 
 /* Ландшафтная ориентация */
 @media (orientation: landscape) and (max-height: 500px) {
   .game-score-overlay {
-    font-size: clamp(2.5rem, 8vh, 4rem);
+    font-size: clamp(2rem, 6vh, 3rem);
+    top: 15px;
   }
 }
 
