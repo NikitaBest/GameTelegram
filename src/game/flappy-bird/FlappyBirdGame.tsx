@@ -178,6 +178,9 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
 
   // Начало игры
   const startGame = useCallback(() => {
+    // Разблокируем аудиоконтекст при первом взаимодействии (критично для мобильных)
+    soundManager.unlockAudioContext();
+    
     // Воспроизводим звук начала игры
     soundManager.play('start');
     
