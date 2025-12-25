@@ -25,11 +25,11 @@ const SOUNDS: Record<SoundType, SoundConfig> = {
     volume: 0.4,
   },
   start: {
-    path: '/sounds/start.mp3',
+    path: '/sounds/jump.mp3', // Используем jump как start, если файла нет
     volume: 0.5,
   },
   gameOver: {
-    path: '/sounds/gameOver.mp3',
+    path: '/sounds/hit.mp3', // Используем hit как gameOver, если файла нет
     volume: 0.5,
   },
 };
@@ -122,45 +122,49 @@ class SoundManager {
     }
 
     try {
-      // Используем оригинальный элемент, если он не играет, иначе клонируем
-      let audioToPlay: HTMLAudioElement;
+      // Всегда клонируем для гарантии независимого воспроизведения
+      // Это позволяет воспроизводить один и тот же звук несколько раз одновременно
+      const audioToPlay = audio.cloneNode(true) as HTMLAudioElement;
+      this.activeClones.add(audioToPlay);
       
-      if (audio.paused || audio.ended) {
-        // Используем оригинальный элемент
-        audioToPlay = audio;
-        audioToPlay.currentTime = 0; // Сбрасываем на начало
-      } else {
-        // Клонируем только если оригинал уже играет
-        audioToPlay = audio.cloneNode() as HTMLAudioElement;
-        this.activeClones.add(audioToPlay);
-        
-        // Автоматическая очистка после окончания
-        audioToPlay.addEventListener('ended', () => {
-          this.activeClones.delete(audioToPlay);
-          // Удаляем ссылку для сборки мусора
-          audioToPlay.src = '';
-        }, { once: true });
-      }
-      
+      // Настройка громкости
       if (options?.volume !== undefined) {
         audioToPlay.volume = options.volume * this.masterVolume;
       } else {
         audioToPlay.volume = SOUNDS[type].volume * this.masterVolume;
       }
 
+      // Настройка зацикливания
       if (options?.loop) {
         audioToPlay.loop = true;
       }
+
+      // Сбрасываем на начало
+      audioToPlay.currentTime = 0;
+      
+      // Автоматическая очистка после окончания
+      audioToPlay.addEventListener('ended', () => {
+        this.activeClones.delete(audioToPlay);
+        // Удаляем ссылку для сборки мусора
+        audioToPlay.src = '';
+        audioToPlay.remove();
+      }, { once: true });
+
+      // Обработка ошибок загрузки
+      audioToPlay.addEventListener('error', () => {
+        this.activeClones.delete(audioToPlay);
+        audioToPlay.src = '';
+        audioToPlay.remove();
+      }, { once: true });
 
       // Воспроизведение с обработкой ошибок
       const playPromise = audioToPlay.play();
       if (playPromise !== undefined) {
         playPromise.catch((error) => {
           // Игнорируем ошибки автовоспроизведения (политики браузера)
-          // Удаляем из активных, если не удалось воспроизвести
-          if (audioToPlay !== audio) {
-            this.activeClones.delete(audioToPlay);
-          }
+          this.activeClones.delete(audioToPlay);
+          audioToPlay.src = '';
+          audioToPlay.remove();
         });
       }
     } catch (error) {
