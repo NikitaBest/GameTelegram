@@ -1,5 +1,6 @@
 import { GameContainer as CosmosGame } from './game cosmos/GameContainer';
 import { FlappyBirdGame } from './flappy-bird/FlappyBirdGame';
+import { BallAndWallGame } from './ball and wall/MyNewGame';
 
 interface GameRouterProps {
   gameId: number | null;
@@ -12,6 +13,7 @@ interface GameRouterProps {
  * Игры:
  * - gameId: 1 - Космическая игра (game cosmos)
  * - gameId: 2 - Flappy Bird (игра по умолчанию)
+ * - gameId: 3 - Ball and Wall (ball and wall)
  * 
  * Для добавления новой игры:
  * 1. Создайте папку с игрой в src/game/
@@ -26,7 +28,7 @@ export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
   console.log('[GameRouter] Выбор игры:', {
     gameId,
     selectedGameId,
-    willUseGame: selectedGameId === 1 ? 'Cosmos' : selectedGameId === 2 ? 'Flappy Bird' : 'Unknown'
+    willUseGame: selectedGameId === 1 ? 'Cosmos' : selectedGameId === 2 ? 'Flappy Bird' : selectedGameId === 3 ? 'Ball and Wall' : 'Unknown'
   });
 
   switch (selectedGameId) {
@@ -37,6 +39,10 @@ export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
     case 2:
       // Flappy Bird (игра по умолчанию)
       return <FlappyBirdGame onGameOver={onGameOver} />;
+    
+    case 3:
+      // Ball and Wall
+      return <BallAndWallGame onGameOver={onGameOver} />;
     
     default:
       // Fallback на Flappy Bird
