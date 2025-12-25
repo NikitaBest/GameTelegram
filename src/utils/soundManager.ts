@@ -39,16 +39,24 @@ class SoundManager {
   private enabled: boolean = true;
   private masterVolume: number = 1.0;
   private activeClones: Set<HTMLAudioElement> = new Set(); // Отслеживаем активные клоны
-  private maxConcurrentSounds: number = 5; // Максимальное количество одновременных звуков
+  private maxConcurrentSounds: number = 3; // Уменьшено для производительности
   private failedLoads: Set<SoundType> = new Set(); // Отслеживаем неудачные загрузки
+  private lastCleanupTime: number = 0; // Время последней очистки
+  private cleanupInterval: number = 500; // Очистка не чаще раза в 500мс
 
   constructor() {
     // Предзагрузка звуков асинхронно, чтобы не блокировать
-    // Используем setTimeout для отложенной загрузки
+    // Используем requestIdleCallback если доступен, иначе setTimeout
     if (typeof window !== 'undefined') {
-      setTimeout(() => {
-        this.preloadSounds();
-      }, 0);
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => {
+          this.preloadSounds();
+        }, { timeout: 2000 });
+      } else {
+        setTimeout(() => {
+          this.preloadSounds();
+        }, 100);
+      }
     }
   }
 
@@ -106,26 +114,37 @@ class SoundManager {
       return;
     }
 
-    // Ограничиваем количество одновременных звуков
-    if (this.activeClones.size >= this.maxConcurrentSounds) {
-      // Очищаем завершенные звуки перед добавлением нового
-      this.cleanupFinishedSounds();
-      if (this.activeClones.size >= this.maxConcurrentSounds) {
-        return; // Пропускаем, если все еще слишком много
-      }
-    }
-
     const audio = this.sounds.get(type);
     if (!audio) {
-      // Не логируем в продакшене, чтобы не засорять консоль
       return;
     }
 
+    // Периодическая очистка (не чаще раза в cleanupInterval)
+    const now = Date.now();
+    if (now - this.lastCleanupTime > this.cleanupInterval) {
+      this.cleanupFinishedSounds();
+      this.lastCleanupTime = now;
+    }
+
+    // Ограничиваем количество одновременных звуков
+    if (this.activeClones.size >= this.maxConcurrentSounds) {
+      return; // Пропускаем, если слишком много звуков
+    }
+
     try {
-      // Всегда клонируем для гарантии независимого воспроизведения
-      // Это позволяет воспроизводить один и тот же звук несколько раз одновременно
-      const audioToPlay = audio.cloneNode(true) as HTMLAudioElement;
-      this.activeClones.add(audioToPlay);
+      // Используем оригинальный элемент, если он не играет (быстрее чем клонирование)
+      let audioToPlay: HTMLAudioElement;
+      const isOriginalPlaying = !audio.paused && !audio.ended && audio.currentTime > 0;
+      
+      if (isOriginalPlaying) {
+        // Клонируем только если оригинал уже играет
+        audioToPlay = audio.cloneNode(false) as HTMLAudioElement; // false = не глубокое клонирование (быстрее)
+        this.activeClones.add(audioToPlay);
+      } else {
+        // Используем оригинальный элемент
+        audioToPlay = audio;
+        audioToPlay.currentTime = 0;
+      }
       
       // Настройка громкости
       if (options?.volume !== undefined) {
@@ -139,37 +158,34 @@ class SoundManager {
         audioToPlay.loop = true;
       }
 
-      // Сбрасываем на начало
-      audioToPlay.currentTime = 0;
-      
-      // Автоматическая очистка после окончания
-      audioToPlay.addEventListener('ended', () => {
-        this.activeClones.delete(audioToPlay);
-        // Удаляем ссылку для сборки мусора
-        audioToPlay.src = '';
-        audioToPlay.remove();
-      }, { once: true });
-
-      // Обработка ошибок загрузки
-      audioToPlay.addEventListener('error', () => {
-        this.activeClones.delete(audioToPlay);
-        audioToPlay.src = '';
-        audioToPlay.remove();
-      }, { once: true });
+      // Сбрасываем на начало только если это клон
+      if (isOriginalPlaying) {
+        audioToPlay.currentTime = 0;
+        
+        // Автоматическая очистка после окончания (только для клонов)
+        const cleanup = () => {
+          this.activeClones.delete(audioToPlay);
+          // Не вызываем remove() - это дорогая DOM операция
+          audioToPlay.src = '';
+        };
+        
+        audioToPlay.addEventListener('ended', cleanup, { once: true });
+        audioToPlay.addEventListener('error', cleanup, { once: true });
+      }
 
       // Воспроизведение с обработкой ошибок
       const playPromise = audioToPlay.play();
       if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          // Игнорируем ошибки автовоспроизведения (политики браузера)
-          this.activeClones.delete(audioToPlay);
-          audioToPlay.src = '';
-          audioToPlay.remove();
+        playPromise.catch(() => {
+          // Игнорируем ошибки автовоспроизведения
+          if (isOriginalPlaying) {
+            this.activeClones.delete(audioToPlay);
+            audioToPlay.src = '';
+          }
         });
       }
     } catch (error) {
       // Игнорируем ошибки в продакшене
-      console.debug(`[SoundManager] Ошибка воспроизведения звука ${type}`);
     }
   }
 
@@ -177,10 +193,27 @@ class SoundManager {
    * Очистка завершенных звуков
    */
   private cleanupFinishedSounds(): void {
+    // Используем итератор для безопасного удаления
+    const toRemove: HTMLAudioElement[] = [];
     this.activeClones.forEach((clone) => {
-      if (clone.ended || clone.paused) {
-        this.activeClones.delete(clone);
-        clone.src = ''; // Освобождаем память
+      // Проверяем состояние без обращения к DOM свойствам если возможно
+      try {
+        if (clone.ended || (clone.paused && clone.currentTime === 0)) {
+          toRemove.push(clone);
+        }
+      } catch (e) {
+        // Если элемент уже удален из DOM, добавляем в список на удаление
+        toRemove.push(clone);
+      }
+    });
+    
+    // Удаляем завершенные звуки
+    toRemove.forEach((clone) => {
+      this.activeClones.delete(clone);
+      try {
+        clone.src = '';
+      } catch (e) {
+        // Игнорируем ошибки при очистке
       }
     });
   }
