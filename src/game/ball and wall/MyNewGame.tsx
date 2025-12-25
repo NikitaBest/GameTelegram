@@ -8,9 +8,9 @@ interface BallAndWallGameProps {
 }
 
 // --- Game Constants & Types ---
-const GRAVITY = 0.25;
-const JUMP_FORCE = -10;
-const MOVE_SPEED_X = 3;
+const GRAVITY = 0.18; // Уменьшена для более плавного падения
+const JUMP_FORCE = -8; // Уменьшена для более плавного прыжка
+const MOVE_SPEED_X = 2.2; // Уменьшена для более медленного движения
 const BALL_RADIUS = 12;
 const SPIKE_WIDTH = 45;
 const SPIKE_HEIGHT = 40;
