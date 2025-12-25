@@ -119,21 +119,37 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     const spikeCount = Math.min(1 + Math.floor(scoreRef.current / 5), 5);
     const newSpikes: Spike[] = [];
     const now = Date.now();
+    const MIN_SPIKE_DISTANCE = SPIKE_HEIGHT + 20; // Минимальное расстояние между шипами
     
-    // Avoid spawning spikes too close to each other or where the ball just bounced?
-    // For simplicity, random positions on both walls
-    for (let i = 0; i < spikeCount; i++) {
+    // Генерируем шипы с проверкой на перекрытие
+    let attempts = 0;
+    const maxAttempts = spikeCount * 20; // Максимальное количество попыток
+    
+    while (newSpikes.length < spikeCount && attempts < maxAttempts) {
+      attempts++;
       const side = Math.random() > 0.5 ? "left" : "right";
       const y = Math.random() * (canvasHeight - 100) + 50; // Keep away from extreme edges
-      newSpikes.push({ 
-        y, 
-        side, 
-        active: true,
-        offsetX: 0, // Начинаем с выезда
-        state: "entering",
-        animationTime: now
+      
+      // Проверяем, не перекрывается ли новый шип с существующими
+      const overlaps = newSpikes.some(existingSpike => {
+        // Проверяем расстояние по вертикали
+        const verticalDistance = Math.abs(existingSpike.y - y);
+        return verticalDistance < MIN_SPIKE_DISTANCE;
       });
+      
+      // Если не перекрывается, добавляем
+      if (!overlaps) {
+        newSpikes.push({ 
+          y, 
+          side, 
+          active: true,
+          offsetX: 0, // Начинаем с выезда
+          state: "entering",
+          animationTime: now
+        });
+      }
     }
+    
     spikes.current = newSpikes;
   };
 
