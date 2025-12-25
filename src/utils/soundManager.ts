@@ -1,13 +1,13 @@
 /**
  * Менеджер звуков для игр
- * Управляет воспроизведением звуковых эффектов
+ * Максимально простая реализация для стабильности
  */
 
 export type SoundType = 'jump' | 'hit' | 'score' | 'start' | 'gameOver';
 
 interface SoundConfig {
   path: string;
-  volume: number; // 0.0 - 1.0
+  volume: number;
 }
 
 // Конфигурация звуков
@@ -25,11 +25,11 @@ const SOUNDS: Record<SoundType, SoundConfig> = {
     volume: 0.4,
   },
   start: {
-    path: '/sounds/jump.mp3', // Используем jump как start, если файла нет
+    path: '/sounds/jump.mp3',
     volume: 0.5,
   },
   gameOver: {
-    path: '/sounds/hit.mp3', // Используем hit как gameOver, если файла нет
+    path: '/sounds/hit.mp3',
     volume: 0.5,
   },
 };
@@ -37,167 +37,88 @@ const SOUNDS: Record<SoundType, SoundConfig> = {
 class SoundManager {
   private sounds: Map<SoundType, HTMLAudioElement> = new Map();
   private enabled: boolean = true;
-  private masterVolume: number = 1.0;
-  private failedLoads: Set<SoundType> = new Set(); // Отслеживаем неудачные загрузки
-  private lastPlayTime: Map<SoundType, number> = new Map(); // Время последнего воспроизведения
-  private minPlayInterval: number = 50; // Минимальный интервал между воспроизведениями одного звука (50мс)
+  private lastPlayTime: Map<SoundType, number> = new Map();
+  private minInterval: number = 80; // Минимальный интервал между воспроизведениями (80мс)
 
   constructor() {
-    // Предзагрузка звуков асинхронно, чтобы не блокировать
-    // Используем requestIdleCallback если доступен, иначе setTimeout
+    // Загружаем звуки асинхронно после небольшой задержки
     if (typeof window !== 'undefined') {
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => {
-          this.preloadSounds();
-        }, { timeout: 2000 });
-      } else {
-        setTimeout(() => {
-          this.preloadSounds();
-        }, 100);
-      }
+      setTimeout(() => {
+        this.initSounds();
+      }, 500); // Задержка 500мс, чтобы не блокировать старт игры
     }
   }
 
   /**
-   * Предзагрузка всех звуков
+   * Инициализация звуков (простая загрузка)
    */
-  private preloadSounds(): void {
+  private initSounds(): void {
     Object.entries(SOUNDS).forEach(([type, config]) => {
       try {
         const audio = new Audio(config.path);
-        audio.volume = config.volume * this.masterVolume;
+        audio.volume = config.volume;
         audio.preload = 'auto';
         
-        // Обработка ошибок загрузки - не блокируем выполнение
+        // Простая обработка ошибок
         audio.addEventListener('error', () => {
-          this.failedLoads.add(type as SoundType);
-          // Если все звуки не загрузились, отключаем звуки автоматически
-          if (this.failedLoads.size === Object.keys(SOUNDS).length) {
-            this.enabled = false;
-          }
+          // Просто не добавляем в Map, если ошибка
         }, { once: true });
         
-        // Добавляем только при успешной загрузке
-        audio.addEventListener('canplaythrough', () => {
+        // Добавляем при готовности
+        const addSound = () => {
           this.sounds.set(type as SoundType, audio);
-        }, { once: true });
+        };
         
-        // Таймаут для случаев, когда событие не сработает
-        // Если через 2 секунды звук не загрузился, считаем его недоступным
-        setTimeout(() => {
-          if (!this.sounds.has(type as SoundType) && !this.failedLoads.has(type as SoundType)) {
-            // Пробуем проверить готовность
-            if (audio.readyState >= 2) { // HAVE_CURRENT_DATA или выше
-              this.sounds.set(type as SoundType, audio);
-            } else {
-              this.failedLoads.add(type as SoundType);
-            }
-          }
-        }, 2000);
+        if (audio.readyState >= 2) {
+          // Уже загружен
+          addSound();
+        } else {
+          audio.addEventListener('canplaythrough', addSound, { once: true });
+          audio.addEventListener('loadeddata', addSound, { once: true });
+        }
       } catch (error) {
-        // Игнорируем ошибки создания Audio элемента
-        this.failedLoads.add(type as SoundType);
-      }
-    });
-  }
-
-  /**
-   * Воспроизведение звука
-   * Упрощенная версия без клонирования для максимальной производительности
-   */
-  play(type: SoundType, options?: { volume?: number; loop?: boolean }): void {
-    if (!this.enabled) return;
-    
-    // Если звук не загрузился, не пытаемся воспроизвести
-    if (this.failedLoads.has(type)) {
-      return;
-    }
-
-    const audio = this.sounds.get(type);
-    if (!audio) {
-      return;
-    }
-
-    // Дебаунсинг - ограничиваем частоту воспроизведения одного звука
-    const now = Date.now();
-    const lastPlay = this.lastPlayTime.get(type) || 0;
-    if (now - lastPlay < this.minPlayInterval) {
-      return; // Пропускаем, если звук воспроизводился недавно
-    }
-    this.lastPlayTime.set(type, now);
-
-    try {
-      // Используем только оригинальный элемент - максимально просто и быстро
-      // Если звук уже играет, просто перезапускаем его
-      if (!audio.paused && audio.currentTime > 0) {
-        // Если звук играет, останавливаем и перезапускаем
-        audio.pause();
-        audio.currentTime = 0;
-      }
-
-      // Настройка громкости
-      if (options?.volume !== undefined) {
-        audio.volume = options.volume * this.masterVolume;
-      } else {
-        audio.volume = SOUNDS[type].volume * this.masterVolume;
-      }
-
-      // Настройка зацикливания
-      if (options?.loop) {
-        audio.loop = true;
-      } else {
-        audio.loop = false;
-      }
-
-      // Сбрасываем на начало
-      audio.currentTime = 0;
-
-      // Воспроизведение с обработкой ошибок (асинхронно, не блокируем)
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Игнорируем ошибки автовоспроизведения (политики браузера)
-        });
-      }
-    } catch (error) {
-      // Игнорируем все ошибки в продакшене
-    }
-  }
-
-
-  /**
-   * Остановка звука
-   */
-  stop(type: SoundType): void {
-    const audio = this.sounds.get(type);
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
-  }
-
-  /**
-   * Остановка всех звуков
-   */
-  stopAll(): void {
-    this.sounds.forEach((audio) => {
-      try {
-        audio.pause();
-        audio.currentTime = 0;
-      } catch (e) {
         // Игнорируем ошибки
       }
     });
   }
 
   /**
+   * Воспроизведение звука - максимально простая версия
+   */
+  play(type: SoundType): void {
+    if (!this.enabled) return;
+
+    const audio = this.sounds.get(type);
+    if (!audio) return; // Звук еще не загружен
+
+    // Простой дебаунсинг - ограничиваем частоту
+    const now = Date.now();
+    const lastPlay = this.lastPlayTime.get(type) || 0;
+    if (now - lastPlay < this.minInterval) {
+      return;
+    }
+    this.lastPlayTime.set(type, now);
+
+    try {
+      // Просто перезапускаем звук
+      audio.currentTime = 0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Игнорируем ошибки (политики браузера на мобильных)
+        });
+      }
+    } catch (error) {
+      // Игнорируем ошибки
+    }
+  }
+
+
+  /**
    * Включить/выключить звуки
    */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
-    if (!enabled) {
-      this.stopAll();
-    }
   }
 
   /**
@@ -205,24 +126,6 @@ class SoundManager {
    */
   isEnabled(): boolean {
     return this.enabled;
-  }
-
-  /**
-   * Установка общей громкости (0.0 - 1.0)
-   */
-  setMasterVolume(volume: number): void {
-    this.masterVolume = Math.max(0, Math.min(1, volume));
-    // Обновляем громкость всех звуков
-    this.sounds.forEach((audio, type) => {
-      audio.volume = SOUNDS[type].volume * this.masterVolume;
-    });
-  }
-
-  /**
-   * Получить текущую громкость
-   */
-  getMasterVolume(): number {
-    return this.masterVolume;
   }
 }
 
