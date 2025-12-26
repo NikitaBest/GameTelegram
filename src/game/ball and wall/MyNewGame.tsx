@@ -12,8 +12,8 @@ const GRAVITY = 0.18; // Уменьшена для более плавного �
 const JUMP_FORCE = -8; // Уменьшена для более плавного прыжка
 const MOVE_SPEED_X = 2.2; // Уменьшена для более медленного движения
 const BALL_RADIUS = 12;
-const SPIKE_WIDTH = 45;
-const SPIKE_HEIGHT = 40;
+const SPIKE_WIDTH = 60; // Увеличено с 45
+const SPIKE_HEIGHT = 55; // Увеличено с 40
 
 // Background colors and corresponding ball/spike colors
 const BG_COLORS = [
