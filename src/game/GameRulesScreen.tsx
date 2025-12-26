@@ -64,7 +64,7 @@ export function GameRulesScreen({
       {/* Кнопка или текст "Тапни чтобы начать" */}
       {startButtonType === 'button' ? (
         <div 
-          className="flex items-center gap-2.5 text-white cursor-pointer transition-all active:scale-95"
+          className="flex items-center gap-2.5 text-white cursor-pointer transition-all active:scale-95 whitespace-nowrap"
           onClick={onStart}
           style={{
             background: 'rgba(255, 255, 255, 0.15)',
@@ -76,17 +76,20 @@ export function GameRulesScreen({
           }}
         >
           {defaultStartIcon}
-          <span className="text-base md:text-lg font-bold">
+          <span className="text-sm md:text-base lg:text-lg font-bold whitespace-nowrap">
             Тапни чтобы начать
           </span>
         </div>
       ) : (
         <div 
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2.5 text-white cursor-pointer"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2 text-white cursor-pointer whitespace-nowrap"
           onClick={onStart}
+          style={{
+            gap: 'clamp(6px, 1.5vw, 10px)',
+          }}
         >
           {defaultStartIcon}
-          <span className="text-base md:text-lg font-bold">
+          <span className="text-sm md:text-base lg:text-lg font-bold whitespace-nowrap">
             Тапни чтобы начать
           </span>
         </div>
