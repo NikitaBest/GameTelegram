@@ -142,6 +142,9 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     gameOverHandledRef.current = false;
     setIsDestroying(false); // Сбрасываем флаг разрушения
     destroyStartTimeRef.current = 0;
+    // Сбрасываем флаги для защиты от двойного нажатия
+    lastTapTimeRef.current = 0;
+    isTouchDeviceRef.current = false;
     // Создаем начальные шипы
     spawnSpikes(height);
   }, []);
@@ -644,11 +647,12 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
 
   // Обработка клика (только для десктопа)
   const handleClick = useCallback((_e: React.MouseEvent) => {
-    // Игнорируем click события на touch устройствах
+    // Игнорируем click события на touch устройствах (они уже обработаны через touch)
     if (isTouchDeviceRef.current) {
+      // Сбрасываем флаг через задержку, чтобы не блокировать настоящие клики мыши
       setTimeout(() => {
         isTouchDeviceRef.current = false;
-      }, 300);
+      }, 400); // Увеличено до 400ms для большей надежности
       return;
     }
 
@@ -751,8 +755,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       lastTapTimeRef.current = now;
 
       if (!showRules && isPlaying && !gameOver) {
-        e.preventDefault(); // Теперь можем использовать preventDefault
-        isTouchDeviceRef.current = true;
+        e.preventDefault(); // Предотвращаем эмуляцию click события
+        isTouchDeviceRef.current = true; // Помечаем, что это touch устройство
         // Jump mechanic
         ballVel.current.y = JUMP_FORCE;
         // Эффект тапа
