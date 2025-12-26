@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { GameRulesScreen, GameRule } from "../GameRulesScreen";
 import { Target, AlertTriangle } from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
+import { soundManager } from "../../utils/soundManager";
 import "./MyNewGame.css";
 
 const tapIcon = '/hugeicons_tap-01.svg';
@@ -383,6 +384,9 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     setIsDestroying(true);
     destroyStartTimeRef.current = Date.now();
     
+    // Звук столкновения с шипами
+    soundManager.play('hit');
+    
     // НЕ останавливаем движение мячика - он продолжает двигаться
     
     // Создаем много частиц для эффекта разрушения
@@ -588,6 +592,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         wallHitEffectTimeRef.current = Date.now();
         // Создаем частицы при ударе о стену
         createParticles(ballPos.current.x, ballPos.current.y, 12, 1.5);
+        // Звук удара о стену (score, так как это успешное отскакивание)
+        soundManager.play('score');
 
         // b. If safe, increment score & change BG
         scoreRef.current += 1;
@@ -634,6 +640,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       tapEffectTimeRef.current = Date.now();
       // Создаем частицы при тапе
       createParticles(ballPos.current.x, ballPos.current.y, 6, 0.8);
+      // Звук прыжка
+      soundManager.play('jump');
     } else if (!isPlaying && !gameOver && !showRules) {
       initGame();
     }
@@ -725,6 +733,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         tapEffectTimeRef.current = Date.now();
         // Создаем частицы при тапе
         createParticles(ballPos.current.x, ballPos.current.y, 6, 0.8);
+        // Звук прыжка
+        soundManager.play('jump');
       } else if (!isPlaying && !gameOver && !showRules) {
         e.preventDefault();
         initGame();
