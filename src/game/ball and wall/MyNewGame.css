@@ -44,7 +44,8 @@
   top: clamp(20px, 8vh, 40px); /* Позиция вверху экрана с адаптивностью */
   left: 50%;
   transform: translateX(-50%);
-  font-family: var(--font-game);
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 800; /* ExtraBold */
   font-size: clamp(2.5rem, 12vw, 6rem); /* Уменьшенный адаптивный размер шрифта */
   color: rgba(255, 255, 255, 0.25);
   pointer-events: none;
