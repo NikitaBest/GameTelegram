@@ -21,10 +21,10 @@ const SPIKE_HEIGHT = 55; // Увеличено с 40
 
 // Background colors and corresponding ball/spike colors
 const BG_COLORS = [
-  "#A799DF", // фон 1
-  "#DD95B6", // фон 2
-  "#9BDAB5", // фон 3
-  "#B77576", // фон 4
+  "#A799DF", // фон 1 фиолетовый
+  "#DD95B6", // фон 2 розовый 
+  "#9BDAB5", // фон 3 салатовый
+  "#B77576", // фон 4 темно красный
 ];
 
 // Ball colors corresponding to each background
@@ -42,6 +42,15 @@ const SPIKE_COLORS = [
   "#F56BFF", // шипы для фона 9BDAB5
   "#7C93EB", // шипы для фона B77576
 ];
+
+// Функция для осветления цвета (для градиента шипов)
+const lightenColor = (hex: string, percent: number): string => {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.min(255, ((num >> 16) & 0xff) + Math.round(((num >> 16) & 0xff) * percent));
+  const g = Math.min(255, ((num >> 8) & 0xff) + Math.round(((num >> 8) & 0xff) * percent));
+  const b = Math.min(255, (num & 0xff) + Math.round((num & 0xff) * percent));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+};
 
 interface Point {
   x: number;
@@ -218,11 +227,27 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     const currentBallColor = colorIndex >= 0 ? BALL_COLORS[colorIndex] : BALL_COLORS[0];
     const currentSpikeColor = colorIndex >= 0 ? SPIKE_COLORS[colorIndex] : SPIKE_COLORS[0];
 
-    // Draw Spikes with animation
-    ctx.fillStyle = currentSpikeColor;
+    // Draw Spikes with animation and gradient
     spikes.current.forEach(spike => {
       // Вычисляем текущую ширину шипа на основе анимации (от 0 до SPIKE_WIDTH)
       const currentWidth = spike.offsetX * SPIKE_WIDTH;
+      
+      // Создаем градиент для каждого шипа
+      // Градиент идет от стены (темнее) к кончику (светлее)
+      const lightColor = lightenColor(currentSpikeColor, 0.3); // Осветляем на 30%
+      
+      let gradient: CanvasGradient;
+      if (spike.side === "left") {
+        // Градиент для левого шипа: от стены (x=0) к кончику (x=currentWidth)
+        gradient = ctx.createLinearGradient(0, spike.y, currentWidth, spike.y);
+      } else {
+        // Градиент для правого шипа: от стены (x=width) к кончику (x=width-currentWidth)
+        gradient = ctx.createLinearGradient(width, spike.y, width - currentWidth, spike.y);
+      }
+      
+      // Добавляем цвета: темный у стены, светлый на кончике
+      gradient.addColorStop(0, currentSpikeColor); // У стены - темный (оригинальный цвет)
+      gradient.addColorStop(1, lightColor); // На кончике - светлее
       
       ctx.beginPath();
       if (spike.side === "left") {
@@ -237,6 +262,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         ctx.lineTo(width, spike.y + SPIKE_HEIGHT/2);
       }
       ctx.closePath();
+      ctx.fillStyle = gradient;
       ctx.fill();
     });
 
