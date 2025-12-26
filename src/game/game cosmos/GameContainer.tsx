@@ -3,7 +3,8 @@ import { useGameLogic } from '../../hooks/useGameLogic';
 import { Spaceship } from './Spaceship';
 import { FallingObject } from './FallingObject';
 import { HUD } from './HUD';
-import { RulesScreen } from './RulesScreen';
+import { GameRulesScreen, GameRule } from '../GameRulesScreen';
+import { Target, Hand, Sparkles } from 'lucide-react';
 import { GAME_WIDTH, GAME_HEIGHT, SHIP_WIDTH, SHIP_HEIGHT } from '../../lib/game-types';
 import { getStableViewportHeight, isTelegramWebApp } from '../../lib/telegram';
 import { VisualEffects } from './VisualEffects';
@@ -30,6 +31,22 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
   const dragStartScreenRef = useRef<{ x: number; y: number } | null>(null);
   const dragStartPlayerRef = useRef<{ x: number; y: number } | null>(null);
   const gameOverHandledRef = useRef(false);
+
+  // Правила игры
+  const gameRules: GameRule[] = [
+    {
+      icon: <Target className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Лови звезды для получения очков!'
+    },
+    {
+      icon: <Hand className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Тапай по экрану, чтобы двигать корабль'
+    },
+    {
+      icon: <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Избегай комет, чтобы не потерять жизнь!'
+    }
+  ];
 
   // Обработка окончания игры - переход на страницу результатов
   useEffect(() => {
@@ -309,7 +326,7 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
 
               {/* Screens */}
               {gameState.showRules && !gameState.isPlaying && !gameState.isGameOver && (
-                <RulesScreen onStart={startGame} />
+                <GameRulesScreen rules={gameRules} onStart={startGame} />
               )}
             </div>
           </div>

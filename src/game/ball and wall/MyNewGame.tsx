@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { MyNewGameRulesScreen } from "./MyNewGameRulesScreen";
+import { GameRulesScreen, GameRule } from "../GameRulesScreen";
+import { Target, AlertTriangle } from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
 import "./MyNewGame.css";
+
+const tapIcon = '/hugeicons_tap-01.svg';
 
 interface BallAndWallGameProps {
   onGameOver: (score: number) => void;
@@ -76,6 +79,22 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
   const [gameOver, setGameOver] = useState(false);
   const [bgColor, setBgColor] = useState(BG_COLORS[0]);
   const [isDestroying, setIsDestroying] = useState(false); // Состояние для отслеживания разрушения
+
+  // Правила игры
+  const gameRules: GameRule[] = [
+    {
+      icon: <img src={tapIcon} alt="tap" className="w-5 h-5 md:w-6 md:h-6" />,
+      text: 'Тапай по экрану, чтобы мяч прыгал'
+    },
+    {
+      icon: <Target className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Отскакивай от стен для получения очков'
+    },
+    {
+      icon: <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Избегай шипов на стенах!'
+    }
+  ];
 
   // Physics State (refs for performance in loop)
   const ballPos = useRef<Point>({ x: 0, y: 0 });
@@ -742,10 +761,15 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       {/* Rules Overlay */}
       <AnimatePresence>
         {showRules && (
-          <MyNewGameRulesScreen onStart={() => {
-            setShowRules(false);
-            initGame();
-          }} />
+          <GameRulesScreen 
+            rules={gameRules}
+            onStart={() => {
+              setShowRules(false);
+              initGame();
+            }}
+            startButtonType="text"
+            startButtonIcon={<img src={tapIcon} alt="tap" className="w-5 h-5 md:w-6 md:h-6" />}
+          />
         )}
       </AnimatePresence>
 

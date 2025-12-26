@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FlappyBirdRulesScreen } from './FlappyBirdRulesScreen';
+import { GameRulesScreen, GameRule } from '../GameRulesScreen';
+import { Hand, Target, AlertTriangle } from 'lucide-react';
 import { soundManager } from '../../utils/soundManager';
 import './FlappyBirdGame.css';
 
@@ -63,6 +64,22 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [showRules, setShowRules] = useState(true);
+
+  // Правила игры
+  const gameRules: GameRule[] = [
+    {
+      icon: <Hand className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Тапай по экрану, чтобы птица прыгала'
+    },
+    {
+      icon: <Target className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Пролетай между трубами для получения очков'
+    },
+    {
+      icon: <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+      text: 'Избегай столкновений с трубами и границами!'
+    }
+  ];
   
   const gameLoopRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number | null>(null);
@@ -528,7 +545,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
 
           {/* Экран правил */}
           {showRules && (
-            <FlappyBirdRulesScreen onStart={startGame} />
+            <GameRulesScreen rules={gameRules} onStart={startGame} />
           )}
         </div>
       </div>
