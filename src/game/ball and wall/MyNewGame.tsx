@@ -12,12 +12,12 @@ interface BallAndWallGameProps {
 }
 
 // --- Game Constants & Types ---
-const GRAVITY = 0.35; // Гравитация для падения мячика
-const JUMP_FORCE = -11; // Сила прыжка мячика (уменьшена)
-const MOVE_SPEED_X = 5.0; // Скорость движения мячика по горизонтали (увеличена)
-const BALL_RADIUS = 12;
-const SPIKE_WIDTH = 60; // Увеличено с 45
-const SPIKE_HEIGHT = 55; // Увеличено с 40
+const GRAVITY = 0.35; // Гравитация: чем больше, тем быстрее падает мячик (увеличить = быстрее падение)
+const JUMP_FORCE = -11; // Сила прыжка: чем больше по модулю, тем выше прыжок (увеличить = выше прыжок)
+const MOVE_SPEED_X = 5.0; // Скорость по горизонтали: чем больше, тем быстрее движение влево/вправо (увеличить = быстрее)
+const BALL_RADIUS = 12; // Радиус мячика в пикселях (увеличить = мячик больше)
+const SPIKE_WIDTH = 60; // Ширина шипа в пикселях (увеличить = шипы шире)
+const SPIKE_HEIGHT = 55; // Высота шипа в пикселях (увеличить = шипы выше)
 
 // Background colors and corresponding ball/spike colors
 const BG_COLORS = [
@@ -830,7 +830,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
               initGame();
             }}
             startButtonType="text"
-            startButtonIcon={<img src={tapIcon} alt="tap" className="w-5 h-5 md:w-6 md:h-6" />}
+            startButtonIcon={<img src={tapIcon} alt="tap" style={{ width: 'clamp(1.5rem, 4vw, 2rem)', height: 'clamp(1.5rem, 4vw, 2rem)' }} />}
           />
         )}
       </AnimatePresence>

@@ -81,18 +81,29 @@ export function GameRulesScreen({
           </span>
         </div>
       ) : (
-        <div 
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2 text-white cursor-pointer whitespace-nowrap"
-          onClick={onStart}
-          style={{
-            gap: 'clamp(6px, 1.5vw, 10px)',
-          }}
-        >
-          {defaultStartIcon}
-          <span className="text-sm md:text-base lg:text-lg font-bold whitespace-nowrap">
-            Тапни чтобы начать
-          </span>
-        </div>
+        <>
+          <style>{`
+            @keyframes blink {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.3; }
+            }
+          `}</style>
+          <div 
+            className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-3 text-white cursor-pointer whitespace-nowrap"
+            onClick={onStart}
+            style={{
+              gap: 'clamp(10px, 2.5vw, 16px)',
+              animation: 'blink 1.5s ease-in-out infinite',
+            }}
+          >
+            {startButtonIcon || defaultStartIcon}
+            <span className="font-bold whitespace-nowrap" style={{
+              fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+            }}>
+              Тапни чтобы начать
+            </span>
+          </div>
+        </>
       )}
     </div>
   );
