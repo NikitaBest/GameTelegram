@@ -108,13 +108,15 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
 
   // Physics State (refs for performance in loop)
   const ballPos = useRef<Point>({ x: 0, y: 0 });
-  const ballVel = useRef<Point>({ x: MOVE_SPEED_X, y: 0 });
+  const ballVel = useRef<Point>({ x: 0, y: 0 }); // Начинаем с 0, движение начнется после первого тапа
   const trail = useRef<Point[]>([]);
   const spikes = useRef<Spike[]>([]);
   const scoreRef = useRef(0);
   const gameOverHandledRef = useRef(false);
   const lastTapTimeRef = useRef<number>(0);
   const isTouchDeviceRef = useRef<boolean>(false);
+  // Флаг для отслеживания первого тапа (чтобы мячик начал двигаться в стороны)
+  const gameStartedRef = useRef<boolean>(false);
   // Delta time для независимости от FPS
   const lastFrameTimeRef = useRef<number | null>(null);
   // Эффекты удара
@@ -132,7 +134,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     const { width, height } = canvasRef.current;
     
     ballPos.current = { x: width / 2, y: height / 2 };
-    ballVel.current = { x: MOVE_SPEED_X, y: 0 }; // Start moving right
+    ballVel.current = { x: 0, y: 0 }; // Начинаем без движения, мячик будет падать вниз
     trail.current = [];
     spikes.current = [];
     particles.current = []; // Очищаем частицы
@@ -147,6 +149,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     // Сбрасываем флаги для защиты от двойного нажатия
     lastTapTimeRef.current = 0;
     isTouchDeviceRef.current = false;
+    // Сбрасываем флаг начала игры (мячик будет падать до первого тапа)
+    gameStartedRef.current = false;
     // Сбрасываем время кадра для delta time
     lastFrameTimeRef.current = null;
     // Создаем начальные шипы
@@ -682,6 +686,11 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     lastTapTimeRef.current = now;
 
     if (!showRules && isPlaying && !gameOver) {
+      // Если это первый тап, начинаем движение в стороны
+      if (!gameStartedRef.current) {
+        gameStartedRef.current = true;
+        ballVel.current.x = MOVE_SPEED_X; // Начинаем движение вправо
+      }
       // Jump mechanic
       ballVel.current.y = JUMP_FORCE;
       // Эффект тапа
@@ -779,6 +788,11 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       if (!showRules && isPlaying && !gameOver) {
         e.preventDefault(); // Предотвращаем эмуляцию click события
         isTouchDeviceRef.current = true; // Помечаем, что это touch устройство
+        // Если это первый тап, начинаем движение в стороны
+        if (!gameStartedRef.current) {
+          gameStartedRef.current = true;
+          ballVel.current.x = MOVE_SPEED_X; // Начинаем движение вправо
+        }
         // Jump mechanic
         ballVel.current.y = JUMP_FORCE;
         // Эффект тапа
