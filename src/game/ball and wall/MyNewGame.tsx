@@ -159,7 +159,9 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     lastFrameTimeRef.current = null;
     // Инициализируем размер canvas для отслеживания изменений
     previousCanvasSizeRef.current = { width, height };
-    lastResizeTimeRef.current = 0;
+    // Устанавливаем очень старое время, чтобы гарантировать, что первый удар не будет заблокирован
+    // Вычитаем больше чем RESIZE_BLOCK_DURATION (1000ms), чтобы быть уверенными
+    lastResizeTimeRef.current = Date.now() - 2000;
     // Создаем начальные шипы
     spawnSpikes(height);
   }, []);
@@ -695,7 +697,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       // 5. Wall Collisions (Left/Right)
       // Защита от ложных столкновений сразу после изменения размера экрана
       const timeSinceResize = Date.now() - lastResizeTimeRef.current;
-      const RESIZE_BLOCK_DURATION = 300; // Блокируем столкновения 300ms после resize
+      const RESIZE_BLOCK_DURATION = 1000; // Блокируем столкновения 1000ms после resize (даем время шипам адаптироваться)
       
       let hitWall = false;
       
@@ -713,7 +715,13 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       }
 
       // Игнорируем столкновения со стенами в течение RESIZE_BLOCK_DURATION после изменения размера
-      if (hitWall && timeSinceResize < RESIZE_BLOCK_DURATION) {
+      // Но только если это действительно было изменение размера (не инициализация)
+      // Проверяем, что lastResizeTimeRef был установлен недавно (в течение последних 2 секунд)
+      // и что это не было при инициализации (когда мячик в центре)
+      const isRecentResize = timeSinceResize < RESIZE_BLOCK_DURATION && timeSinceResize >= 0;
+      const isInitialState = ballPos.current.x === width / 2 && ballPos.current.y === height / 2;
+      
+      if (hitWall && isRecentResize && !isInitialState) {
         hitWall = false;
         // Просто корректируем позицию, но не начисляем очки и не создаем шипы
       }
@@ -800,10 +808,18 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         const prevSize = previousCanvasSizeRef.current;
         
         // Сохраняем время изменения размера для защиты от ложных столкновений
-        lastResizeTimeRef.current = Date.now();
+        // Но только если это реальное изменение размера во время игры, а не инициализация
+        // Проверяем, что размер действительно изменился
+        const isRealResize = prevSize && 
+          (prevSize.width !== width || prevSize.height !== height) &&
+          isPlaying;
         
-        // Если игра идет, корректно адаптируем позицию мячика к новым размерам
-        if (isPlaying && prevSize) {
+        if (isRealResize) {
+          lastResizeTimeRef.current = Date.now();
+        }
+        
+        // Если игра идет, корректно адаптируем позицию мячика и шипов к новым размерам
+        if (isPlaying && prevSize && prevSize.width > 0 && prevSize.height > 0) {
           // Вычисляем пропорции изменения размера
           const scaleX = width / prevSize.width;
           const scaleY = height / prevSize.height;
@@ -815,6 +831,44 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
           // Ограничиваем позицию мячика новыми границами
           ballPos.current.x = Math.max(BALL_RADIUS, Math.min(width - BALL_RADIUS, ballPos.current.x));
           ballPos.current.y = Math.max(BALL_RADIUS, Math.min(height - BALL_RADIUS, ballPos.current.y));
+          
+          // Масштабируем позиции шипов по вертикали (y)
+          // Это важно, чтобы шипы оставались на своих местах при повороте экрана
+          spikes.current = spikes.current.map(spike => {
+            // Масштабируем y позицию шипа
+            const newY = spike.y * scaleY;
+            
+            // Ограничиваем позицию шипа новыми границами (с запасом для высоты шипа)
+            const clampedY = Math.max(
+              SPIKE_HEIGHT / 2 + 10, 
+              Math.min(height - SPIKE_HEIGHT / 2 - 10, newY)
+            );
+            
+            return {
+              ...spike,
+              y: clampedY,
+              // Сохраняем состояние анимации, чтобы шипы не сбрасывались
+              // Не меняем offsetX, state и animationTime - они должны продолжаться
+            };
+          }).filter(spike => {
+            // Удаляем шипы, которые оказались слишком близко к краям после масштабирования
+            return spike.y >= SPIKE_HEIGHT / 2 + 10 && spike.y <= height - SPIKE_HEIGHT / 2 - 10;
+          });
+        } else if (isPlaying && !prevSize) {
+          // Если игра идет, но предыдущий размер не был сохранен, просто ограничиваем позицию
+          ballPos.current.x = Math.max(BALL_RADIUS, Math.min(width - BALL_RADIUS, ballPos.current.x));
+          ballPos.current.y = Math.max(BALL_RADIUS, Math.min(height - BALL_RADIUS, ballPos.current.y));
+          
+          // Также ограничиваем позиции шипов
+          spikes.current = spikes.current.map(spike => {
+            const clampedY = Math.max(
+              SPIKE_HEIGHT / 2 + 10, 
+              Math.min(height - SPIKE_HEIGHT / 2 - 10, spike.y)
+            );
+            return { ...spike, y: clampedY };
+          }).filter(spike => {
+            return spike.y >= SPIKE_HEIGHT / 2 + 10 && spike.y <= height - SPIKE_HEIGHT / 2 - 10;
+          });
         }
         
         canvasRef.current.width = width;
