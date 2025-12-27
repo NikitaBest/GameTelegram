@@ -584,7 +584,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     // 2.6. Update Spikes Animation
     const now = Date.now();
     const ENTER_DURATION = 400; // Время выезда (мс)
-    const VISIBLE_DURATION = 2000; // Время видимости (мс)
+    const VISIBLE_DURATION = 4000; // Время видимости (мс) - увеличено, чтобы мяч успевал долететь до стены
     const EXIT_DURATION = 400; // Время заезда (мс)
     
     spikes.current = spikes.current.map(spike => {
@@ -834,6 +834,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
           
           // Масштабируем позиции шипов по вертикали (y)
           // Это важно, чтобы шипы оставались на своих местах при повороте экрана
+          const now = Date.now();
           spikes.current = spikes.current.map(spike => {
             // Масштабируем y позицию шипа
             const newY = spike.y * scaleY;
@@ -844,11 +845,33 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
               Math.min(height - SPIKE_HEIGHT / 2 - 10, newY)
             );
             
+            // При повороте экрана продлеваем время видимости шипов
+            // Если шип в состоянии "visible", сбрасываем время анимации, чтобы он оставался видимым дольше
+            // Это дает мячу время долететь до стены
+            let newState = spike.state;
+            let newAnimationTime = spike.animationTime;
+            let newOffsetX = spike.offsetX;
+            
+            if (spike.state === "visible") {
+              // Продлеваем время видимости - сбрасываем время анимации
+              newAnimationTime = now;
+              newOffsetX = 1; // Полностью видимый
+            } else if (spike.state === "entering") {
+              // Если шип еще выезжает, продолжаем анимацию с текущего прогресса
+              // Не сбрасываем, чтобы анимация была плавной
+            } else if (spike.state === "exiting") {
+              // Если шип заезжает, возвращаем его в состояние "visible" и продлеваем время
+              newState = "visible";
+              newAnimationTime = now;
+              newOffsetX = 1;
+            }
+            
             return {
               ...spike,
               y: clampedY,
-              // Сохраняем состояние анимации, чтобы шипы не сбрасывались
-              // Не меняем offsetX, state и animationTime - они должны продолжаться
+              state: newState,
+              animationTime: newAnimationTime,
+              offsetX: newOffsetX,
             };
           }).filter(spike => {
             // Удаляем шипы, которые оказались слишком близко к краям после масштабирования
