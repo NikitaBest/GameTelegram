@@ -37,12 +37,11 @@ export function GameRulesScreen({
           background: 'rgba(173, 216, 230, 0.05)',
           backdropFilter: 'blur(12px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Заголовок */}
-        <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+        <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-5">
           Правила игры
         </h2>
 
