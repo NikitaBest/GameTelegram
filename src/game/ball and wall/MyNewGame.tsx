@@ -12,9 +12,9 @@ interface BallAndWallGameProps {
 }
 
 // --- Game Constants & Types ---
-const GRAVITY = 0.18; // Уменьшена для более плавного падения
-const JUMP_FORCE = -8; // Уменьшена для более плавного прыжка
-const MOVE_SPEED_X = 2.2; // Уменьшена для более медленного движения
+const GRAVITY = 0.35; // Гравитация для падения мячика
+const JUMP_FORCE = -11; // Сила прыжка мячика (уменьшена)
+const MOVE_SPEED_X = 5.0; // Скорость движения мячика по горизонтали (увеличена)
 const BALL_RADIUS = 12;
 const SPIKE_WIDTH = 60; // Увеличено с 45
 const SPIKE_HEIGHT = 55; // Увеличено с 40
@@ -115,6 +115,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
   const gameOverHandledRef = useRef(false);
   const lastTapTimeRef = useRef<number>(0);
   const isTouchDeviceRef = useRef<boolean>(false);
+  // Delta time для независимости от FPS
+  const lastFrameTimeRef = useRef<number | null>(null);
   // Эффекты удара
   const tapEffectTimeRef = useRef<number>(0); // Время последнего тапа для эффекта
   const wallHitEffectTimeRef = useRef<number>(0); // Время последнего удара о стену для эффекта
@@ -145,6 +147,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     // Сбрасываем флаги для защиты от двойного нажатия
     lastTapTimeRef.current = 0;
     isTouchDeviceRef.current = false;
+    // Сбрасываем время кадра для delta time
+    lastFrameTimeRef.current = null;
     // Создаем начальные шипы
     spawnSpikes(height);
   }, []);
@@ -455,18 +459,32 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     }
   }, [onGameOver]);
 
-  const update = useCallback(() => {
+  const update = useCallback((currentTime: number) => {
     if (!canvasRef.current) return;
     // Продолжаем цикл даже во время разрушения, чтобы анимация работала
     if (!isPlaying && !isDestroying) return;
     
+    // Расчет delta time для независимости от FPS
+    if (lastFrameTimeRef.current === null) {
+      lastFrameTimeRef.current = currentTime;
+      requestRef.current = requestAnimationFrame(update);
+      return;
+    }
+
+    const deltaTime = currentTime - lastFrameTimeRef.current;
+    lastFrameTimeRef.current = currentTime;
+    
+    // Нормализуем delta time к 60 FPS (16.67ms на кадр)
+    // Это обеспечивает одинаковую скорость на всех устройствах
+    const normalizedDelta = deltaTime / 16.67;
+    
     const canvas = canvasRef.current;
     const { width, height } = canvas;
 
-    // 1. Update Ball Physics (всегда, даже во время разрушения)
-    ballVel.current.y += GRAVITY;
-    ballPos.current.x += ballVel.current.x;
-    ballPos.current.y += ballVel.current.y;
+    // 1. Update Ball Physics (всегда, даже во время разрушения) с учетом delta time
+    ballVel.current.y += GRAVITY * normalizedDelta;
+    ballPos.current.x += ballVel.current.x * normalizedDelta;
+    ballPos.current.y += ballVel.current.y * normalizedDelta;
 
     // Проверяем, не закончилась ли анимация разрушения
     if (isDestroying) {
@@ -499,14 +517,14 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       }
     }
 
-    // 2.5. Update Particles (с ограничением количества для производительности)
+    // 2.5. Update Particles (с ограничением количества для производительности) с учетом delta time
     particles.current = particles.current
       .map(particle => ({
         ...particle,
-        x: particle.x + particle.vx,
-        y: particle.y + particle.vy,
-        life: particle.life - 0.02, // Затухание
-        vy: particle.vy + 0.1, // Гравитация для частиц
+        x: particle.x + particle.vx * normalizedDelta,
+        y: particle.y + particle.vy * normalizedDelta,
+        life: particle.life - 0.02 * normalizedDelta, // Затухание
+        vy: particle.vy + 0.1 * normalizedDelta, // Гравитация для частиц
       }))
       .filter(particle => particle.life > 0);
     
@@ -729,9 +747,13 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     // Запускаем цикл если игра идет ИЛИ идет анимация разрушения
     if (isPlaying || isDestroying) {
       requestRef.current = requestAnimationFrame(update);
+    } else {
+      // Сбрасываем время кадра при остановке игры
+      lastFrameTimeRef.current = null;
     }
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      lastFrameTimeRef.current = null; // Сбрасываем время кадра при размонтировании
     };
   }, [isPlaying, isDestroying, update]);
 
