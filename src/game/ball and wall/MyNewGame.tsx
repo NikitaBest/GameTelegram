@@ -18,6 +18,7 @@ const MOVE_SPEED_X = 5.0; // Скорость по горизонтали: че�
 const BALL_RADIUS = 12; // Радиус мячика в пикселях (увеличить = мячик больше)
 const SPIKE_WIDTH = 60; // Ширина шипа в пикселях (увеличить = шипы шире)
 const SPIKE_HEIGHT = 55; // Высота шипа в пикселях (увеличить = шипы выше)
+const COLLISION_TOLERANCE = -3; // Точность столкновения: чем больше, тем раньше срабатывает (увеличить = более чувствительно, уменьшить = более точно)
 
 // Background colors and corresponding ball/spike colors
 const BG_COLORS = [
@@ -302,7 +303,10 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       destroyElapsed = now - destroyStartTimeRef.current;
       const DESTROY_DURATION = 800;
       destroyProgress = Math.min(1, destroyElapsed / DESTROY_DURATION);
-      trailFadeProgress = 1 - destroyProgress; // От 1 до 0
+      // Используем квадратичную функцию для более быстрого исчезновения прозрачности
+      // destroyProgress^2 делает исчезновение быстрее в начале
+      const fadeProgress = destroyProgress * destroyProgress;
+      trailFadeProgress = 1 - fadeProgress; // От 1 до 0, быстрее в начале
     }
     
     // Draw Trail (белая тень) - рисуем после вычисления now
@@ -504,18 +508,50 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       // Продолжаем анимацию разрушения (обновляем частицы и физику)
     }
 
-    // 2. Trail Logic
+    // 2. Trail Logic (добавляем trail только если нет столкновения)
+    // Проверяем столкновение заранее, чтобы не добавлять trail при попадании на шип
+    let willHitSpike = false;
     if (!isDestroying) {
+      // Быстрая проверка столкновения для trail (используем ту же логику, что и основная проверка)
+      willHitSpike = spikes.current.some(spike => {
+        if (spike.offsetX < 1.0) return false;
+        const ballX = ballPos.current.x;
+        const ballY = ballPos.current.y;
+        const spikeY = spike.y;
+        const spikeTop = spikeY - SPIKE_HEIGHT / 2;
+        const spikeBottom = spikeY + SPIKE_HEIGHT / 2;
+        if (ballY + BALL_RADIUS < spikeTop || ballY - BALL_RADIUS > spikeBottom) return false;
+        
+        if (spike.side === "left") {
+          const ballLeftEdge = ballX - BALL_RADIUS;
+          const ballRightEdge = ballX + BALL_RADIUS;
+          const effectiveSpikeWidth = Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
+          return ballRightEdge > 0 && ballLeftEdge < effectiveSpikeWidth;
+        } else {
+          const ballLeftEdge = ballX - BALL_RADIUS;
+          const ballRightEdge = ballX + BALL_RADIUS;
+          const effectiveSpikeStart = width - Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
+          return ballLeftEdge < width && ballRightEdge > effectiveSpikeStart;
+        }
+      });
+    }
+    
+    if (!isDestroying && !willHitSpike) {
       trail.current.push({ ...ballPos.current });
       if (trail.current.length > 40) trail.current.shift();
-    } else {
-      // Во время разрушения постепенно уменьшаем длину trail (растворяем тень)
+    } else if (isDestroying) {
+      // Во время разрушения быстро уменьшаем длину trail (растворяем тень)
       const destroyElapsed = Date.now() - destroyStartTimeRef.current;
       const DESTROY_DURATION = 800;
       const destroyProgress = Math.min(1, destroyElapsed / DESTROY_DURATION);
       
-      // Удаляем элементы из начала trail, чтобы тень постепенно исчезала
-      const targetLength = Math.floor(40 * (1 - destroyProgress));
+      // Используем квадратичную функцию для более быстрого исчезновения trail
+      // destroyProgress^2 делает исчезновение быстрее в начале
+      const fadeProgress = destroyProgress * destroyProgress;
+      
+      // Удаляем элементы из начала trail, чтобы тень быстро исчезала и была ближе к мячику
+      // Максимальная длина trail уменьшается быстрее
+      const targetLength = Math.floor(40 * (1 - fadeProgress));
       while (trail.current.length > targetLength) {
         trail.current.shift();
       }
@@ -592,20 +628,48 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       }
 
       // 4. Проверка столкновения с шипами (ПЕРЕД проверкой стен, чтобы остановить мяч)
+      // Используем текущую позицию, но проверяем более точно с учетом треугольной формы
       const hitSpike = spikes.current.find(spike => {
-        // Проверяем только если шип полностью выехал
-        if (spike.offsetX < 0.9) return false;
+        // Проверяем только если шип полностью выехал (100%)
+        if (spike.offsetX < 1.0) return false;
+        
+        // Точная проверка столкновения с учетом треугольной формы шипа
+        const ballX = ballPos.current.x;
+        const ballY = ballPos.current.y;
+        const spikeY = spike.y;
+        const spikeTop = spikeY - SPIKE_HEIGHT / 2;
+        const spikeBottom = spikeY + SPIKE_HEIGHT / 2;
+        
+        // Проверяем, находится ли мячик в вертикальных пределах шипа (с учетом радиуса)
+        if (ballY + BALL_RADIUS < spikeTop || ballY - BALL_RADIUS > spikeBottom) {
+          return false; // Мячик выше или ниже шипа
+        }
         
         if (spike.side === "left") {
-          // Проверяем столкновение с левым шипом
-          const distanceX = ballPos.current.x - BALL_RADIUS;
-          const distanceY = Math.abs(ballPos.current.y - spike.y);
-          return distanceX <= SPIKE_WIDTH && distanceY < (SPIKE_HEIGHT / 2 + BALL_RADIUS);
+          // Для левого шипа: проверяем, что мячик реально пересекает область шипа
+          // Шип треугольный: от стены (x=0) до кончика (x=SPIKE_WIDTH)
+          // Мячик должен реально коснуться шипа, а не просто быть рядом
+          const ballLeftEdge = ballX - BALL_RADIUS;
+          const ballRightEdge = ballX + BALL_RADIUS;
+          
+          // Учитываем COLLISION_TOLERANCE (отрицательное значение делает проверку строже)
+          // Если COLLISION_TOLERANCE = -1, то effectiveSpikeWidth = 59 (вместо 60)
+          const effectiveSpikeWidth = Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
+          
+          // Мячик попадает на шип, если его левый край находится в пределах шипа
+          // И правый край мячика должен быть за стеной (x > 0)
+          return ballRightEdge > 0 && ballLeftEdge < effectiveSpikeWidth;
         } else {
-          // Проверяем столкновение с правым шипом
-          const distanceX = width - (ballPos.current.x + BALL_RADIUS);
-          const distanceY = Math.abs(ballPos.current.y - spike.y);
-          return distanceX <= SPIKE_WIDTH && distanceY < (SPIKE_HEIGHT / 2 + BALL_RADIUS);
+          // Для правого шипа: проверяем, что мячик реально пересекает область шипа
+          const ballLeftEdge = ballX - BALL_RADIUS;
+          const ballRightEdge = ballX + BALL_RADIUS;
+          
+          // Шип треугольный: от стены (x=width) до кончика (x=width-SPIKE_WIDTH)
+          const effectiveSpikeStart = width - Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
+          
+          // Мячик попадает на шип, если его правый край находится в пределах шипа
+          // И левый край мячика должен быть перед стеной (x < width)
+          return ballLeftEdge < width && ballRightEdge > effectiveSpikeStart;
         }
       });
 
