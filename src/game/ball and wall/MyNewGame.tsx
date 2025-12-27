@@ -120,6 +120,9 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
   const gameStartedRef = useRef<boolean>(false);
   // Delta time для независимости от FPS
   const lastFrameTimeRef = useRef<number | null>(null);
+  // Отслеживание изменения размера экрана для предотвращения ложных столкновений
+  const lastResizeTimeRef = useRef<number>(0);
+  const previousCanvasSizeRef = useRef<{ width: number; height: number } | null>(null);
   // Эффекты удара
   const tapEffectTimeRef = useRef<number>(0); // Время последнего тапа для эффекта
   const wallHitEffectTimeRef = useRef<number>(0); // Время последнего удара о стену для эффекта
@@ -154,6 +157,9 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
     gameStartedRef.current = false;
     // Сбрасываем время кадра для delta time
     lastFrameTimeRef.current = null;
+    // Инициализируем размер canvas для отслеживания изменений
+    previousCanvasSizeRef.current = { width, height };
+    lastResizeTimeRef.current = 0;
     // Создаем начальные шипы
     spawnSpikes(height);
   }, []);
@@ -687,6 +693,10 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
       }
 
       // 5. Wall Collisions (Left/Right)
+      // Защита от ложных столкновений сразу после изменения размера экрана
+      const timeSinceResize = Date.now() - lastResizeTimeRef.current;
+      const RESIZE_BLOCK_DURATION = 300; // Блокируем столкновения 300ms после resize
+      
       let hitWall = false;
       
       // Right Wall
@@ -700,6 +710,12 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         ballPos.current.x = BALL_RADIUS;
         ballVel.current.x = MOVE_SPEED_X; // Flip direction
         hitWall = true;
+      }
+
+      // Игнорируем столкновения со стенами в течение RESIZE_BLOCK_DURATION после изменения размера
+      if (hitWall && timeSinceResize < RESIZE_BLOCK_DURATION) {
+        hitWall = false;
+        // Просто корректируем позицию, но не начисляем очки и не создаем шипы
       }
 
       if (hitWall) {
@@ -781,12 +797,38 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         // Use visible window size
         const width = window.innerWidth;
         const height = window.innerHeight;
+        const prevSize = previousCanvasSizeRef.current;
+        
+        // Сохраняем время изменения размера для защиты от ложных столкновений
+        lastResizeTimeRef.current = Date.now();
+        
+        // Если игра идет, корректно адаптируем позицию мячика к новым размерам
+        if (isPlaying && prevSize) {
+          // Вычисляем пропорции изменения размера
+          const scaleX = width / prevSize.width;
+          const scaleY = height / prevSize.height;
+          
+          // Масштабируем позицию мячика пропорционально
+          ballPos.current.x = ballPos.current.x * scaleX;
+          ballPos.current.y = ballPos.current.y * scaleY;
+          
+          // Ограничиваем позицию мячика новыми границами
+          ballPos.current.x = Math.max(BALL_RADIUS, Math.min(width - BALL_RADIUS, ballPos.current.x));
+          ballPos.current.y = Math.max(BALL_RADIUS, Math.min(height - BALL_RADIUS, ballPos.current.y));
+        }
+        
         canvasRef.current.width = width;
         canvasRef.current.height = height;
+        
+        // Сохраняем новый размер для следующего resize
+        previousCanvasSizeRef.current = { width, height };
+        
         // Center ball only if game is not playing (initial state)
         if (!isPlaying && !gameOver) {
           ballPos.current = { x: width / 2, y: height / 2 };
+          previousCanvasSizeRef.current = { width, height };
         }
+        
         // Draw current state (draw стабильна, не пересоздается)
         draw();
       }
