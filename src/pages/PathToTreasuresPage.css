@@ -4,8 +4,8 @@
   min-height: 100dvh;
   /* Фон убран - используется общий фон из .page-background */
   background: transparent;
-  padding: 40px 16px;
-  padding-top: 60px;
+  padding: 0 16px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
   overflow-x: hidden;
   overflow-y: auto;
@@ -108,8 +108,8 @@
 /* Адаптация для маленьких экранов */
 @media (max-width: 375px) {
   .path-to-treasures-page {
-    padding: 30px 12px;
-    padding-top: 50px;
+    padding: 0 12px;
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
   }
   
   .title-block {
@@ -130,8 +130,8 @@
 /* Адаптация для очень маленьких экранов */
 @media (max-width: 320px) {
   .path-to-treasures-page {
-    padding: 25px 10px;
-    padding-top: 45px;
+    padding: 0 10px;
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
   }
   
   .title-block {
@@ -147,6 +147,51 @@
   
   .page-subtitle {
     font-size: 12px;
+  }
+}
+
+.support-text {
+  font-family: 'Rubik', Helvetica, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 16px 0 0 0;
+  padding: 0 16px;
+}
+
+.support-link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.support-link:hover {
+  color: #FFFFFF;
+  text-decoration-color: rgba(255, 255, 255, 0.8);
+}
+
+.support-link:active {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 375px) {
+  .support-text {
+    font-size: 13px;
+    margin-top: 14px;
+    padding: 0 12px;
+  }
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 320px) {
+  .support-text {
+    font-size: 12px;
+    margin-top: 12px;
+    padding: 0 10px;
   }
 }
 

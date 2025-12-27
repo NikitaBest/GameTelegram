@@ -201,6 +201,18 @@ const PathToTreasuresPage = ({ drawId, onStartGame }) => {
               disabled={!allSubscribed || totalPartners === 0}
               text={allSubscribed && totalPartners > 0 ? 'Начать игру' : 'Вперёд!'}
             />
+            
+            <p className="support-text">
+              Возникли проблемы? Пиши{' '}
+              <a 
+                href="https://t.me/mors_manager" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="support-link"
+              >
+                @mors_manager
+              </a>
+            </p>
           </>
         )}
       </div>
