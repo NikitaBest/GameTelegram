@@ -391,32 +391,42 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           console.log('[GameResultsPage] Telegram Web App доступен:', !!tg);
           
           // Нормализуем referralLink - убеждаемся, что он в правильном формате
-          let normalizedReferralLink = referralLink;
-          if (!referralLink.startsWith('http://') && !referralLink.startsWith('https://')) {
-            normalizedReferralLink = `https://${referralLink}`;
+          // referralLink должен быть в формате: https://t.me/chest_of_goldbot?startapp=84
+          let normalizedReferralLink = referralLink.trim();
+          
+          // Если ссылка не начинается с http/https, добавляем https://
+          if (!normalizedReferralLink.startsWith('http://') && !normalizedReferralLink.startsWith('https://')) {
+            // Если начинается с t.me, добавляем https://
+            if (normalizedReferralLink.startsWith('t.me/')) {
+              normalizedReferralLink = `https://${normalizedReferralLink}`;
+            } else {
+              // Иначе предполагаем, что это полный URL без протокола
+              normalizedReferralLink = `https://${normalizedReferralLink}`;
+            }
           }
           
           // Для открытия диалога выбора контактов в Telegram Mini App
-          // Используем формат t.me/share/url
+          // Используем формат t.me/share/url (как в примере)
           const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
+          // Правильное формирование URL: сначала кодируем referralLink, потом весь shareUrl
           const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(normalizedReferralLink)}&text=${encodeURIComponent(shareText)}`;
           
           console.log('[GameResultsPage] Нормализованная ссылка:', normalizedReferralLink);
           console.log('[GameResultsPage] ShareUrl для открытия диалога:', shareUrl);
           
-          // КРИТИЧЕСКИ ВАЖНО для Telegram Mini App в продакшене:
-          // openLink должен вызываться СИНХРОННО и НАПРЯМУЮ из обработчика события пользователя
+          // КРИТИЧЕСКИ ВАЖНО для Telegram Mini App:
+          // openTelegramLink открывает ссылку НАПРЯМУЮ в Telegram (не в браузере)
+          // openLink может открывать в браузере, поэтому используем openTelegramLink в первую очередь
+          // Вызов должен быть СИНХРОННЫМ и НАПРЯМУЮ из обработчика события пользователя
           // НЕ закрываем модальное окно ПЕРЕД вызовом - это может прервать цепочку событий!
-          // Диалог выбора контактов откроется поверх модального окна, и мы закроем его после
           
-          // ВАЖНО: Вызываем openLink СИНХРОННО, БЕЗ закрытия модального окна
-          // Это гарантирует, что вызов происходит в том же стеке вызовов, что и событие клика
-          if (tg && typeof tg.openLink === 'function') {
-            console.log('[GameResultsPage] Вызываем tg.openLink с shareUrl (синхронно, БЕЗ закрытия модального окна)');
+          // ПРИОРИТЕТ 1: openTelegramLink - открывает напрямую в Telegram (не в браузере)
+          if (tg && typeof tg.openTelegramLink === 'function') {
+            console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl (открывает в Telegram, не в браузере)');
             // Прямой вызов без оберток для максимальной надежности в продакшене
-            tg.openLink(shareUrl);
+            tg.openTelegramLink(shareUrl);
             
-            // Закрываем модальное окно ПОСЛЕ успешного вызова openLink
+            // Закрываем модальное окно ПОСЛЕ успешного вызова
             // Используем небольшую задержку, чтобы дать Telegram время открыть диалог
             setTimeout(() => {
               setIsModalOpen(false);
@@ -424,18 +434,16 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             return;
           }
           
-          // Fallback: если openLink недоступен, пробуем openTelegramLink
-          if (tg && typeof tg.openTelegramLink === 'function') {
-            console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl (синхронно)');
+          // ПРИОРИТЕТ 2: openLink - может открывать в браузере, но лучше чем ничего
+          if (tg && typeof tg.openLink === 'function') {
+            console.log('[GameResultsPage] Вызываем tg.openLink с shareUrl (может открыть в браузере)');
             try {
-              tg.openTelegramLink(shareUrl);
-              // Закрываем модальное окно после вызова
+              tg.openLink(shareUrl);
               setTimeout(() => {
                 setIsModalOpen(false);
               }, 300);
             } catch (err) {
-              console.error('[GameResultsPage] Ошибка в tg.openTelegramLink:', err);
-              // При ошибке закрываем модальное окно сразу
+              console.error('[GameResultsPage] Ошибка в tg.openLink:', err);
               setIsModalOpen(false);
             }
             return;
