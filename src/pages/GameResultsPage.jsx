@@ -391,51 +391,37 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           // referralLink должен быть в формате: http://t.me/chest_of_goldbot/game?startapp=84
           console.log('[GameResultsPage] ReferralLink для отправки:', referralLink);
           
-          // Всегда используем формат t.me/share/url для открытия диалога выбора контактов
-          // Это единственный надежный способ открыть список друзей в Telegram Web App
-          const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+          // Нормализуем referralLink - убеждаемся, что он в правильном формате
+          let normalizedReferralLink = referralLink;
+          if (!referralLink.startsWith('http://') && !referralLink.startsWith('https://')) {
+            normalizedReferralLink = `https://${referralLink}`;
+          }
+          
+          // Формируем URL для шаринга - используем формат t.me/share/url
+          // Это откроет диалог выбора контактов в Telegram
+          const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(normalizedReferralLink)}&text=${encodeURIComponent(shareText)}`;
           console.log('[GameResultsPage] Сформированный shareUrl:', shareUrl);
           
+          // Закрываем модальное окно перед открытием диалога (чтобы не мешать)
+          setIsModalOpen(false);
+
           if (!tg) {
-            console.warn('[GameResultsPage] Telegram Web App недоступен, используем window.open');
-            window.open(shareUrl, '_blank');
-            setIsModalOpen(false);
+            console.warn('[GameResultsPage] Telegram Web App недоступен, используем window.location.href');
+            // Используем небольшую задержку для плавности
+            setTimeout(() => {
+              window.location.href = shareUrl;
+            }, 100);
             return;
           }
 
-          try {
-            // Используем openTelegramLink с URL формата t.me/share/url
-            // Это откроет диалог выбора контактов в Telegram
-            if (typeof tg.openTelegramLink === 'function') {
-              console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl');
-              tg.openTelegramLink(shareUrl);
-              
-              // Не закрываем модальное окно сразу - даем время Telegram открыть диалог
-              // Закроем через небольшую задержку
-              setTimeout(() => {
-                setIsModalOpen(false);
-              }, 300);
-            }
-            // Fallback на openLink
-            else if (typeof tg.openLink === 'function') {
-              console.log('[GameResultsPage] Используем tg.openLink как fallback');
-              tg.openLink(shareUrl);
-              setTimeout(() => {
-                setIsModalOpen(false);
-              }, 300);
-            }
-            // Последний fallback - открываем в новой вкладке
-            else {
-              console.warn('[GameResultsPage] Telegram Web App методы недоступны, используем window.open');
-              window.open(shareUrl, '_blank');
-              setIsModalOpen(false);
-            }
-          } catch (error) {
-            console.error('[GameResultsPage] Ошибка при открытии списка друзей:', error);
-            // Fallback на window.open при ошибке
-            window.open(shareUrl, '_blank');
-            setIsModalOpen(false);
-          }
+          // На мобильных устройствах location.href работает надежнее, чем openTelegramLink
+          // Используем location.href как основной метод для максимальной совместимости
+          console.log('[GameResultsPage] Открываем диалог выбора контактов через location.href');
+          
+          // Небольшая задержка для плавности закрытия модального окна
+          setTimeout(() => {
+            window.location.href = shareUrl;
+          }, 150);
         }}
         onAttemptAdded={() => {
           // Обновляем количество попыток после успешного просмотра рекламы
