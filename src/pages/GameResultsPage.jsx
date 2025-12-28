@@ -383,10 +383,18 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             return;
           }
 
+          // Проверяем доступность Telegram Web App
           const tg = window.Telegram?.WebApp;
           
           // referralLink должен быть в формате: http://t.me/chest_of_goldbot/game?startapp=84
           console.log('[GameResultsPage] ReferralLink для отправки:', referralLink);
+          console.log('[GameResultsPage] Telegram Web App доступен:', !!tg);
+          console.log('[GameResultsPage] Telegram Web App версия:', tg?.version);
+          console.log('[GameResultsPage] Telegram Web App методы:', {
+            openTelegramLink: typeof tg?.openTelegramLink,
+            openLink: typeof tg?.openLink,
+            shareUrl: typeof tg?.shareUrl,
+          });
           
           // Нормализуем referralLink - убеждаемся, что он в правильном формате
           let normalizedReferralLink = referralLink;
@@ -396,7 +404,6 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           
           // Для открытия диалога выбора контактов в Telegram Mini App
           // НЕОБХОДИМО использовать формат t.me/share/url
-          // Прямая ссылка на бота НЕ откроет диалог выбора контактов
           const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
           const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(normalizedReferralLink)}&text=${encodeURIComponent(shareText)}`;
           
@@ -408,45 +415,59 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
 
           if (!tg) {
             console.warn('[GameResultsPage] Telegram Web App недоступен, используем window.location.href');
-            setTimeout(() => {
+            // Используем requestAnimationFrame для надежности на мобильных
+            requestAnimationFrame(() => {
               window.location.href = shareUrl;
-            }, 100);
+            });
             return;
           }
 
-          // В Telegram Mini App для открытия диалога выбора контактов
-          // нужно использовать openTelegramLink с URL формата t.me/share/url
+          // В продакшене важно вызывать метод синхронно, без setTimeout
+          // setTimeout может не работать правильно в минифицированном коде
           console.log('[GameResultsPage] Открываем диалог выбора контактов через t.me/share/url');
           
-          try {
-            // Используем openTelegramLink с shareUrl - это единственный способ
-            // открыть диалог выбора контактов в Telegram Mini App
-            if (typeof tg.openTelegramLink === 'function') {
-              console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl');
-              // Небольшая задержка для плавности
-              setTimeout(() => {
-                tg.openTelegramLink(shareUrl);
-                console.log('[GameResultsPage] tg.openTelegramLink вызван');
-              }, 150);
-            } else if (typeof tg.openLink === 'function') {
-              console.log('[GameResultsPage] Используем tg.openLink как fallback');
-              setTimeout(() => {
-                tg.openLink(shareUrl);
-              }, 150);
-            } else {
-              // Fallback на location.href
+          // Используем requestAnimationFrame для надежности вместо setTimeout
+          // Это гарантирует выполнение в следующем кадре рендеринга
+          requestAnimationFrame(() => {
+            try {
+              // Метод 1: openTelegramLink - основной метод для Telegram Mini App
+              if (typeof tg.openTelegramLink === 'function') {
+                console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl');
+                try {
+                  tg.openTelegramLink(shareUrl);
+                  console.log('[GameResultsPage] tg.openTelegramLink вызван успешно');
+                  return;
+                } catch (err) {
+                  console.error('[GameResultsPage] Ошибка в tg.openTelegramLink:', err);
+                }
+              }
+              
+              // Метод 2: openLink - альтернативный метод
+              if (typeof tg.openLink === 'function') {
+                console.log('[GameResultsPage] Используем tg.openLink как fallback');
+                try {
+                  tg.openLink(shareUrl);
+                  console.log('[GameResultsPage] tg.openLink вызван успешно');
+                  return;
+                } catch (err) {
+                  console.error('[GameResultsPage] Ошибка в tg.openLink:', err);
+                }
+              }
+              
+              // Метод 3: location.href - последний fallback
               console.log('[GameResultsPage] Используем window.location.href как fallback');
-              setTimeout(() => {
-                window.location.href = shareUrl;
-              }, 150);
-            }
-          } catch (error) {
-            console.error('[GameResultsPage] Ошибка при открытии диалога:', error);
-            // Fallback на location.href при ошибке
-            setTimeout(() => {
               window.location.href = shareUrl;
-            }, 150);
-          }
+              
+            } catch (error) {
+              console.error('[GameResultsPage] Критическая ошибка при открытии диалога:', error);
+              // Последний fallback
+              try {
+                window.location.href = shareUrl;
+              } catch (fallbackError) {
+                console.error('[GameResultsPage] Не удалось открыть ссылку:', fallbackError);
+              }
+            }
+          });
         }}
         onAttemptAdded={() => {
           // Обновляем количество попыток после успешного просмотра рекламы
