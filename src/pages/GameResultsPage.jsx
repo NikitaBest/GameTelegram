@@ -386,8 +386,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           const tg = window.Telegram?.WebApp;
           
           // referralLink должен быть в формате: http://t.me/chest_of_goldbot/game?startapp=84
-          // Используем прямую ссылку без обертки в t.me/share/url
-          console.log('[GameResultsPage] ReferralLink для отправки (прямая ссылка):', referralLink);
+          console.log('[GameResultsPage] ReferralLink для отправки:', referralLink);
           
           // Нормализуем referralLink - убеждаемся, что он в правильном формате
           let normalizedReferralLink = referralLink;
@@ -395,43 +394,57 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             normalizedReferralLink = `https://${referralLink}`;
           }
           
-          console.log('[GameResultsPage] Нормализованная ссылка:', normalizedReferralLink);
+          // Для открытия диалога выбора контактов в Telegram Mini App
+          // НЕОБХОДИМО использовать формат t.me/share/url
+          // Прямая ссылка на бота НЕ откроет диалог выбора контактов
+          const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
+          const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(normalizedReferralLink)}&text=${encodeURIComponent(shareText)}`;
           
-          // Закрываем модальное окно перед открытием диалога (чтобы не мешать)
+          console.log('[GameResultsPage] Нормализованная ссылка:', normalizedReferralLink);
+          console.log('[GameResultsPage] ShareUrl для открытия диалога:', shareUrl);
+          
+          // Закрываем модальное окно перед открытием диалога
           setIsModalOpen(false);
 
           if (!tg) {
             console.warn('[GameResultsPage] Telegram Web App недоступен, используем window.location.href');
-            // Используем небольшую задержку для плавности
             setTimeout(() => {
-              window.location.href = normalizedReferralLink;
+              window.location.href = shareUrl;
             }, 100);
             return;
           }
 
-          // Используем прямую ссылку через openTelegramLink или location.href
-          // Прямая ссылка на бота с параметром startapp должна открыть диалог выбора контактов
-          console.log('[GameResultsPage] Открываем диалог выбора контактов через прямую ссылку');
+          // В Telegram Mini App для открытия диалога выбора контактов
+          // нужно использовать openTelegramLink с URL формата t.me/share/url
+          console.log('[GameResultsPage] Открываем диалог выбора контактов через t.me/share/url');
           
           try {
-            // Пробуем использовать openTelegramLink с прямой ссылкой
+            // Используем openTelegramLink с shareUrl - это единственный способ
+            // открыть диалог выбора контактов в Telegram Mini App
             if (typeof tg.openTelegramLink === 'function') {
-              console.log('[GameResultsPage] Используем tg.openTelegramLink с прямой ссылкой');
+              console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl');
+              // Небольшая задержка для плавности
               setTimeout(() => {
-                tg.openTelegramLink(normalizedReferralLink);
+                tg.openTelegramLink(shareUrl);
+                console.log('[GameResultsPage] tg.openTelegramLink вызван');
+              }, 150);
+            } else if (typeof tg.openLink === 'function') {
+              console.log('[GameResultsPage] Используем tg.openLink как fallback');
+              setTimeout(() => {
+                tg.openLink(shareUrl);
               }, 150);
             } else {
               // Fallback на location.href
-              console.log('[GameResultsPage] Используем window.location.href с прямой ссылкой');
+              console.log('[GameResultsPage] Используем window.location.href как fallback');
               setTimeout(() => {
-                window.location.href = normalizedReferralLink;
+                window.location.href = shareUrl;
               }, 150);
             }
           } catch (error) {
-            console.error('[GameResultsPage] Ошибка при открытии прямой ссылки:', error);
+            console.error('[GameResultsPage] Ошибка при открытии диалога:', error);
             // Fallback на location.href при ошибке
             setTimeout(() => {
-              window.location.href = normalizedReferralLink;
+              window.location.href = shareUrl;
             }, 150);
           }
         }}
