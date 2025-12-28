@@ -54,6 +54,22 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               }
             }
             
+            // Получаем referralLink из ответа saveAttempt
+            // referralLink может быть в response.value или response.value.participating
+            const referralLinkData = response.value?.referralLink || response.value?.participating?.referralLink || attemptsData?.referralLink;
+            if (referralLinkData) {
+              setReferralLink(referralLinkData);
+              if (import.meta.env.DEV) {
+                console.log('ReferralLink получен из saveAttempt:', referralLinkData);
+              }
+            } else {
+              // Если referralLink не найден в saveAttempt, пробуем получить из startDraw
+              // Но это должно быть сделано заранее, поэтому просто логируем
+              if (import.meta.env.DEV) {
+                console.warn('ReferralLink не найден в ответе saveAttempt');
+              }
+            }
+            
             // Запрос 2: Запрашиваем место через with-user сразу после сохранения попытки
             if (drawId) {
               try {
@@ -336,18 +352,60 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         onClose={() => setIsModalOpen(false)}
         participatingId={participatingId}
         onInviteFriends={() => {
-          if (referralLink) {
-            const tg = window.Telegram?.WebApp;
-            if (tg?.openTelegramLink) {
-              // Формируем ссылку для шаринга через Telegram
-              const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
+          if (!referralLink) {
+            console.error('[GameResultsPage] referralLink не найден, невозможно открыть список друзей');
+            alert('Ссылка для приглашения друзей недоступна. Попробуйте позже.');
+            setIsModalOpen(false);
+            return;
+          }
+
+          const tg = window.Telegram?.WebApp;
+          
+          if (!tg) {
+            console.warn('[GameResultsPage] Telegram Web App недоступен, используем window.open');
+            const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+            window.open(shareUrl, '_blank');
+            setIsModalOpen(false);
+            return;
+          }
+
+          // Формируем текст для приглашения
+          const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
+          
+          try {
+            // Пробуем использовать shareUrl, если доступен (открывает список друзей)
+            if (typeof tg.shareUrl === 'function') {
+              console.log('[GameResultsPage] Используем tg.shareUrl для открытия списка друзей');
+              tg.shareUrl(referralLink, shareText);
+            } 
+            // Используем openTelegramLink с URL для шаринга (открывает диалог выбора контактов)
+            else if (typeof tg.openTelegramLink === 'function') {
+              console.log('[GameResultsPage] Используем tg.openTelegramLink для открытия списка друзей');
+              // URL формата t.me/share/url открывает диалог выбора контактов в Telegram
               const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
               tg.openTelegramLink(shareUrl);
-            } else {
-              // Fallback для браузера
-              window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('Присоединяйся к игре!')}`, '_blank');
             }
+            // Используем openLink как fallback
+            else if (typeof tg.openLink === 'function') {
+              console.log('[GameResultsPage] Используем tg.openLink для открытия списка друзей');
+              const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+              tg.openLink(shareUrl);
+            }
+            // Последний fallback - открываем в новой вкладке
+            else {
+              console.warn('[GameResultsPage] Telegram Web App методы недоступны, используем window.open');
+              const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+              window.open(shareUrl, '_blank');
+            }
+          } catch (error) {
+            console.error('[GameResultsPage] Ошибка при открытии списка друзей:', error);
+            // Fallback на window.open при ошибке
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+            window.open(shareUrl, '_blank');
           }
+          
+          // Закрываем модальное окно после открытия списка друзей
           setIsModalOpen(false);
         }}
         onAttemptAdded={() => {
