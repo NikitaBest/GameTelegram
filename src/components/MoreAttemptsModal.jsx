@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Film, Loader2 } from 'lucide-react';
+import { Film, Loader2, CheckCircle } from 'lucide-react';
 import { viewAd } from '../api/services/adService';
 import './MoreAttemptsModal.css';
 
-const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, participatingId, onAttemptAdded }) => {
+const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, participatingId, onAttemptAdded, isViewedAds = false }) => {
   const [isLoadingAd, setIsLoadingAd] = useState(false);
   const [adError, setAdError] = useState(null);
   const [adReady, setAdReady] = useState(false);
@@ -132,7 +132,7 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
           <div className="attempt-group">
             <button className="attempt-option invite-friends" onClick={onInviteFriends}>
               <div className="attempt-option-left">
-                <div className="attempt-bonus">+2 попытки</div>
+                <div className="attempt-bonus">+3 попытки</div>
                 <div className="attempt-action">
                   <img src="/fa-solid_user-friends.svg" alt="Друзья" className="attempt-icon" />
                   <span>Пригласить друзей</span>
@@ -147,23 +147,29 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
 
           {/* Посмотреть рекламу */}
           <button 
-            className="attempt-option watch-ad" 
+            className={`attempt-option watch-ad ${isViewedAds ? 'disabled' : ''}`}
             onClick={handleWatchAd}
-            disabled={isLoadingAd}
+            disabled={isLoadingAd || isViewedAds}
           >
             <div className="attempt-option-left">
               <div className="attempt-bonus">+1 попытка</div>
               <div className="attempt-action">
                 {isLoadingAd ? (
                   <Loader2 size={20} className="spinning" />
+                ) : isViewedAds ? (
+                  <CheckCircle size={20} />
                 ) : (
                   <Film size={20} />
                 )}
-                <span>{isLoadingAd ? 'Загрузка...' : 'Посмотреть рекламу'}</span>
+                <span>{isLoadingAd ? 'Загрузка...' : isViewedAds ? 'Бонус получен' : 'Посмотреть рекламу'}</span>
               </div>
             </div>
             <div className="attempt-option-arrow">
-              <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
+              {isViewedAds ? (
+                <CheckCircle size={24} className="check-icon" />
+              ) : (
+                <img src="/material-symbols_arrow-back-rounded.svg" alt="Перейти" />
+              )}
             </div>
           </button>
           

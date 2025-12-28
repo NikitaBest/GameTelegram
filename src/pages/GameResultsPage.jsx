@@ -20,6 +20,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
   const [secondsToEnd, setSecondsToEnd] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [referralLink, setReferralLink] = useState(null);
+  const [isViewedAds, setIsViewedAds] = useState(false); // Флаг просмотра рекламы
   const [isDataLoaded, setIsDataLoaded] = useState(false); // Флаг, что save и with-user выполнены
   const hasSavedRef = useRef(false);
   const { user } = useAuth();
@@ -45,11 +46,23 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               const remaining = maxAttemptsCount - attemptsCount; // Оставшиеся попытки
               setAttemptsLeft(remaining > 0 ? remaining : 0);
               
+              // Получаем isViewedAds из ответа
+              // isViewedAds может быть в response.value.isViewedAds или attemptsData.isViewedAds
+              const isViewedAdsValue = 
+                response.value?.isViewedAds !== undefined 
+                  ? response.value.isViewedAds 
+                  : attemptsData?.isViewedAds !== undefined 
+                    ? attemptsData.isViewedAds 
+                    : false;
+              
+              setIsViewedAds(isViewedAdsValue);
+              
               if (import.meta.env.DEV) {
                 console.log('Данные попыток из saveAttempt:', {
                   attemptsCount, // Растрачено
                   maxAttemptsCount, // Доступно
                   remaining, // Осталось (50 - 23 = 27)
+                  isViewedAds: isViewedAdsValue,
                 });
               }
             }
@@ -373,6 +386,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         participatingId={participatingId}
+        isViewedAds={isViewedAds}
         onInviteFriends={() => {
           console.log('[GameResultsPage] Нажата кнопка "Пригласить друзей"');
           
