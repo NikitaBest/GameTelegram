@@ -403,54 +403,51 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           
           console.log('[GameResultsPage] Нормализованная ссылка:', normalizedReferralLink);
           console.log('[GameResultsPage] ShareUrl для открытия диалога:', shareUrl);
-          console.log('[GameResultsPage] Telegram Web App методы:', {
-            openLink: typeof tg?.openLink,
-            openTelegramLink: typeof tg?.openTelegramLink,
-            shareUrl: typeof tg?.shareUrl,
-          });
           
-          // Закрываем модальное окно асинхронно, чтобы не блокировать открытие диалога
-          setIsModalOpen(false);
+          // КРИТИЧЕСКИ ВАЖНО для Telegram Mini App в продакшене:
+          // openLink должен вызываться СИНХРОННО и НАПРЯМУЮ из обработчика события пользователя
+          // НЕ закрываем модальное окно ПЕРЕД вызовом - это может прервать цепочку событий!
+          // Диалог выбора контактов откроется поверх модального окна, и мы закроем его после
           
-          // ВАЖНО: Вызываем методы синхронно, без задержек
-          // Telegram Web App требует синхронного вызова для корректной работы
-          try {
-            if (tg) {
-              // Метод 1: openLink - основной метод для открытия внешних ссылок в Telegram Web App
-              // Этот метод должен открывать диалог выбора контактов для t.me/share/url
-              if (typeof tg.openLink === 'function') {
-                console.log('[GameResultsPage] Вызываем tg.openLink с shareUrl');
-                tg.openLink(shareUrl);
-                return;
-              }
-              
-              // Метод 2: openTelegramLink - альтернативный метод для Telegram ссылок
-              if (typeof tg.openTelegramLink === 'function') {
-                console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl');
-                tg.openTelegramLink(shareUrl);
-                return;
-              }
-            }
+          // ВАЖНО: Вызываем openLink СИНХРОННО, БЕЗ закрытия модального окна
+          // Это гарантирует, что вызов происходит в том же стеке вызовов, что и событие клика
+          if (tg && typeof tg.openLink === 'function') {
+            console.log('[GameResultsPage] Вызываем tg.openLink с shareUrl (синхронно, БЕЗ закрытия модального окна)');
+            // Прямой вызов без оберток для максимальной надежности в продакшене
+            tg.openLink(shareUrl);
             
-            // Метод 3: Прямое открытие через location.href (fallback)
-            // Используем небольшую задержку только для fallback, чтобы модальное окно успело закрыться
-            console.log('[GameResultsPage] Используем window.location.href как fallback');
+            // Закрываем модальное окно ПОСЛЕ успешного вызова openLink
+            // Используем небольшую задержку, чтобы дать Telegram время открыть диалог
             setTimeout(() => {
-              window.location.href = shareUrl;
-            }, 100);
-            
-          } catch (error) {
-            console.error('[GameResultsPage] Ошибка при открытии диалога:', error);
-            // Последний fallback
-            try {
-              setTimeout(() => {
-                window.location.href = shareUrl;
-              }, 100);
-            } catch (fallbackError) {
-              console.error('[GameResultsPage] Не удалось открыть ссылку:', fallbackError);
-              alert('Не удалось открыть диалог выбора контактов. Попробуйте позже.');
-            }
+              setIsModalOpen(false);
+            }, 300);
+            return;
           }
+          
+          // Fallback: если openLink недоступен, пробуем openTelegramLink
+          if (tg && typeof tg.openTelegramLink === 'function') {
+            console.log('[GameResultsPage] Вызываем tg.openTelegramLink с shareUrl (синхронно)');
+            try {
+              tg.openTelegramLink(shareUrl);
+              // Закрываем модальное окно после вызова
+              setTimeout(() => {
+                setIsModalOpen(false);
+              }, 300);
+            } catch (err) {
+              console.error('[GameResultsPage] Ошибка в tg.openTelegramLink:', err);
+              // При ошибке закрываем модальное окно сразу
+              setIsModalOpen(false);
+            }
+            return;
+          }
+          
+          // Последний fallback: используем location.href
+          // В этом случае закрываем модальное окно перед переходом
+          console.log('[GameResultsPage] Используем window.location.href как fallback');
+          setIsModalOpen(false);
+          setTimeout(() => {
+            window.location.href = shareUrl;
+          }, 100);
         }}
         onAttemptAdded={() => {
           // Обновляем количество попыток после успешного просмотра рекламы
