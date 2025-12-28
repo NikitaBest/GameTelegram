@@ -8,13 +8,15 @@ import { Target, Hand, Sparkles } from 'lucide-react';
 import { GAME_WIDTH, GAME_HEIGHT, SHIP_WIDTH, SHIP_HEIGHT } from '../../lib/game-types';
 import { getStableViewportHeight, isTelegramWebApp } from '../../lib/telegram';
 import { VisualEffects } from './VisualEffects';
+import { Game } from '../../api/services/drawService';
 import './GameContainer.css';
 
 interface GameContainerProps {
   onGameOver?: (score: number) => void;
+  gameData?: Game | null;
 }
 
-export function GameContainer({ onGameOver }: GameContainerProps) {
+export function GameContainer({ onGameOver, gameData }: GameContainerProps) {
   const {
     gameState,
     playerX,
@@ -32,8 +34,8 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
   const dragStartPlayerRef = useRef<{ x: number; y: number } | null>(null);
   const gameOverHandledRef = useRef(false);
 
-  // Правила игры
-  const gameRules: GameRule[] = [
+  // Правила игры (используются только если нет данных из бекенда)
+  const gameRules: GameRule[] | undefined = gameData ? undefined : [
     {
       icon: <Target className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
       text: 'Лови звезды для получения очков!'
@@ -326,7 +328,7 @@ export function GameContainer({ onGameOver }: GameContainerProps) {
 
               {/* Screens */}
               {gameState.showRules && !gameState.isPlaying && !gameState.isGameOver && (
-                <GameRulesScreen rules={gameRules} onStart={startGame} />
+                <GameRulesScreen rules={gameRules} gameData={gameData} onStart={startGame} />
               )}
             </div>
           </div>

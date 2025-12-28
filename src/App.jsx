@@ -80,6 +80,7 @@ function App() {
   // ВРЕМЕННО для тестирования: в DEV режиме используем gameId = 12 (Ball and Wall)
   // В продакшене должно быть: useState(null)
   const [gameId, setGameId] = useState(import.meta.env.DEV ? 12 : null); // ID игры из бекенда
+  const [gameData, setGameData] = useState(null); // Данные игры (правила) из бекенда
   const [isAppReady, setIsAppReady] = useState(false); // Флаг готовности приложения
   
   // Авторизация
@@ -262,12 +263,17 @@ function App() {
               }
               setGameId(id);
             }}
+            onGameDataReceived={(game) => {
+              console.log('[App] Данные игры получены:', game);
+              setGameData(game);
+            }}
           />
         )}
         {currentPage === 'game' && (
           <GameRouter 
             key={gameKey} // Пересоздаём компонент при каждом переходе на игру
             gameId={gameId}
+            gameData={gameData}
             onGameOver={(score) => {
               console.log('[App] Игра завершена с очками:', score);
               setGameScore(score);

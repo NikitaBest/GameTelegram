@@ -1,9 +1,11 @@
 import { GameContainer as CosmosGame } from './game cosmos/GameContainer';
 import { FlappyBirdGame } from './flappy-bird/FlappyBirdGame';
 import { BallAndWallGame } from './ball and wall/MyNewGame';
+import { Game } from '../api/services/drawService';
 
 interface GameRouterProps {
   gameId: number | null;
+  gameData: Game | null;
   onGameOver: (score: number) => void;
 }
 
@@ -20,7 +22,7 @@ interface GameRouterProps {
  * 2. Добавьте case в switch ниже
  * 3. Убедитесь, что игра принимает onGameOver(score: number)
  */
-export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
+export function GameRouter({ gameId, gameData, onGameOver }: GameRouterProps) {
   // Если gameId не указан, используем Ball and Wall по умолчанию
   const selectedGameId = gameId || 12;
 
@@ -28,26 +30,27 @@ export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
   console.log('[GameRouter] Выбор игры:', {
     gameId,
     selectedGameId,
+    gameData,
     willUseGame: selectedGameId === 11 ? 'Cosmos' : selectedGameId === 12 ? 'Ball and Wall' : selectedGameId === 13 ? 'Flappy Bird' : 'Unknown'
   });
 
   switch (selectedGameId) {
     case 11:
       // Космическая игра
-      return <CosmosGame onGameOver={onGameOver} />;
+      return <CosmosGame gameData={gameData} onGameOver={onGameOver} />;
     
     case 12:
       // Ball and Wall (игра по умолчанию)
-      return <BallAndWallGame onGameOver={onGameOver} />;
+      return <BallAndWallGame gameData={gameData} onGameOver={onGameOver} />;
     
     case 13:
       // Flappy Bird
-      return <FlappyBirdGame onGameOver={onGameOver} />;
+      return <FlappyBirdGame gameData={gameData} onGameOver={onGameOver} />;
     
     default:
       // Fallback на Ball and Wall
       console.warn(`Неизвестный gameId: ${gameId}, используем игру по умолчанию (Ball and Wall)`);
-      return <BallAndWallGame onGameOver={onGameOver} />;
+      return <BallAndWallGame gameData={gameData} onGameOver={onGameOver} />;
   }
 }
 

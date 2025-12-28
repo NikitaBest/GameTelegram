@@ -1,5 +1,6 @@
-import { ReactNode } from 'react';
-import { Hand } from 'lucide-react';
+import { ReactNode, useMemo } from 'react';
+import { Hand, Target, AlertTriangle } from 'lucide-react';
+import type { Game } from '../api/services/drawService';
 
 export interface GameRule {
   icon: ReactNode; // React компонент иконки или img элемент
@@ -7,7 +8,8 @@ export interface GameRule {
 }
 
 interface GameRulesScreenProps {
-  rules: GameRule[];
+  rules?: GameRule[]; // Правила в формате компонента (опционально, для обратной совместимости)
+  gameData?: Game | null; // Данные игры из бекенда (опционально)
   onStart: () => void;
   startButtonType?: 'button' | 'text'; // Тип кнопки: кнопка или текст внизу
   startButtonIcon?: ReactNode; // Опциональная иконка для кнопки
@@ -15,11 +17,54 @@ interface GameRulesScreenProps {
 
 export function GameRulesScreen({ 
   rules, 
+  gameData,
   onStart, 
   startButtonType = 'button',
   startButtonIcon 
 }: GameRulesScreenProps) {
   const defaultStartIcon = startButtonIcon || <Hand className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />;
+
+  // Преобразуем правила из бекенда в формат GameRule[]
+  const processedRules = useMemo(() => {
+    // Если есть правила в формате компонента - используем их
+    if (rules && rules.length > 0) {
+      return rules;
+    }
+
+    // Если есть данные игры из бекенда - преобразуем их в правила
+    if (gameData) {
+      const backendRules: GameRule[] = [];
+
+      // Правила игры (rules)
+      if (gameData.rules) {
+        backendRules.push({
+          icon: <Target className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+          text: gameData.rules
+        });
+      }
+
+      // Описание управления (gameControlDescription)
+      if (gameData.gameControlDescription) {
+        backendRules.push({
+          icon: <Hand className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+          text: gameData.gameControlDescription
+        });
+      }
+
+      // Условия получения очков (pointConditionDescription)
+      if (gameData.pointConditionDescription) {
+        backendRules.push({
+          icon: <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
+          text: gameData.pointConditionDescription
+        });
+      }
+
+      return backendRules;
+    }
+
+    // Если ничего нет - возвращаем пустой массив
+    return [];
+  }, [rules, gameData]);
 
   return (
     <div 
@@ -47,7 +92,7 @@ export function GameRulesScreen({
 
         {/* Список правил */}
         <div className="space-y-4">
-          {rules.map((rule, index) => (
+          {processedRules.map((rule, index) => (
             <div key={index} className="flex items-start gap-3">
               <div className="flex-shrink-0 mt-0.5">
                 {rule.icon}

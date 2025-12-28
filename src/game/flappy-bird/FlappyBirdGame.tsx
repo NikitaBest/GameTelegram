@@ -2,10 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameRulesScreen, GameRule } from '../GameRulesScreen';
 import { Hand, Target, AlertTriangle } from 'lucide-react';
 import { soundManager } from '../../utils/soundManager';
+import { Game } from '../../api/services/drawService';
 import './FlappyBirdGame.css';
 
 interface FlappyBirdGameProps {
   onGameOver: (score: number) => void;
+  gameData?: Game | null;
 }
 
 // Константы игры
@@ -49,7 +51,7 @@ interface Cloud {
   size: number; // Размер облака (в процентах от высоты экрана)
 }
 
-export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
+export function FlappyBirdGame({ onGameOver, gameData }: FlappyBirdGameProps) {
   console.log('[FlappyBirdGame] Компонент монтирован');
   
   const [bird, setBird] = useState<Bird>({
@@ -65,8 +67,8 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
   const [isGameOver, setIsGameOver] = useState(false);
   const [showRules, setShowRules] = useState(true);
 
-  // Правила игры
-  const gameRules: GameRule[] = [
+  // Правила игры (используются только если нет данных из бекенда)
+  const gameRules: GameRule[] | undefined = gameData ? undefined : [
     {
       icon: <Hand className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />,
       text: 'Тапай по экрану, чтобы птица прыгала'
@@ -545,7 +547,7 @@ export function FlappyBirdGame({ onGameOver }: FlappyBirdGameProps) {
 
           {/* Экран правил */}
           {showRules && (
-            <GameRulesScreen rules={gameRules} onStart={startGame} />
+            <GameRulesScreen rules={gameRules} gameData={gameData} onStart={startGame} />
           )}
         </div>
       </div>

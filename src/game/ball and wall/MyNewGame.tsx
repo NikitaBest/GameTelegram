@@ -3,12 +3,14 @@ import { GameRulesScreen, GameRule } from "../GameRulesScreen";
 import { Target, AlertTriangle } from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
 import { soundManager } from "../../utils/soundManager";
+import { Game } from "../../api/services/drawService";
 import "./MyNewGame.css";
 
 const tapIcon = '/hugeicons_tap-01.svg';
 
 interface BallAndWallGameProps {
   onGameOver: (score: number) => void;
+  gameData?: Game | null;
 }
 
 // --- Game Constants & Types ---
@@ -78,7 +80,7 @@ interface Particle {
   color: string;
 }
 
-export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
+export function BallAndWallGame({ onGameOver, gameData }: BallAndWallGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number | undefined>(undefined);
@@ -91,8 +93,8 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
   const [bgColor, setBgColor] = useState(BG_COLORS[0]);
   const [isDestroying, setIsDestroying] = useState(false); // Состояние для отслеживания разрушения
 
-  // Правила игры
-  const gameRules: GameRule[] = [
+  // Правила игры (используются только если нет данных из бекенда)
+  const gameRules: GameRule[] | undefined = gameData ? undefined : [
     {
       icon: <img src={tapIcon} alt="tap" className="w-5 h-5 md:w-6 md:h-6" />,
       text: 'Тапай по экрану, чтобы мяч прыгал'
@@ -1022,6 +1024,7 @@ export function BallAndWallGame({ onGameOver }: BallAndWallGameProps) {
         {showRules && (
           <GameRulesScreen 
             rules={gameRules}
+            gameData={gameData}
             onStart={() => {
               setShowRules(false);
               initGame();
