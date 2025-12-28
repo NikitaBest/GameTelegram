@@ -132,7 +132,7 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
           <div className="attempt-group">
             <button className="attempt-option invite-friends" onClick={onInviteFriends}>
               <div className="attempt-option-left">
-                <div className="attempt-bonus">+3 попытки</div>
+                <div className="attempt-bonus">+2 попытки</div>
                 <div className="attempt-action">
                   <img src="/fa-solid_user-friends.svg" alt="Друзья" className="attempt-icon" />
                   <span>Пригласить друзей</span>
