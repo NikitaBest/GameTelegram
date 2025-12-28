@@ -203,7 +203,7 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
             },
             prizes: prizes,
             starsForParticipants: {
-              minAmount: Math.floor(draw.starsDistributionAmount) || 10,
+              minAmount: 10, // Статичное значение, не берем с бекенда
               description: 'Всем участникам звёзды',
               note: 'Чем выше место тем больше звёзд!',
               iconCount: 2,
