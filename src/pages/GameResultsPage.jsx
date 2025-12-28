@@ -385,11 +385,9 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
 
           const tg = window.Telegram?.WebApp;
           
-          // Формируем текст для приглашения
-          const shareText = 'Присоединяйся к игре и выиграй призы! 🎮';
-          
           // referralLink должен быть в формате: http://t.me/chest_of_goldbot/game?startapp=84
-          console.log('[GameResultsPage] ReferralLink для отправки:', referralLink);
+          // Используем прямую ссылку без обертки в t.me/share/url
+          console.log('[GameResultsPage] ReferralLink для отправки (прямая ссылка):', referralLink);
           
           // Нормализуем referralLink - убеждаемся, что он в правильном формате
           let normalizedReferralLink = referralLink;
@@ -397,10 +395,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             normalizedReferralLink = `https://${referralLink}`;
           }
           
-          // Формируем URL для шаринга - используем формат t.me/share/url
-          // Это откроет диалог выбора контактов в Telegram
-          const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(normalizedReferralLink)}&text=${encodeURIComponent(shareText)}`;
-          console.log('[GameResultsPage] Сформированный shareUrl:', shareUrl);
+          console.log('[GameResultsPage] Нормализованная ссылка:', normalizedReferralLink);
           
           // Закрываем модальное окно перед открытием диалога (чтобы не мешать)
           setIsModalOpen(false);
@@ -409,19 +404,36 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             console.warn('[GameResultsPage] Telegram Web App недоступен, используем window.location.href');
             // Используем небольшую задержку для плавности
             setTimeout(() => {
-              window.location.href = shareUrl;
+              window.location.href = normalizedReferralLink;
             }, 100);
             return;
           }
 
-          // На мобильных устройствах location.href работает надежнее, чем openTelegramLink
-          // Используем location.href как основной метод для максимальной совместимости
-          console.log('[GameResultsPage] Открываем диалог выбора контактов через location.href');
+          // Используем прямую ссылку через openTelegramLink или location.href
+          // Прямая ссылка на бота с параметром startapp должна открыть диалог выбора контактов
+          console.log('[GameResultsPage] Открываем диалог выбора контактов через прямую ссылку');
           
-          // Небольшая задержка для плавности закрытия модального окна
-          setTimeout(() => {
-            window.location.href = shareUrl;
-          }, 150);
+          try {
+            // Пробуем использовать openTelegramLink с прямой ссылкой
+            if (typeof tg.openTelegramLink === 'function') {
+              console.log('[GameResultsPage] Используем tg.openTelegramLink с прямой ссылкой');
+              setTimeout(() => {
+                tg.openTelegramLink(normalizedReferralLink);
+              }, 150);
+            } else {
+              // Fallback на location.href
+              console.log('[GameResultsPage] Используем window.location.href с прямой ссылкой');
+              setTimeout(() => {
+                window.location.href = normalizedReferralLink;
+              }, 150);
+            }
+          } catch (error) {
+            console.error('[GameResultsPage] Ошибка при открытии прямой ссылки:', error);
+            // Fallback на location.href при ошибке
+            setTimeout(() => {
+              window.location.href = normalizedReferralLink;
+            }, 150);
+          }
         }}
         onAttemptAdded={() => {
           // Обновляем количество попыток после успешного просмотра рекламы
