@@ -37,8 +37,33 @@ const BalanceModal = ({ isOpen, onClose, balance = 0, minWithdraw = 15 }) => {
             disabled={!canWithdraw}
             onClick={() => {
               if (canWithdraw) {
-                // TODO: Логика вывода
-                console.log('Вывод средств');
+                const withdrawUrl = 'https://t.me/chest_of_goldbot?start=stars';
+                const tg = window.Telegram?.WebApp;
+                
+                console.log('[BalanceModal] Открываем ссылку вывода:', withdrawUrl);
+                
+                // Используем openTelegramLink для открытия напрямую в Telegram
+                if (tg && typeof tg.openTelegramLink === 'function') {
+                  console.log('[BalanceModal] Вызываем tg.openTelegramLink');
+                  tg.openTelegramLink(withdrawUrl);
+                  // Закрываем модальное окно после открытия ссылки
+                  setTimeout(() => {
+                    onClose();
+                  }, 300);
+                } else if (tg && typeof tg.openLink === 'function') {
+                  console.log('[BalanceModal] Вызываем tg.openLink');
+                  tg.openLink(withdrawUrl);
+                  setTimeout(() => {
+                    onClose();
+                  }, 300);
+                } else {
+                  // Fallback: открываем через location.href
+                  console.log('[BalanceModal] Используем window.location.href');
+                  onClose();
+                  setTimeout(() => {
+                    window.location.href = withdrawUrl;
+                  }, 100);
+                }
               }
             }}
           >
