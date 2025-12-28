@@ -11,9 +11,9 @@ interface GameRouterProps {
  * Роутер для выбора игры на основе gameId из бекенда
  * 
  * Игры:
- * - gameId: 1 - Космическая игра (game cosmos)
- * - gameId: 2 - Ball and Wall (ball and wall, игра по умолчанию)
- * - gameId: 3 - Flappy Bird
+ * - gameId: 11 - Космическая игра (game cosmos)
+ * - gameId: 12 - Ball and Wall (ball and wall, игра по умолчанию)
+ * - gameId: 13 - Flappy Bird
  * 
  * Для добавления новой игры:
  * 1. Создайте папку с игрой в src/game/
@@ -22,25 +22,25 @@ interface GameRouterProps {
  */
 export function GameRouter({ gameId, onGameOver }: GameRouterProps) {
   // Если gameId не указан, используем Ball and Wall по умолчанию
-  const selectedGameId = gameId || 2;
+  const selectedGameId = gameId || 12;
 
   // Отладка
   console.log('[GameRouter] Выбор игры:', {
     gameId,
     selectedGameId,
-    willUseGame: selectedGameId === 1 ? 'Cosmos' : selectedGameId === 2 ? 'Ball and Wall' : selectedGameId === 3 ? 'Flappy Bird' : 'Unknown'
+    willUseGame: selectedGameId === 11 ? 'Cosmos' : selectedGameId === 12 ? 'Ball and Wall' : selectedGameId === 13 ? 'Flappy Bird' : 'Unknown'
   });
 
   switch (selectedGameId) {
-    case 1:
+    case 11:
       // Космическая игра
       return <CosmosGame onGameOver={onGameOver} />;
     
-    case 2:
+    case 12:
       // Ball and Wall (игра по умолчанию)
       return <BallAndWallGame onGameOver={onGameOver} />;
     
-    case 3:
+    case 13:
       // Flappy Bird
       return <FlappyBirdGame onGameOver={onGameOver} />;
     
