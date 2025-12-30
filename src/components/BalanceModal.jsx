@@ -3,7 +3,9 @@ import './BalanceModal.css';
 const BalanceModal = ({ isOpen, onClose, balance = 0, minWithdraw = 15 }) => {
   if (!isOpen) return null;
 
+  // Рассчитываем оставшуюся сумму до вывода и округляем до 2 знаков после запятой
   const remaining = Math.max(0, minWithdraw - balance);
+  const remainingRounded = Math.round(remaining * 100) / 100; // Округляем до 2 знаков после запятой
   const canWithdraw = balance >= minWithdraw;
 
   return (
@@ -24,7 +26,7 @@ const BalanceModal = ({ isOpen, onClose, balance = 0, minWithdraw = 15 }) => {
           <div className="balance-modal-info">
             <div className="balance-modal-remaining">
               <span>До вывода:</span>
-              <span className="remaining-amount">{remaining}</span>
+              <span className="remaining-amount">{remainingRounded.toFixed(2)}</span>
               <img src="/cupleader-1.svg" alt="Звезда" className="balance-star-small" />
             </div>
             <p className="balance-modal-hint">
