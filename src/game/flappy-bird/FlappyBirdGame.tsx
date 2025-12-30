@@ -18,6 +18,11 @@ const GAME_HEIGHT = 600;
 const BIRD_SIZE = 40;
 const BIRD_START_X = 100;
 const BIRD_START_Y = 250;
+// Область столкновения - используем меньший размер для более строгой проверки
+// Птица должна реально зайти в трубу, а не просто коснуться её краем
+// Уменьшенная область дает запас сверху и снизу для более справедливой игры
+const COLLISION_SIZE = BIRD_SIZE * 0.5; // 50% от размера птицы (20px вместо 40px) - очень строгая проверка
+const COLLISION_OFFSET = (BIRD_SIZE - COLLISION_SIZE) / 2; // Смещение для центрирования области столкновения (10px сверху и снизу)
 // Физика игры - более отзывчивая и менее плавная:
 const GRAVITY = 0.35; // Гравитация для падения
 const JUMP_STRENGTH = -6.5; // Сила прыжка для быстрого подъема
@@ -263,20 +268,30 @@ export function FlappyBirdGame({ onGameOver, gameData }: FlappyBirdGameProps) {
     setClouds(initialClouds);
   }, []);
 
-  // Проверка столкновений
+  // Проверка столкновений (более строгая - птица должна реально зайти в трубу)
   const checkCollision = useCallback((bird: Bird, pipes: Pipe[]): boolean => {
-    // Столкновение с верхом/низом
-    if (bird.y < 0 || bird.y + BIRD_SIZE > GAME_HEIGHT) {
+    // Вычисляем координаты области столкновения (центрированной относительно птицы)
+    const collisionX = bird.x + COLLISION_OFFSET;
+    const collisionY = bird.y + COLLISION_OFFSET;
+    const collisionRight = collisionX + COLLISION_SIZE;
+    const collisionBottom = collisionY + COLLISION_SIZE;
+    
+    // Столкновение с верхом/низом (используем область столкновения)
+    if (collisionY < 0 || collisionBottom > GAME_HEIGHT) {
       return true;
     }
 
-    // Столкновение с трубами
+    // Столкновение с трубами (более строгая проверка)
     for (const pipe of pipes) {
+      // Проверяем, пересекается ли область столкновения с трубой
+      // Птица должна реально зайти в трубу, а не просто коснуться её краем
       if (
-        bird.x + BIRD_SIZE > pipe.x &&
-        bird.x < pipe.x + PIPE_WIDTH
+        collisionRight > pipe.x &&
+        collisionX < pipe.x + PIPE_WIDTH
       ) {
-        if (bird.y < pipe.topHeight || bird.y + BIRD_SIZE > pipe.bottomY) {
+        // Проверяем, находится ли область столкновения внутри трубы
+        // (выше верхней трубы или ниже нижней трубы)
+        if (collisionY < pipe.topHeight || collisionBottom > pipe.bottomY) {
           return true;
         }
       }
