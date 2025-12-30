@@ -16,6 +16,14 @@ export interface SaveAttemptResponse {
   error: string | null;
 }
 
+export interface CheckChannelSubscriptionBoostResponse {
+  value: {
+    subscribed: boolean;
+  } | null;
+  isSuccess: boolean;
+  error: string | null;
+}
+
 /**
  * Генерация хеша для защиты от подделки запроса
  */
@@ -93,5 +101,33 @@ function getPointsWord(points: number): string {
   }
   
   return 'очков';
+}
+
+/**
+ * Проверка подписки на канал для получения бонуса
+ */
+export async function checkChannelSubscriptionBoost(
+  participatingId: number
+): Promise<CheckChannelSubscriptionBoostResponse> {
+  if (!participatingId) {
+    throw new Error('participatingId обязателен');
+  }
+
+  try {
+    const response = await apiClient.post<CheckChannelSubscriptionBoostResponse>(
+      '/attempt/check-channel-subscription-boost',
+      { participatingId: String(participatingId) }
+    );
+    
+    // @ts-expect-error - Vite добавляет env в import.meta
+    if (import.meta.env.DEV) {
+      console.log('Результат проверки подписки на канал:', response);
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Ошибка при проверке подписки на канал:', error);
+    throw error;
+  }
 }
 

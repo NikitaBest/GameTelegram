@@ -1,11 +1,16 @@
 import './ChannelSubscriptionModal.css';
 
-const ChannelSubscriptionModal = ({ isOpen, onClose }) => {
+const ChannelSubscriptionModal = ({ isOpen, onClose, onSubscribeClick }) => {
   if (!isOpen) return null;
 
   const channelUrl = 'https://t.me/+OTBc8GHHdroyNjIy';
 
   const handleSubscribe = () => {
+    // Вызываем callback, что пользователь нажал на кнопку подписки
+    if (onSubscribeClick) {
+      onSubscribeClick();
+    }
+    
     const tg = window.Telegram?.WebApp;
     
     console.log('[ChannelSubscriptionModal] Открываем ссылку на канал:', channelUrl);

@@ -4,7 +4,7 @@ import Leaderboard from '../components/Leaderboard';
 import MoreAttemptsModal from '../components/MoreAttemptsModal';
 import ChannelSubscriptionModal from '../components/ChannelSubscriptionModal';
 import { useAuth } from '../hooks/useAuth';
-import { saveAttempt } from '../api/services/attemptService';
+import { saveAttempt, checkChannelSubscriptionBoost } from '../api/services/attemptService';
 import { getLeaderboard, getUserRank } from '../api/services/leaderboardService';
 import { startDraw } from '../api/services/drawService';
 import '../styles/gradient-text.css';
@@ -28,6 +28,9 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
   const [channelSubscriptionBoosted, setChannelSubscriptionBoosted] = useState(null); // Флаг подписки на канал из ответа
   const hasSavedRef = useRef(false);
   const channelSubscriptionModalShownRef = useRef(false); // Флаг, что модальное окно уже было показано
+  const userClickedSubscribeRef = useRef(false); // Флаг, что пользователь нажал на кнопку подписки
+  const subscriptionCheckedRef = useRef(false); // Флаг, что проверка подписки уже была выполнена
+  const wasHiddenRef = useRef(false); // Флаг, что страница была скрыта
   const { user } = useAuth();
 
   // Запрос 1: Сохраняем попытку и получаем participating, отображаем сколько попыток осталось
@@ -292,6 +295,98 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
     checkChannelSubscription();
   }, [drawId, isDataLoaded]);
 
+  // Проверка подписки на канал при возврате пользователя в приложение
+  useEffect(() => {
+    // Проверяем только если пользователь нажал на кнопку подписки
+    if (!userClickedSubscribeRef.current) {
+      return;
+    }
+
+    if (!participatingId || !score) {
+      return;
+    }
+
+    const handleVisibilityChange = async () => {
+      // Отслеживаем, когда страница становится скрытой
+      if (document.visibilityState === 'hidden') {
+        wasHiddenRef.current = true;
+        console.log('[GameResultsPage] Страница скрыта, пользователь ушел');
+        return;
+      }
+
+      // Проверяем, когда пользователь возвращается в приложение (вкладка становится видимой)
+      // И только если страница была скрыта и проверка еще не выполнена
+      if (document.visibilityState === 'visible' && wasHiddenRef.current && !subscriptionCheckedRef.current) {
+        console.log('[GameResultsPage] Пользователь вернулся в приложение, проверяем подписку на канал');
+        
+        // Небольшая задержка, чтобы дать время приложению полностью загрузиться
+        setTimeout(async () => {
+          try {
+            subscriptionCheckedRef.current = true; // Помечаем, что проверка началась
+            
+            const checkResponse = await checkChannelSubscriptionBoost(participatingId);
+            
+            console.log('[GameResultsPage] Результат проверки подписки:', checkResponse);
+            
+            if (checkResponse.isSuccess && checkResponse.value?.subscribed === true) {
+              console.log('[GameResultsPage] ✅ Пользователь подписался на канал! Обновляем счет.');
+              
+              // Увеличиваем счет на 15%
+              const increasedScore = score * 1.15;
+              
+              // Округляем до верхнего десятка
+              const roundedScore = Math.ceil(increasedScore / 10) * 10;
+              
+              console.log('[GameResultsPage] Исходный счет:', score);
+              console.log('[GameResultsPage] Увеличенный на 15%:', increasedScore);
+              console.log('[GameResultsPage] Округленный до верхнего десятка:', roundedScore);
+              
+              // Сохраняем обновленный счет
+              try {
+                const saveResponse = await saveAttempt(participatingId, roundedScore);
+                
+                if (saveResponse.isSuccess) {
+                  console.log('[GameResultsPage] ✅ Счет успешно обновлен после подписки на канал');
+                  // Можно обновить отображаемый счет, если нужно
+                  // Но обычно это делается через обновление страницы или перезагрузку данных
+                } else {
+                  console.error('[GameResultsPage] Ошибка при сохранении обновленного счета:', saveResponse.error);
+                }
+              } catch (saveErr) {
+                console.error('[GameResultsPage] Ошибка при сохранении обновленного счета:', saveErr);
+              }
+            } else {
+              console.log('[GameResultsPage] Пользователь еще не подписался на канал');
+              subscriptionCheckedRef.current = false; // Разрешаем повторную проверку
+              wasHiddenRef.current = false; // Сбрасываем флаг
+            }
+          } catch (err) {
+            console.error('[GameResultsPage] Ошибка при проверке подписки на канал:', err);
+            subscriptionCheckedRef.current = false; // Разрешаем повторную проверку при ошибке
+            wasHiddenRef.current = false; // Сбрасываем флаг
+          }
+        }, 1000); // Задержка 1 секунда перед проверкой
+      }
+    };
+
+    // Отслеживаем изменение видимости страницы
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Также отслеживаем фокус окна (на случай, если пользователь вернулся через переключение вкладок)
+    const handleFocus = () => {
+      if (wasHiddenRef.current && !subscriptionCheckedRef.current) {
+        handleVisibilityChange();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [participatingId, score]);
+
   // Таймер обратного отсчёта
   useEffect(() => {
     if (secondsToEnd <= 0) return;
@@ -513,6 +608,11 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
       <ChannelSubscriptionModal
         isOpen={isChannelSubscriptionModalOpen}
         onClose={() => setIsChannelSubscriptionModalOpen(false)}
+        onSubscribeClick={() => {
+          // Помечаем, что пользователь нажал на кнопку подписки
+          userClickedSubscribeRef.current = true;
+          console.log('[GameResultsPage] Пользователь нажал на кнопку подписки на канал');
+        }}
       />
 
       {/* Модальное окно для получения попыток */}
