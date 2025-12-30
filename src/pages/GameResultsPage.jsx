@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { RotateCcw, Clock, Bot } from 'lucide-react';
 import Leaderboard from '../components/Leaderboard';
 import MoreAttemptsModal from '../components/MoreAttemptsModal';
+import ChannelSubscriptionModal from '../components/ChannelSubscriptionModal';
 import { useAuth } from '../hooks/useAuth';
 import { saveAttempt } from '../api/services/attemptService';
 import { getLeaderboard, getUserRank } from '../api/services/leaderboardService';
@@ -20,10 +21,13 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
   const [attemptsLeft, setAttemptsLeft] = useState(0);
   const [secondsToEnd, setSecondsToEnd] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChannelSubscriptionModalOpen, setIsChannelSubscriptionModalOpen] = useState(false);
   const [referralLink, setReferralLink] = useState(null);
   const [isViewedAds, setIsViewedAds] = useState(false); // Флаг просмотра рекламы
   const [isDataLoaded, setIsDataLoaded] = useState(false); // Флаг, что save и with-user выполнены
+  const [channelSubscriptionBoosted, setChannelSubscriptionBoosted] = useState(null); // Флаг подписки на канал из ответа
   const hasSavedRef = useRef(false);
+  const channelSubscriptionModalShownRef = useRef(false); // Флаг, что модальное окно уже было показано
   const { user } = useAuth();
 
   // Запрос 1: Сохраняем попытку и получаем participating, отображаем сколько попыток осталось
@@ -41,10 +45,14 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             // Отображаем количество попыток из ответа saveAttempt
             // Попытки могут быть в response.value или response.value.participating
             const attemptsData = response.value?.participating || response.value;
+            let attemptsCount = 0;
+            let maxAttemptsCount = 0;
+            let remaining = 0;
+            
             if (attemptsData) {
-              const attemptsCount = attemptsData.attemptsCount || 0; // Растрачено попыток
-              const maxAttemptsCount = attemptsData.maxAttemptsCount || 0; // Доступно попыток
-              const remaining = maxAttemptsCount - attemptsCount; // Оставшиеся попытки
+              attemptsCount = attemptsData.attemptsCount || 0; // Растрачено попыток
+              maxAttemptsCount = attemptsData.maxAttemptsCount || 0; // Доступно попыток
+              remaining = maxAttemptsCount - attemptsCount; // Оставшиеся попытки
               setAttemptsLeft(remaining > 0 ? remaining : 0);
               
               // Получаем isViewedAds из ответа
@@ -214,6 +222,75 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
 
   // Запрос 3: top-list используется только для отображения рейтинга в компоненте Leaderboard
   // Все данные (попытки, время, referralLink) получаем из saveAttempt
+
+  // Запрос 4: Получаем channelSubscriptionBoosted из /participating/start для проверки условий показа модального окна
+  useEffect(() => {
+    if (!drawId || !isDataLoaded) {
+      console.log('[GameResultsPage] Пропускаем проверку channelSubscriptionBoosted:', { drawId, isDataLoaded });
+      return; // Ждем, пока save завершится
+    }
+    
+    const checkChannelSubscription = async () => {
+      try {
+        console.log('[GameResultsPage] Запрашиваем startDraw для получения channelSubscriptionBoosted, drawId:', drawId);
+        const drawResponse = await startDraw(drawId);
+        
+        console.log('[GameResultsPage] Ответ startDraw:', {
+          isSuccess: drawResponse.isSuccess,
+          hasValue: !!drawResponse.value,
+          valueKeys: drawResponse.value ? Object.keys(drawResponse.value) : [],
+          hasUser: !!drawResponse.value?.user,
+          userKeys: drawResponse.value?.user ? Object.keys(drawResponse.value.user) : [],
+          channelSubscriptionBoosted: drawResponse.value?.user?.channelSubscriptionBoosted,
+          channelSubscriptionBoostedType: typeof drawResponse.value?.user?.channelSubscriptionBoosted,
+        });
+        
+        if (drawResponse.isSuccess && drawResponse.value) {
+          // channelSubscriptionBoosted находится в объекте user
+          const channelSubscriptionBoostedData = drawResponse.value.user?.channelSubscriptionBoosted;
+          
+          console.log('[GameResultsPage] channelSubscriptionBoosted получен из startDraw:', {
+            value: channelSubscriptionBoostedData,
+            type: typeof channelSubscriptionBoostedData,
+            isFalse: channelSubscriptionBoostedData === false,
+            isStrictlyFalse: channelSubscriptionBoostedData === false && typeof channelSubscriptionBoostedData === 'boolean',
+          });
+          
+          setChannelSubscriptionBoosted(channelSubscriptionBoostedData);
+          
+          // Проверяем условия для показа модального окна подписки на канал
+          // Показываем модальное окно только если channelSubscriptionBoosted === false
+          // Используем строгую проверку на false (boolean)
+          // И проверяем, что модальное окно еще не было показано
+          if (channelSubscriptionBoostedData === false && !channelSubscriptionModalShownRef.current) {
+            console.log('[GameResultsPage] ✅ Условия для показа модального окна подписки на канал выполнены! Показываем модальное окно.');
+            channelSubscriptionModalShownRef.current = true; // Помечаем, что модальное окно будет показано
+            // Показываем модальное окно с небольшой задержкой, чтобы страница успела загрузиться
+            setTimeout(() => {
+              console.log('[GameResultsPage] Открываем модальное окно подписки на канал');
+              setIsChannelSubscriptionModalOpen(true);
+            }, 500);
+          } else {
+            if (channelSubscriptionModalShownRef.current) {
+              console.log('[GameResultsPage] ❌ Модальное окно уже было показано ранее');
+            } else {
+              console.log('[GameResultsPage] ❌ Условия не выполнены. channelSubscriptionBoosted !== false:', channelSubscriptionBoostedData);
+            }
+          }
+        } else {
+          console.warn('[GameResultsPage] Ответ startDraw не успешен или нет value:', {
+            isSuccess: drawResponse.isSuccess,
+            hasValue: !!drawResponse.value,
+            error: drawResponse.error,
+          });
+        }
+      } catch (err) {
+        console.error('[GameResultsPage] Ошибка при получении channelSubscriptionBoosted из startDraw:', err);
+      }
+    };
+    
+    checkChannelSubscription();
+  }, [drawId, isDataLoaded]);
 
   // Таймер обратного отсчёта
   useEffect(() => {
@@ -431,6 +508,12 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           <img src="/material-symbols_arrow-back-rounded.svg" alt="" className="play-again-arrow" />
         </button>
       )}
+
+      {/* Модальное окно для подписки на канал */}
+      <ChannelSubscriptionModal
+        isOpen={isChannelSubscriptionModalOpen}
+        onClose={() => setIsChannelSubscriptionModalOpen(false)}
+      />
 
       {/* Модальное окно для получения попыток */}
       <MoreAttemptsModal

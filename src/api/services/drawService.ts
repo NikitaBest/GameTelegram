@@ -111,6 +111,7 @@ export interface StartDrawValue {
   referralsCount: number;
   status: number;
   referralLink: string;
+  channelSubscriptionBoosted: boolean | null;
   id: number;
   createdAt: string;
 }
