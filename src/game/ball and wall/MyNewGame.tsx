@@ -20,7 +20,6 @@ const MOVE_SPEED_X = 5.0; // Скорость по горизонтали: че�
 const BALL_RADIUS = 12; // Радиус мячика в пикселях (увеличить = мячик больше)
 const SPIKE_WIDTH = 60; // Ширина шипа в пикселях (увеличить = шипы шире)
 const SPIKE_HEIGHT = 55; // Высота шипа в пикселях (увеличить = шипы выше)
-const COLLISION_TOLERANCE = -3; // Точность столкновения: чем больше, тем раньше срабатывает (увеличить = более чувствительно, уменьшить = более точно)
 
 // Background colors and corresponding ball/spike colors
 const BG_COLORS = [
@@ -520,28 +519,33 @@ export function BallAndWallGame({ onGameOver, gameData }: BallAndWallGameProps) 
 
     // 2. Trail Logic (добавляем trail только если нет столкновения)
     // Проверяем столкновение заранее, чтобы не добавлять trail при попадании на шип
+    // Используем ту же точную логику, что и основная проверка столкновения
     let willHitSpike = false;
     if (!isDestroying) {
-      // Быстрая проверка столкновения для trail (используем ту же логику, что и основная проверка)
+      // Используем упрощенную проверку для trail - только если мячик реально зашел на шип
       willHitSpike = spikes.current.some(spike => {
         if (spike.offsetX < 1.0) return false;
+        
         const ballX = ballPos.current.x;
         const ballY = ballPos.current.y;
         const spikeY = spike.y;
         const spikeTop = spikeY - SPIKE_HEIGHT / 2;
         const spikeBottom = spikeY + SPIKE_HEIGHT / 2;
-        if (ballY + BALL_RADIUS < spikeTop || ballY - BALL_RADIUS > spikeBottom) return false;
+        
+        // Быстрая проверка вертикальных границ
+        if (ballY + BALL_RADIUS < spikeTop || ballY - BALL_RADIUS > spikeBottom) {
+          return false;
+        }
+        
+        const currentSpikeWidth = spike.offsetX * SPIKE_WIDTH;
         
         if (spike.side === "left") {
-          const ballLeftEdge = ballX - BALL_RADIUS;
-          const ballRightEdge = ballX + BALL_RADIUS;
-          const effectiveSpikeWidth = Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
-          return ballRightEdge > 0 && ballLeftEdge < effectiveSpikeWidth;
+          // Мячик зашел на шип, если его центр или правый край находятся внутри треугольника
+          // Проверяем, что мячик действительно пересекает область шипа
+          return ballX + BALL_RADIUS > 0 && ballX < currentSpikeWidth;
         } else {
-          const ballLeftEdge = ballX - BALL_RADIUS;
-          const ballRightEdge = ballX + BALL_RADIUS;
-          const effectiveSpikeStart = width - Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
-          return ballLeftEdge < width && ballRightEdge > effectiveSpikeStart;
+          // Мячик зашел на шип, если его центр или левый край находятся внутри треугольника
+          return ballX - BALL_RADIUS < width && ballX > width - currentSpikeWidth;
         }
       });
     }
@@ -638,60 +642,88 @@ export function BallAndWallGame({ onGameOver, gameData }: BallAndWallGameProps) 
       }
 
       // 4. Проверка столкновения с шипами (ПЕРЕД проверкой стен, чтобы остановить мяч)
-      // Используем текущую позицию, но проверяем более точно с учетом треугольной формы
-      const hitSpike = spikes.current.find(spike => {
-        // Проверяем только если шип полностью выехал (100%)
-        if (spike.offsetX < 1.0) return false;
+      // Функция для проверки точки внутри треугольника шипа
+      const isPointInSpikeTriangle = (px: number, py: number, spike: Spike, canvasWidth: number): boolean => {
+        if (spike.offsetX < 1.0) return false; // Шип еще не полностью выехал
         
-        // Точная проверка столкновения с учетом треугольной формы шипа
+        const spikeY = spike.y;
+        const spikeTop = spikeY - SPIKE_HEIGHT / 2;
+        const spikeBottom = spikeY + SPIKE_HEIGHT / 2;
+        const currentSpikeWidth = spike.offsetX * SPIKE_WIDTH;
+        
+        // Проверяем вертикальные границы
+        if (py < spikeTop || py > spikeBottom) return false;
+        
+        if (spike.side === "left") {
+          // Левый шип: треугольник с вершинами (0, spikeTop), (currentSpikeWidth, spikeY), (0, spikeBottom)
+          // Вычисляем максимальную ширину шипа на этой высоте py
+          let spikeWidthAtY: number;
+          if (py <= spikeY) {
+            // Верхняя половина треугольника: от spikeTop до spikeY
+            const ratio = (py - spikeTop) / (spikeY - spikeTop);
+            spikeWidthAtY = currentSpikeWidth * ratio;
+          } else {
+            // Нижняя половина треугольника: от spikeY до spikeBottom
+            const ratio = (spikeBottom - py) / (spikeBottom - spikeY);
+            spikeWidthAtY = currentSpikeWidth * ratio;
+          }
+          
+          // Мячик попадает, если его x координата находится внутри треугольника
+          return px < spikeWidthAtY && px >= 0;
+        } else {
+          // Правый шип: треугольник с вершинами (width, spikeTop), (width - currentSpikeWidth, spikeY), (width, spikeBottom)
+          let spikeWidthAtY: number;
+          if (py <= spikeY) {
+            const ratio = (py - spikeTop) / (spikeY - spikeTop);
+            spikeWidthAtY = currentSpikeWidth * ratio;
+          } else {
+            const ratio = (spikeBottom - py) / (spikeBottom - spikeY);
+            spikeWidthAtY = currentSpikeWidth * ratio;
+          }
+          
+          // Мячик попадает, если его x координата находится внутри треугольника
+          return px > canvasWidth - spikeWidthAtY && px <= canvasWidth;
+        }
+      };
+      
+      // Проверяем столкновение: мячик должен реально зайти на шип
+      const hitSpike = spikes.current.find(spike => {
+        if (spike.offsetX < 1.0) return false; // Шип еще не полностью выехал
+        
         const ballX = ballPos.current.x;
         const ballY = ballPos.current.y;
         const spikeY = spike.y;
         const spikeTop = spikeY - SPIKE_HEIGHT / 2;
         const spikeBottom = spikeY + SPIKE_HEIGHT / 2;
         
-        // Проверяем, находится ли мячик в вертикальных пределах шипа (с учетом радиуса)
+        // Быстрая проверка вертикальных границ
         if (ballY + BALL_RADIUS < spikeTop || ballY - BALL_RADIUS > spikeBottom) {
-          return false; // Мячик выше или ниже шипа
+          return false;
         }
         
+        // Проверяем несколько точек мячика: центр и ближайший к шипу край
+        // Это гарантирует, что мячик реально зашел на шип, а не просто рядом
         if (spike.side === "left") {
-          // Для левого шипа: проверяем, что мячик реально пересекает область шипа
-          // Шип треугольный: от стены (x=0) до кончика (x=SPIKE_WIDTH)
-          // Мячик должен реально коснуться шипа, а не просто быть рядом
-          const ballLeftEdge = ballX - BALL_RADIUS;
-          const ballRightEdge = ballX + BALL_RADIUS;
+          // Для левого шипа проверяем центр и правый край мячика (который ближе к шипу)
+          const centerInSpike = isPointInSpikeTriangle(ballX, ballY, spike, width);
+          const rightEdgeInSpike = isPointInSpikeTriangle(ballX + BALL_RADIUS, ballY, spike, width);
           
-          // Учитываем COLLISION_TOLERANCE (отрицательное значение делает проверку строже)
-          // Если COLLISION_TOLERANCE = -1, то effectiveSpikeWidth = 59 (вместо 60)
-          const effectiveSpikeWidth = Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
-          
-          // Мячик попадает на шип, если его левый край находится в пределах шипа
-          // И правый край мячика должен быть за стеной (x > 0)
-          return ballRightEdge > 0 && ballLeftEdge < effectiveSpikeWidth;
+          // Мячик разбивается только если его центр или правый край реально зашли на шип
+          return centerInSpike || rightEdgeInSpike;
         } else {
-          // Для правого шипа: проверяем, что мячик реально пересекает область шипа
-          const ballLeftEdge = ballX - BALL_RADIUS;
-          const ballRightEdge = ballX + BALL_RADIUS;
+          // Для правого шипа проверяем центр и левый край мячика (который ближе к шипу)
+          const centerInSpike = isPointInSpikeTriangle(ballX, ballY, spike, width);
+          const leftEdgeInSpike = isPointInSpikeTriangle(ballX - BALL_RADIUS, ballY, spike, width);
           
-          // Шип треугольный: от стены (x=width) до кончика (x=width-SPIKE_WIDTH)
-          const effectiveSpikeStart = width - Math.max(0, SPIKE_WIDTH + COLLISION_TOLERANCE);
-          
-          // Мячик попадает на шип, если его правый край находится в пределах шипа
-          // И левый край мячика должен быть перед стеной (x < width)
-          return ballLeftEdge < width && ballRightEdge > effectiveSpikeStart;
+          // Мячик разбивается только если его центр или левый край реально зашли на шип
+          return centerInSpike || leftEdgeInSpike;
         }
       });
 
       if (hitSpike) {
-        // Откатываем позицию мяча назад, чтобы он не пролетел через шип
-        if (hitSpike.side === "left") {
-          ballPos.current.x = BALL_RADIUS + SPIKE_WIDTH;
-        } else {
-          ballPos.current.x = width - BALL_RADIUS - SPIKE_WIDTH;
-        }
-        // НЕ останавливаем движение - мяч продолжает двигаться во время разрушения
-        // Запускаем эффект разрушения
+        // Мячик реально зашел на шип - запускаем эффект разрушения
+        // НЕ откатываем позицию и НЕ останавливаем движение - мяч продолжает двигаться во время разрушения
+        // Это создает эффект, что мячик залетел на шип и разбился
         startDestruction();
         return;
       }
