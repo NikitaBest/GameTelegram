@@ -264,18 +264,18 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           // Проверяем условия для показа модального окна подписки на канал
           // Показываем модальное окно только если channelSubscriptionBoosted === false
           // Используем строгую проверку на false (boolean)
-          // И проверяем, что модальное окно еще не было показано
-          if (channelSubscriptionBoostedData === false && !channelSubscriptionModalShownRef.current) {
+          // Показываем модальное окно, если оно еще не открыто
+          if (channelSubscriptionBoostedData === false && !isChannelSubscriptionModalOpen) {
             console.log('[GameResultsPage] ✅ Условия для показа модального окна подписки на канал выполнены! Показываем модальное окно.');
-            channelSubscriptionModalShownRef.current = true; // Помечаем, что модальное окно будет показано
+            channelSubscriptionModalShownRef.current = true; // Помечаем, что модальное окно было показано
             // Показываем модальное окно с небольшой задержкой, чтобы страница успела загрузиться
             setTimeout(() => {
               console.log('[GameResultsPage] Открываем модальное окно подписки на канал');
               setIsChannelSubscriptionModalOpen(true);
             }, 500);
           } else {
-            if (channelSubscriptionModalShownRef.current) {
-              console.log('[GameResultsPage] ❌ Модальное окно уже было показано ранее');
+            if (isChannelSubscriptionModalOpen) {
+              console.log('[GameResultsPage] Модальное окно уже открыто');
             } else {
               console.log('[GameResultsPage] ❌ Условия не выполнены. channelSubscriptionBoosted !== false:', channelSubscriptionBoostedData);
             }
@@ -293,7 +293,7 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
     };
     
     checkChannelSubscription();
-  }, [drawId, isDataLoaded]);
+  }, [drawId, isDataLoaded, isChannelSubscriptionModalOpen]);
 
   // Проверка подписки на канал при возврате пользователя в приложение
   useEffect(() => {
@@ -331,6 +331,9 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
             if (checkResponse.isSuccess && checkResponse.value?.subscribed === true) {
               console.log('[GameResultsPage] ✅ Пользователь подписался на канал! Обновляем счет.');
               
+              // Закрываем модальное окно, так как пользователь подписался
+              setIsChannelSubscriptionModalOpen(false);
+              
               // Увеличиваем счет на 15%
               const increasedScore = score * 1.15;
               
@@ -359,6 +362,12 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               console.log('[GameResultsPage] Пользователь еще не подписался на канал');
               subscriptionCheckedRef.current = false; // Разрешаем повторную проверку
               wasHiddenRef.current = false; // Сбрасываем флаг
+              // НЕ закрываем модальное окно - оно должно остаться открытым или показаться снова
+              // Показываем модальное окно снова, если оно было закрыто
+              if (!isChannelSubscriptionModalOpen) {
+                console.log('[GameResultsPage] Показываем модальное окно снова, так как пользователь не подписался');
+                setIsChannelSubscriptionModalOpen(true);
+              }
             }
           } catch (err) {
             console.error('[GameResultsPage] Ошибка при проверке подписки на канал:', err);

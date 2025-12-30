@@ -15,59 +15,43 @@ const ChannelSubscriptionModal = ({ isOpen, onClose, onSubscribeClick }) => {
     // Вызов должен быть СИНХРОННЫМ и НАПРЯМУЮ из обработчика события пользователя
     // НЕ вызываем callback и НЕ закрываем модальное окно ПЕРЕД вызовом - это может прервать цепочку событий!
     
-    // Для ссылок на каналы используем openLink в первую очередь
-    // openTelegramLink может не работать для ссылок на каналы с форматом t.me/+
-    if (tg && typeof tg.openLink === 'function') {
-      console.log('[ChannelSubscriptionModal] Вызываем tg.openLink (приоритет для ссылок на каналы)');
-      try {
-        // Вызываем callback ПОСЛЕ успешного открытия ссылки
-        tg.openLink(channelUrl);
-        
-        // Вызываем callback, что пользователь нажал на кнопку подписки
-        if (onSubscribeClick) {
-          onSubscribeClick();
-        }
-        
-        // Закрываем модальное окно ПОСЛЕ успешного вызова
-        // Используем небольшую задержку, чтобы дать Telegram время открыть канал
-        setTimeout(() => {
-          onClose();
-        }, 300);
-        return;
-      } catch (err) {
-        console.error('[ChannelSubscriptionModal] Ошибка в tg.openLink:', err);
-      }
+    // Вызываем callback, что пользователь нажал на кнопку подписки
+    // Важно: вызываем ДО открытия ссылки, чтобы отследить нажатие
+    if (onSubscribeClick) {
+      onSubscribeClick();
     }
     
-    // ПРИОРИТЕТ 2: openTelegramLink - может работать для некоторых ссылок
+    // ПРИОРИТЕТ 1: openTelegramLink - открывает ссылку ВНУТРИ Telegram (не в браузере)
+    // Это правильный метод для открытия ссылок внутри Telegram Mini App
     if (tg && typeof tg.openTelegramLink === 'function') {
-      console.log('[ChannelSubscriptionModal] Вызываем tg.openTelegramLink');
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openTelegramLink (открывает внутри Telegram)');
       try {
+        // Прямой вызов без оберток для максимальной надежности в продакшене
+        // НЕ закрываем модальное окно - оно закроется автоматически при переходе на канал
+        // или останется открытым для повторного показа, если пользователь вернется без подписки
         tg.openTelegramLink(channelUrl);
-        
-        // Вызываем callback, что пользователь нажал на кнопку подписки
-        if (onSubscribeClick) {
-          onSubscribeClick();
-        }
-        
-        // Закрываем модальное окно после открытия ссылки
-        setTimeout(() => {
-          onClose();
-        }, 300);
         return;
       } catch (err) {
         console.error('[ChannelSubscriptionModal] Ошибка в tg.openTelegramLink:', err);
       }
     }
     
-    // Fallback: открываем через location.href
-    // В этом случае вызываем callback и закрываем модальное окно перед переходом
-    console.log('[ChannelSubscriptionModal] Используем window.location.href как fallback');
-    
-    // Вызываем callback, что пользователь нажал на кнопку подписки
-    if (onSubscribeClick) {
-      onSubscribeClick();
+    // ПРИОРИТЕТ 2: openLink - может открывать в браузере, но лучше чем ничего
+    // Используем только если openTelegramLink недоступен
+    if (tg && typeof tg.openLink === 'function') {
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openLink (может открыть в браузере)');
+      try {
+        // НЕ закрываем модальное окно - оно закроется автоматически при переходе на канал
+        tg.openLink(channelUrl);
+        return;
+      } catch (err) {
+        console.error('[ChannelSubscriptionModal] Ошибка в tg.openLink:', err);
+      }
     }
+    
+    // Fallback: открываем через location.href
+    // В этом случае закрываем модальное окно перед переходом, так как это полный переход
+    console.log('[ChannelSubscriptionModal] Используем window.location.href как fallback');
     
     onClose();
     setTimeout(() => {
