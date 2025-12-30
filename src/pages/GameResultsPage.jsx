@@ -5,6 +5,7 @@ import MoreAttemptsModal from '../components/MoreAttemptsModal';
 import { useAuth } from '../hooks/useAuth';
 import { saveAttempt } from '../api/services/attemptService';
 import { getLeaderboard, getUserRank } from '../api/services/leaderboardService';
+import { startDraw } from '../api/services/drawService';
 import '../styles/gradient-text.css';
 import '../styles/action-button.css';
 import './GameResultsPage.css';
@@ -64,6 +65,56 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
                   remaining, // Осталось (50 - 23 = 27)
                   isViewedAds: isViewedAdsValue,
                 });
+              }
+            }
+            
+            // Получаем secondsToEnd из ответа saveAttempt
+            // secondsToEnd может быть в разных местах ответа:
+            // 1. response.value.draw.secondsToEnd (в объекте draw)
+            // 2. response.value.secondsToEnd (прямо в value)
+            // 3. response.value.participating.draw.secondsToEnd (в participating.draw)
+            const secondsToEndData = 
+              response.value?.draw?.secondsToEnd !== undefined 
+                ? response.value.draw.secondsToEnd 
+                : response.value?.secondsToEnd !== undefined 
+                  ? response.value.secondsToEnd 
+                  : response.value?.participating?.draw?.secondsToEnd !== undefined
+                    ? response.value.participating.draw.secondsToEnd
+                    : null;
+            
+            if (secondsToEndData !== null && secondsToEndData !== undefined) {
+              setSecondsToEnd(secondsToEndData);
+              console.log('[GameResultsPage] secondsToEnd получен из saveAttempt:', secondsToEndData);
+            } else {
+              // Если secondsToEnd не найден в saveAttempt, получаем из данных розыгрыша
+              if (drawId) {
+                try {
+                  const drawResponse = await startDraw(drawId);
+                  if (drawResponse.isSuccess && drawResponse.value?.draw?.secondsToEnd !== undefined) {
+                    const secondsToEndFromDraw = drawResponse.value.draw.secondsToEnd;
+                    setSecondsToEnd(secondsToEndFromDraw);
+                    console.log('[GameResultsPage] secondsToEnd получен из startDraw:', secondsToEndFromDraw);
+                  } else {
+                    if (import.meta.env.DEV) {
+                      console.warn('[GameResultsPage] secondsToEnd не найден ни в saveAttempt, ни в startDraw');
+                    }
+                  }
+                } catch (err) {
+                  console.error('[GameResultsPage] Ошибка при получении secondsToEnd из startDraw:', err);
+                }
+              } else {
+                // Если drawId нет, логируем для отладки
+                if (import.meta.env.DEV) {
+                  console.warn('[GameResultsPage] secondsToEnd не найден в ответе saveAttempt, и drawId отсутствует');
+                  console.log('[GameResultsPage] Структура ответа saveAttempt для secondsToEnd:', {
+                    hasValue: !!response.value,
+                    valueKeys: response.value ? Object.keys(response.value) : [],
+                    hasDraw: !!response.value?.draw,
+                    drawKeys: response.value?.draw ? Object.keys(response.value.draw) : [],
+                    hasParticipating: !!response.value?.participating,
+                    participatingKeys: response.value?.participating ? Object.keys(response.value.participating) : [],
+                  });
+                }
               }
             }
             

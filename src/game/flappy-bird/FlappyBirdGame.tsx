@@ -5,6 +5,8 @@ import { soundManager } from '../../utils/soundManager';
 import { Game } from '../../api/services/drawService';
 import './FlappyBirdGame.css';
 
+const tapIcon = '/hugeicons_tap-01.svg';
+
 interface FlappyBirdGameProps {
   onGameOver: (score: number) => void;
   gameData?: Game | null;
@@ -547,7 +549,13 @@ export function FlappyBirdGame({ onGameOver, gameData }: FlappyBirdGameProps) {
 
           {/* Экран правил */}
           {showRules && (
-            <GameRulesScreen rules={gameRules} gameData={gameData} onStart={startGame} />
+            <GameRulesScreen 
+              rules={gameData ? undefined : gameRules} 
+              gameData={gameData} 
+              onStart={startGame}
+              startButtonType="text"
+              startButtonIcon={<img src={tapIcon} alt="tap" style={{ width: 'clamp(1.5rem, 4vw, 2rem)', height: 'clamp(1.5rem, 4vw, 2rem)' }} />}
+            />
           )}
         </div>
       </div>
