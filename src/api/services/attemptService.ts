@@ -131,3 +131,25 @@ export async function checkChannelSubscriptionBoost(
   }
 }
 
+/**
+ * Проверка подписки на канал через user endpoint
+ */
+export async function checkUserChannelSubscriptionBoost(): Promise<CheckChannelSubscriptionBoostResponse> {
+  try {
+    const response = await apiClient.post<CheckChannelSubscriptionBoostResponse>(
+      '/user/check-channel-subscription-boost',
+      {}
+    );
+    
+    // @ts-expect-error - Vite добавляет env в import.meta
+    if (import.meta.env.DEV) {
+      console.log('Результат проверки подписки на канал (user endpoint):', response);
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Ошибка при проверке подписки на канал (user endpoint):', error);
+    throw error;
+  }
+}
+

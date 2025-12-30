@@ -1,7 +1,22 @@
 import './ChannelSubscriptionModal.css';
+import { checkUserChannelSubscriptionBoost } from '../api/services/attemptService';
 
 const ChannelSubscriptionModal = ({ isOpen, onClose, onSubscribeClick }) => {
   if (!isOpen) return null;
+
+  const handleClose = async () => {
+    // При закрытии модального окна делаем запрос на бекенд
+    try {
+      console.log('[ChannelSubscriptionModal] Закрытие модального окна, отправляем запрос на /user/check-channel-subscription-boost');
+      await checkUserChannelSubscriptionBoost();
+      console.log('[ChannelSubscriptionModal] Запрос успешно выполнен');
+    } catch (error) {
+      console.error('[ChannelSubscriptionModal] Ошибка при отправке запроса:', error);
+    }
+    
+    // Закрываем модальное окно
+    onClose();
+  };
 
 
   const handleSubscribe = () => {
@@ -41,9 +56,9 @@ const ChannelSubscriptionModal = ({ isOpen, onClose, onSubscribeClick }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div className="channel-subscription-modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>
+        <button className="modal-close" onClick={handleClose}>
           <img src="/Close.svg" alt="Закрыть" />
         </button>
 
