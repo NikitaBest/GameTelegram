@@ -28,24 +28,27 @@ const ChannelSubscriptionModal = ({ isOpen, onClose, onSubscribeClick }) => {
     }
     
     const tg = window.Telegram?.WebApp;
-    const channelUrl = 'https://t.me/+OTBc8GHHdroyNjIy';
-    // Формат tg://join для invite-ссылок (может работать лучше)
+    // Прямая ссылка на канал (может работать лучше, чем invite-ссылка)
+    const channelDirectUrl = 'https://t.me/chest_of_gold';
+    // Invite-ссылка (резервный вариант)
+    const channelInviteUrl = 'https://t.me/+OTBc8GHHdroyNjIy';
+    // Формат tg:// для прямого канала
+    const telegramDirectUrl = 'tg://resolve?domain=chest_of_gold';
+    // Формат tg://join для invite-ссылок
     const telegramJoinUrl = 'tg://join?invite=OTBc8GHHdroyNjIy';
     
-    console.log('[ChannelSubscriptionModal] Открываем ссылку на канал:', channelUrl);
+    console.log('[ChannelSubscriptionModal] Открываем ссылку на канал');
     console.log('[ChannelSubscriptionModal] Telegram Web App доступен:', !!tg);
+    console.log('[ChannelSubscriptionModal] Пробуем прямую ссылку на канал:', channelDirectUrl);
     
     // КРИТИЧЕСКИ ВАЖНО: НЕ вызываем callback ПЕРЕД открытием ссылки
     // Это может прервать цепочку событий и помешать переходу
     
-    // Пробуем сначала формат tg://join для invite-ссылок
+    // ПРИОРИТЕТ 1: Прямая ссылка на канал через tg://resolve
     if (tg && typeof tg.openTelegramLink === 'function') {
-      console.log('[ChannelSubscriptionModal] Вызываем tg.openTelegramLink с tg://join форматом');
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openTelegramLink с tg://resolve');
       try {
-        // Прямой синхронный вызов БЕЗ callback'ов перед ним
-        tg.openTelegramLink(telegramJoinUrl);
-        
-        // Вызываем callback ПОСЛЕ открытия ссылки с задержкой
+        tg.openTelegramLink(telegramDirectUrl);
         setTimeout(() => {
           if (onSubscribeClick) {
             onSubscribeClick();
@@ -53,28 +56,79 @@ const ChannelSubscriptionModal = ({ isOpen, onClose, onSubscribeClick }) => {
         }, 500);
         return;
       } catch (err) {
-        console.error('[ChannelSubscriptionModal] Ошибка в tg://join формате:', err);
-        // Пробуем обычный формат https://t.me/+
-        try {
-          console.log('[ChannelSubscriptionModal] Пробуем формат https://t.me/+');
-          tg.openTelegramLink(channelUrl);
-          setTimeout(() => {
-            if (onSubscribeClick) {
-              onSubscribeClick();
-            }
-          }, 500);
-          return;
-        } catch (err2) {
-          console.error('[ChannelSubscriptionModal] Ошибка в https://t.me/+ формате:', err2);
-        }
+        console.error('[ChannelSubscriptionModal] Ошибка в tg://resolve:', err);
       }
     }
     
-    // Пробуем openLink
-    if (tg && typeof tg.openLink === 'function') {
-      console.log('[ChannelSubscriptionModal] Вызываем tg.openLink');
+    // ПРИОРИТЕТ 2: Прямая ссылка на канал через https://t.me/
+    if (tg && typeof tg.openTelegramLink === 'function') {
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openTelegramLink с прямой ссылкой на канал');
       try {
-        tg.openLink(channelUrl);
+        tg.openTelegramLink(channelDirectUrl);
+        setTimeout(() => {
+          if (onSubscribeClick) {
+            onSubscribeClick();
+          }
+        }, 500);
+        return;
+      } catch (err) {
+        console.error('[ChannelSubscriptionModal] Ошибка в прямой ссылке на канал:', err);
+      }
+    }
+    
+    // ПРИОРИТЕТ 3: Invite-ссылка через tg://join
+    if (tg && typeof tg.openTelegramLink === 'function') {
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openTelegramLink с tg://join');
+      try {
+        tg.openTelegramLink(telegramJoinUrl);
+        setTimeout(() => {
+          if (onSubscribeClick) {
+            onSubscribeClick();
+          }
+        }, 500);
+        return;
+      } catch (err) {
+        console.error('[ChannelSubscriptionModal] Ошибка в tg://join:', err);
+      }
+    }
+    
+    // ПРИОРИТЕТ 4: Invite-ссылка через https://t.me/+
+    if (tg && typeof tg.openTelegramLink === 'function') {
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openTelegramLink с invite-ссылкой');
+      try {
+        tg.openTelegramLink(channelInviteUrl);
+        setTimeout(() => {
+          if (onSubscribeClick) {
+            onSubscribeClick();
+          }
+        }, 500);
+        return;
+      } catch (err) {
+        console.error('[ChannelSubscriptionModal] Ошибка в invite-ссылке:', err);
+      }
+    }
+    
+    // ПРИОРИТЕТ 5: openLink с прямой ссылкой
+    if (tg && typeof tg.openLink === 'function') {
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openLink с прямой ссылкой');
+      try {
+        tg.openLink(channelDirectUrl);
+        setTimeout(() => {
+          if (onSubscribeClick) {
+            onSubscribeClick();
+          }
+        }, 500);
+        return;
+      } catch (err) {
+        console.error('[ChannelSubscriptionModal] Ошибка в tg.openLink:', err);
+      }
+    }
+    
+    // ПРИОРИТЕТ 6: openLink с invite-ссылкой
+    if (tg && typeof tg.openLink === 'function') {
+      console.log('[ChannelSubscriptionModal] Вызываем tg.openLink с invite-ссылкой');
+      try {
+        tg.openLink(channelInviteUrl);
         setTimeout(() => {
           if (onSubscribeClick) {
             onSubscribeClick();
@@ -91,7 +145,7 @@ const ChannelSubscriptionModal = ({ isOpen, onClose, onSubscribeClick }) => {
     if (onSubscribeClick) {
       onSubscribeClick();
     }
-    window.location.href = channelUrl;
+    window.location.href = channelDirectUrl;
   };
 
   return (
