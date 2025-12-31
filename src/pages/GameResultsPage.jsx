@@ -261,10 +261,12 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
           
           setChannelSubscriptionBoosted(channelSubscriptionBoostedData);
           
-          // Проверяем условия для показа модального окна подписки на канал
+          // ВРЕМЕННО ОТКЛЮЧЕНО: Проверяем условия для показа модального окна подписки на канал
           // Показываем модальное окно только если channelSubscriptionBoosted === false
           // Используем строгую проверку на false (boolean)
           // Показываем модальное окно, если оно еще не открыто
+          // ВРЕМЕННО СКРЫТО - модальное окно не показывается
+          /*
           if (channelSubscriptionBoostedData === false && !isChannelSubscriptionModalOpen) {
             console.log('[GameResultsPage] ✅ Условия для показа модального окна подписки на канал выполнены! Показываем модальное окно.');
             channelSubscriptionModalShownRef.current = true; // Помечаем, что модальное окно было показано
@@ -280,6 +282,8 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               console.log('[GameResultsPage] ❌ Условия не выполнены. channelSubscriptionBoosted !== false:', channelSubscriptionBoostedData);
             }
           }
+          */
+          console.log('[GameResultsPage] Модальное окно подписки на канал временно скрыто');
         } else {
           console.warn('[GameResultsPage] Ответ startDraw не успешен или нет value:', {
             isSuccess: drawResponse.isSuccess,
@@ -362,12 +366,15 @@ const GameResultsPage = ({ score, drawId, participatingId, onPlayAgain, onGoToMa
               console.log('[GameResultsPage] Пользователь еще не подписался на канал');
               subscriptionCheckedRef.current = false; // Разрешаем повторную проверку
               wasHiddenRef.current = false; // Сбрасываем флаг
-              // НЕ закрываем модальное окно - оно должно остаться открытым или показаться снова
+              // ВРЕМЕННО ОТКЛЮЧЕНО: НЕ закрываем модальное окно - оно должно остаться открытым или показаться снова
               // Показываем модальное окно снова, если оно было закрыто
+              // ВРЕМЕННО СКРЫТО - модальное окно не показывается
+              /*
               if (!isChannelSubscriptionModalOpen) {
                 console.log('[GameResultsPage] Показываем модальное окно снова, так как пользователь не подписался');
                 setIsChannelSubscriptionModalOpen(true);
               }
+              */
             }
           } catch (err) {
             console.error('[GameResultsPage] Ошибка при проверке подписки на канал:', err);
