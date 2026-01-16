@@ -10,7 +10,7 @@ import Leaderboard from '../components/Leaderboard';
 import BackgroundStars from '../components/BackgroundStars';
 import LoadingScreen from '../components/LoadingScreen';
 import { startDraw } from '../api/services/drawService';
-import { getLeaderboard } from '../api/services/leaderboardService';
+import { getLeaderboard, getUserRank } from '../api/services/leaderboardService';
 import { useAuth } from '../hooks/useAuth';
 import { formatTime } from '../utils/mockData';
 import './DrawPage.css';
@@ -143,53 +143,85 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
           let userPlace = null;
           let userPhotoUrl = null;
           
-          // Сначала пробуем запрос (0, 0) для получения текущего пользователя
-          let leaderboardResponse = await getLeaderboard(drawId, 0, 0);
-          console.log('Данные лидерборда (0, 0):', leaderboardResponse);
-          
-          let currentUser = null;
-          if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
-            const items = leaderboardResponse.value.items || [];
-            currentUser = findCurrentUser(items);
-          }
-          
-          // Если не нашли пользователя в запросе (0, 0), запрашиваем больший диапазон
-          if (!currentUser) {
-            if (import.meta.env.DEV) {
-              console.log('[DrawPage] Пользователь не найден в запросе (0, 0), запрашиваем диапазон 1-100');
+          // Используем getUserRank для получения места пользователя независимо от позиции
+          // Это работает для любых мест (включая трехзначные)
+          try {
+            const userRankResponse = await getUserRank(drawId);
+            if (userRankResponse.isSuccess && userRankResponse.value) {
+              const items = userRankResponse.value.items || [];
+              
+              // Ищем текущего пользователя по participatingId
+              let currentUser = null;
+              if (participatingId) {
+                currentUser = items.find(item => 
+                  item.participatingId === participatingId || 
+                  String(item.participatingId) === String(participatingId) ||
+                  Number(item.participatingId) === Number(participatingId)
+                );
+              }
+              
+              // Если не нашли по participatingId, ищем по userTelegramId
+              if (!currentUser && user?.telegramId) {
+                currentUser = items.find(item => item.userTelegramId === user.telegramId);
+              }
+              
+              // Устанавливаем место и аватар, если нашли пользователя
+              if (currentUser) {
+                if (currentUser.topNumber) {
+                  userPlace = currentUser.topNumber;
+                }
+                if (currentUser.photoUrl) {
+                  userPhotoUrl = currentUser.photoUrl;
+                }
+                
+                if (import.meta.env.DEV) {
+                  console.log('[DrawPage] Место пользователя получено через getUserRank:', {
+                    topNumber: currentUser.topNumber,
+                    participatingId: currentUser.participatingId,
+                    userTelegramId: currentUser.userTelegramId,
+                    foundBy: participatingId && currentUser.participatingId === participatingId ? 'participatingId' : 'userTelegramId'
+                  });
+                }
+              } else {
+                // Если getUserRank не вернул пользователя, пробуем через обычный лидерборд (fallback)
+                if (import.meta.env.DEV) {
+                  console.log('[DrawPage] Пользователь не найден в getUserRank, пробуем через getLeaderboard (0, 0)');
+                }
+                
+                const leaderboardResponse = await getLeaderboard(drawId, 0, 0);
+                if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
+                  const items = leaderboardResponse.value.items || [];
+                  const foundUser = findCurrentUser(items);
+                  if (foundUser) {
+                    if (foundUser.topNumber) {
+                      userPlace = foundUser.topNumber;
+                    }
+                    if (foundUser.photoUrl) {
+                      userPhotoUrl = foundUser.photoUrl;
+                    }
+                  }
+                }
+              }
             }
-            
-            leaderboardResponse = await getLeaderboard(drawId, 1, 100);
-            if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
-              const items = leaderboardResponse.value.items || [];
-              currentUser = findCurrentUser(items);
-            }
-          }
-          
-          // Устанавливаем место и аватар, если нашли пользователя
-          if (currentUser) {
-            if (currentUser.topNumber) {
-              userPlace = currentUser.topNumber;
-            }
-            if (currentUser.photoUrl) {
-              userPhotoUrl = currentUser.photoUrl;
-            }
-            
-            if (import.meta.env.DEV) {
-              console.log('[DrawPage] Место пользователя из лидерборда:', {
-                topNumber: currentUser.topNumber,
-                participatingId: currentUser.participatingId,
-                userTelegramId: currentUser.userTelegramId,
-                foundBy: participatingId && currentUser.participatingId === participatingId ? 'participatingId' : 'userTelegramId'
-              });
-            }
-          } else {
-            if (import.meta.env.DEV) {
-              console.warn('[DrawPage] Текущий пользователь не найден в лидерборде:', {
-                participatingId,
-                userTelegramId: user?.telegramId,
-                drawId
-              });
+          } catch (err) {
+            console.error('[DrawPage] Ошибка при получении места пользователя:', err);
+            // В случае ошибки пробуем fallback через обычный лидерборд
+            try {
+              const leaderboardResponse = await getLeaderboard(drawId, 0, 0);
+              if (leaderboardResponse.isSuccess && leaderboardResponse.value) {
+                const items = leaderboardResponse.value.items || [];
+                const foundUser = findCurrentUser(items);
+                if (foundUser) {
+                  if (foundUser.topNumber) {
+                    userPlace = foundUser.topNumber;
+                  }
+                  if (foundUser.photoUrl) {
+                    userPhotoUrl = foundUser.photoUrl;
+                  }
+                }
+              }
+            } catch (fallbackErr) {
+              console.error('[DrawPage] Ошибка при fallback запросе:', fallbackErr);
             }
           }
 

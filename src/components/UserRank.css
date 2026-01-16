@@ -21,9 +21,12 @@
 }
 
 .user-rank-content {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  flex: 1;
+  min-width: 0; /* Позволяет контенту сжиматься при необходимости */
 }
 
 .user-icon {
@@ -39,6 +42,8 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  flex: 1;
+  min-width: 0; /* Позволяет тексту сжиматься при необходимости */
 }
 
 .user-rank-text {
@@ -46,8 +51,10 @@
   font-weight: 700;
   color: #627fc0;
   font-size: 12px;
-  text-align: center;
+  text-align: left; /* Изменено с center на left для лучшей читаемости */
   white-space: nowrap;
+  overflow: visible; /* Убеждаемся, что текст не обрезается */
+  text-overflow: clip; /* Не обрезаем текст многоточием */
 }
 
 /* Адаптация для средних экранов (до 414px) */
@@ -68,6 +75,7 @@
   .user-icon {
     width: 28px;
     height: 28px;
+    flex-shrink: 0; /* Иконка не сжимается */
   }
 }
 
@@ -89,6 +97,7 @@
   .user-icon {
     width: 26px;
     height: 26px;
+    flex-shrink: 0;
   }
 }
 
@@ -111,6 +120,7 @@
   .user-icon {
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
   }
 }
 
