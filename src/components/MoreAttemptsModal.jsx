@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Film, Loader2, CheckCircle } from 'lucide-react';
 import { viewAd } from '../api/services/adService';
+import { initAdProvider, showAd } from '../lib/adProviders';
 import './MoreAttemptsModal.css';
+
+// Конфигурация рекламного провайдера
+const AD_PROVIDER = 'gigapub';
 
 const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, participatingId, onAttemptAdded, isViewedAds = false }) => {
   const [isLoadingAd, setIsLoadingAd] = useState(false);
@@ -9,36 +13,15 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
   const [adReady, setAdReady] = useState(false);
   const showAdFnRef = useRef(null);
 
-  // Регистрируем callback при инициализации Adextra SDK
+  // Инициализация рекламного провайдера (GigaPub)
   useEffect(() => {
-    // Функция инициализации - вызывается когда SDK готов
-    const onAdextraInit = (showFn) => {
-      console.log('Adextra SDK инициализирован, showFn:', typeof showFn);
+    const cleanup = initAdProvider(AD_PROVIDER, (showFn) => {
+      console.log(`${AD_PROVIDER} SDK инициализирован, showFn:`, typeof showFn);
       showAdFnRef.current = showFn;
       setAdReady(true);
-    };
+    });
 
-    // Регистрируем callback для инициализации
-    if (!window.adextra_onInit_callbacks) {
-      window.adextra_onInit_callbacks = [];
-    }
-    window.adextra_onInit_callbacks.push(onAdextraInit);
-
-    // Проверяем, может SDK уже инициализирован
-    if (typeof window.p_adextra === 'function') {
-      showAdFnRef.current = window.p_adextra;
-      setAdReady(true);
-    }
-
-    return () => {
-      // Удаляем callback при размонтировании
-      if (window.adextra_onInit_callbacks) {
-        const index = window.adextra_onInit_callbacks.indexOf(onAdextraInit);
-        if (index > -1) {
-          window.adextra_onInit_callbacks.splice(index, 1);
-        }
-      }
-    };
+    return cleanup;
   }, []);
 
   // Сброс состояния при открытии
@@ -87,29 +70,19 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
     };
 
     try {
-      // Пробуем разные способы вызова рекламы
-      const showFn = showAdFnRef.current || window.p_adextra;
-      
-      if (typeof showFn === 'function') {
-        console.log('Показываем рекламу Adextra...');
-        showFn(onSuccess, onError);
+      // Используем универсальную функцию показа рекламы
+      if (showAdFnRef.current) {
+        console.log(`Показываем рекламу ${AD_PROVIDER}...`);
+        await showAd(AD_PROVIDER, showAdFnRef.current, onSuccess, onError);
       } else {
-        // Пробуем найти функцию show в глобальном объекте
-        console.log('Ищем альтернативные методы показа рекламы...');
-        console.log('window.adextra_onInit_callbacks:', window.adextra_onInit_callbacks);
-        console.log('window.adextra_onInit_fallbacks:', window.adextra_onInit_fallbacks);
-        
-        // Проверяем fallbacks
-        if (window.adextra_onInit_fallbacks && window.adextra_onInit_fallbacks.length > 0) {
-          console.log('Вызываем fallback...');
-          const fallback = window.adextra_onInit_fallbacks[0];
-          if (typeof fallback === 'function') {
-            fallback();
-          }
+        // Если SDK еще не загружен, пробуем напрямую через window
+        if (AD_PROVIDER === 'gigapub' && typeof window.showGiga === 'function') {
+          console.log('Используем window.showGiga напрямую...');
+          await showAd(AD_PROVIDER, window.showGiga, onSuccess, onError);
+        } else {
+          setAdError('Реклама недоступна. Попробуйте позже.');
+          setIsLoadingAd(false);
         }
-        
-        setAdError('Реклама недоступна. Попробуйте позже.');
-        setIsLoadingAd(false);
       }
     } catch (err) {
       console.error('Ошибка при показе рекламы:', err);
