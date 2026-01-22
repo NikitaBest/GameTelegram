@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Film, Loader2, CheckCircle } from 'lucide-react';
-// ВРЕМЕННО ОТКЛЮЧЕНО: import { viewAd } from '../api/services/adService';
-// ВРЕМЕННО ОТКЛЮЧЕНО: import { initAdProvider, showAd } from '../lib/adProviders';
+import { viewAd } from '../api/services/adService';
+import { initAdProvider, showAd } from '../lib/adProviders';
 import './MoreAttemptsModal.css';
 
 // Конфигурация рекламного провайдера
-// ВРЕМЕННО ОТКЛЮЧЕНО: const AD_PROVIDER = 'gigapub';
-const AD_PROVIDER = null; // Реклама временно отключена
+const AD_PROVIDER = 'gigapub';
 
 const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, participatingId, onAttemptAdded, isViewedAds = false }) => {
   const [isLoadingAd, setIsLoadingAd] = useState(false);
@@ -14,15 +13,16 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
   const [adReady, setAdReady] = useState(false);
   const showAdFnRef = useRef(null);
 
-  // Инициализация рекламного провайдера (GigaPub) - ВРЕМЕННО ОТКЛЮЧЕНО
-  // useEffect(() => {
-  //   const cleanup = initAdProvider(AD_PROVIDER, (showFn) => {
-  //     console.log(`${AD_PROVIDER} SDK инициализирован, showFn:`, typeof showFn);
-  //     showAdFnRef.current = showFn;
-  //     setAdReady(true);
-  //   });
-  //   return cleanup;
-  // }, []);
+  // Инициализация рекламного провайдера (GigaPub)
+  useEffect(() => {
+    const cleanup = initAdProvider(AD_PROVIDER, (showFn) => {
+      console.log(`${AD_PROVIDER} SDK инициализирован, showFn:`, typeof showFn);
+      showAdFnRef.current = showFn;
+      setAdReady(true);
+    });
+
+    return cleanup;
+  }, []);
 
   // Сброс состояния при открытии
   useEffect(() => {
@@ -33,62 +33,62 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
   }, [isOpen]);
 
   const handleWatchAd = async () => {
-    // ВРЕМЕННО ОТКЛЮЧЕНО: Реклама недоступна
-    setAdError('Реклама временно недоступна');
-    return;
+    if (!participatingId) {
+      console.error('participatingId не указан');
+      setAdError('Ошибка: ID участия не найден');
+      return;
+    }
 
-    // ЗАКОММЕНТИРОВАННЫЙ КОД (для восстановления):
-    // if (!participatingId) {
-    //   console.error('participatingId не указан');
-    //   setAdError('Ошибка: ID участия не найден');
-    //   return;
-    // }
-    // setIsLoadingAd(true);
-    // setAdError(null);
-    // // Callback при успешном просмотре рекламы
-    // const onSuccess = async () => {
-    //   console.log('--Ad Shown Successfully--');
-    //   try {
-    //     const response = await viewAd(participatingId);
-    //     if (response.isSuccess) {
-    //       console.log('Попытка добавлена:', response);
-    //       onAttemptAdded?.();
-    //       onClose();
-    //     } else {
-    //       setAdError(response.error || 'Ошибка при добавлении попытки');
-    //     }
-    //   } catch (err) {
-    //     console.error('Ошибка при отправке просмотра рекламы:', err);
-    //     setAdError('Не удалось добавить попытку');
-    //   }
-    //   setIsLoadingAd(false);
-    // };
-    // // Callback при ошибке или пропуске рекламы
-    // const onError = () => {
-    //   console.log('--Ad Failed or Skipped--');
-    //   setAdError('Реклама не была просмотрена');
-    //   setIsLoadingAd(false);
-    // };
-    // try {
-    //   // Используем универсальную функцию показа рекламы
-    //   if (showAdFnRef.current) {
-    //     console.log(`Показываем рекламу ${AD_PROVIDER}...`);
-    //     await showAd(AD_PROVIDER, showAdFnRef.current, onSuccess, onError);
-    //   } else {
-    //     // Если SDK еще не загружен, пробуем напрямую через window
-    //     if (AD_PROVIDER === 'gigapub' && typeof window.showGiga === 'function') {
-    //       console.log('Используем window.showGiga напрямую...');
-    //       await showAd(AD_PROVIDER, window.showGiga, onSuccess, onError);
-    //     } else {
-    //       setAdError('Реклама недоступна. Попробуйте позже.');
-    //       setIsLoadingAd(false);
-    //     }
-    //   }
-    // } catch (err) {
-    //   console.error('Ошибка при показе рекламы:', err);
-    //   setAdError('Произошла ошибка');
-    //   setIsLoadingAd(false);
-    // }
+    setIsLoadingAd(true);
+    setAdError(null);
+
+    // Callback при успешном просмотре рекламы
+    const onSuccess = async () => {
+      console.log('--Ad Shown Successfully--');
+      
+      try {
+        const response = await viewAd(participatingId);
+        if (response.isSuccess) {
+          console.log('Попытка добавлена:', response);
+          onAttemptAdded?.();
+          onClose();
+        } else {
+          setAdError(response.error || 'Ошибка при добавлении попытки');
+        }
+      } catch (err) {
+        console.error('Ошибка при отправке просмотра рекламы:', err);
+        setAdError('Не удалось добавить попытку');
+      }
+      setIsLoadingAd(false);
+    };
+
+    // Callback при ошибке или пропуске рекламы
+    const onError = () => {
+      console.log('--Ad Failed or Skipped--');
+      setAdError('Реклама не была просмотрена');
+      setIsLoadingAd(false);
+    };
+
+    try {
+      // Используем универсальную функцию показа рекламы
+      if (showAdFnRef.current) {
+        console.log(`Показываем рекламу ${AD_PROVIDER}...`);
+        await showAd(AD_PROVIDER, showAdFnRef.current, onSuccess, onError);
+      } else {
+        // Если SDK еще не загружен, пробуем напрямую через window
+        if (AD_PROVIDER === 'gigapub' && typeof window.showGiga === 'function') {
+          console.log('Используем window.showGiga напрямую...');
+          await showAd(AD_PROVIDER, window.showGiga, onSuccess, onError);
+        } else {
+        setAdError('Реклама недоступна. Попробуйте позже.');
+        setIsLoadingAd(false);
+        }
+      }
+    } catch (err) {
+      console.error('Ошибка при показе рекламы:', err);
+      setAdError('Произошла ошибка');
+      setIsLoadingAd(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -118,12 +118,11 @@ const MoreAttemptsModal = ({ isOpen, onClose, onInviteFriends, onWatchAd, partic
             <p className="attempt-note">*Начисляется после перехода и старта игры</p>
           </div>
 
-          {/* Посмотреть рекламу - ВРЕМЕННО ОТКЛЮЧЕНО */}
+          {/* Посмотреть рекламу */}
           <button 
-            className={`attempt-option watch-ad ${isViewedAds ? 'disabled' : ''} disabled`}
+            className={`attempt-option watch-ad ${isViewedAds ? 'disabled' : ''}`}
             onClick={handleWatchAd}
-            disabled={true}
-            title="Реклама временно недоступна"
+            disabled={isLoadingAd || isViewedAds}
           >
             <div className="attempt-option-left">
               <div className="attempt-bonus">+1 попытка</div>
