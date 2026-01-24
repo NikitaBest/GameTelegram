@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import BalanceIndicator from '../components/BalanceIndicator';
+import TasksButton from '../components/TasksButton';
 import CountdownTimer from '../components/CountdownTimer';
 import TreasureChest from '../components/TreasureChest';
 import PrizeFundButton from '../components/PrizeFundButton';
@@ -319,7 +320,10 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
 
       <BackgroundStars />
       <div className="draw-content">
-        <BalanceIndicator balance={drawData.balance} />
+        <div className="balance-tasks-container">
+          <TasksButton />
+          <BalanceIndicator balance={drawData.balance} />
+        </div>
         
         <CountdownTimer 
           initialSeconds={drawData.timeUntilEnd}

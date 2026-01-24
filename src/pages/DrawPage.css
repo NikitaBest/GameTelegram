@@ -30,6 +30,18 @@
   flex-direction: column;
 }
 
+.balance-tasks-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 auto 16px;
+  width: 100%;
+  max-width: 343px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .treasure-and-prize-container {
   position: relative;
   width: 100%;

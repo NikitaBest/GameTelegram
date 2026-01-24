@@ -37,6 +37,18 @@
         l();
       }();
     </script>
+    <!-- GigaPub OfferWall SDK Loader -->
+    <!-- Загружается асинхронно, не блокирует загрузку приложения -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (!window.loadOfferWallSDK) {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.giga.pub/script/offer/loader/loader.js';
+          script.async = true;
+          document.head.appendChild(script);
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
