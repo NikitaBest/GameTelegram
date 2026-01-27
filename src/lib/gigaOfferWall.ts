@@ -545,6 +545,19 @@ export function isOfferWallAvailable(): boolean {
  * 
  * @returns Promise<boolean> - true если есть задания, false если нет
  */
+/**
+ * Проверка наличия доступных заданий
+ * 
+ * Согласно документации GigaPub:
+ * ```javascript
+ * const sdk = await loadOfferWallSDK({ projectId: 'YOUR_PROJECT_ID' });
+ * if (sdk.hasOffers()) {
+ *   // Show the OfferWall button
+ * } else {
+ *   // Hide the button
+ * }
+ * ```
+ */
 export async function hasAvailableTasks(): Promise<boolean> {
   // Проверяем, что мы в Telegram Web App
   if (!isTelegramWebApp()) {
@@ -559,17 +572,24 @@ export async function hasAvailableTasks(): Promise<boolean> {
     return false;
   }
 
-  // Если SDK еще не загружен, пробуем инициализировать
-  if (!window.gigaOfferWallSDK) {
-    // Если loader еще не загружен, возвращаем false (ждем загрузки)
-    if (!window.loadOfferWallSDK) {
-      console.log('[GigaOfferWall] Loader SDK еще не загружен');
-      return false;
-    }
+  // Если loader еще не загружен, возвращаем false (ждем загрузки)
+  if (!window.loadOfferWallSDK) {
+    console.log('[GigaOfferWall] Loader SDK еще не загружен, ждем...');
+    return false;
+  }
 
-    // Пробуем инициализировать SDK
+  // Инициализируем SDK согласно документации: await loadOfferWallSDK()
+  let sdk = window.gigaOfferWallSDK;
+  
+  if (!sdk) {
+    // SDK еще не инициализирован, инициализируем его
+    console.log('[GigaOfferWall] SDK не инициализирован, инициализируем...');
     try {
-      const sdk = await window.loadOfferWallSDK({ projectId: PROJECT_ID });
+      // Согласно документации: const sdk = await loadOfferWallSDK({ projectId: 'YOUR_PROJECT_ID' })
+      sdk = await window.loadOfferWallSDK({ projectId: PROJECT_ID });
+      console.log('[GigaOfferWall] ✅ SDK успешно инициализирован для проверки заданий');
+      
+      // Сохраняем ссылку на SDK
       window.gigaOfferWallSDK = sdk;
       
       // Настраиваем обработчик событий, если еще не настроен
@@ -578,25 +598,37 @@ export async function hasAvailableTasks(): Promise<boolean> {
         sdk._eventsConfigured = true;
       }
     } catch (error) {
-      console.error('[GigaOfferWall] Ошибка инициализации SDK для проверки заданий:', error);
+      console.error('[GigaOfferWall] ❌ Ошибка инициализации SDK для проверки заданий:', error);
       return false;
     }
   }
 
-  const sdk = window.gigaOfferWallSDK;
   if (!sdk) {
+    console.error('[GigaOfferWall] ❌ SDK недоступен после инициализации');
     return false;
   }
 
   // Проверяем наличие заданий согласно документации GigaPub
-  // Основной метод: sdk.hasOffers() - проверяет, есть ли доступные предложения
+  // Согласно документации: после await loadOfferWallSDK() вызываем sdk.hasOffers()
+  // hasOffers() - синхронный метод, возвращает boolean
   try {
     // Метод 1: hasOffers() - основной метод согласно документации
+    // Согласно документации: if (sdk.hasOffers()) { ... } else { ... }
+    // hasOffers() вызывается синхронно, без await
     if (typeof sdk.hasOffers === 'function') {
-      const result = sdk.hasOffers();
-      const hasOffers = result instanceof Promise ? await result : result;
-      const hasOffersBool = Boolean(hasOffers);
-      console.log('[GigaOfferWall] ✅ Проверка через hasOffers():', hasOffersBool ? 'Есть задания' : 'Нет заданий');
+      console.log('[GigaOfferWall] 🔍 Вызываем sdk.hasOffers() (согласно документации)...');
+      
+      // Согласно документации, hasOffers() вызывается синхронно
+      const hasOffersResult = sdk.hasOffers();
+      console.log('[GigaOfferWall] 📊 Результат sdk.hasOffers():', hasOffersResult, 'тип:', typeof hasOffersResult);
+      
+      // Преобразуем в boolean строго
+      // Согласно документации, hasOffers() должен возвращать boolean
+      const hasOffersBool = Boolean(hasOffersResult);
+      
+      console.log('[GigaOfferWall] ✅ Финальный результат hasOffers():', hasOffersBool);
+      console.log('[GigaOfferWall]', hasOffersBool ? '✅ Есть задания → ПОКАЗАТЬ кнопку' : '❌ Нет заданий → СКРЫТЬ кнопку');
+      
       return hasOffersBool;
     }
 

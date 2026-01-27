@@ -7,18 +7,25 @@ const TasksButton = ({ onVisibilityChange }) => {
 
   // Функция для проверки наличия заданий
   const checkTasks = async () => {
+    console.log('[TasksButton] 🔍 Начинаем проверку наличия заданий...');
     try {
       const available = await hasAvailableTasks();
+      console.log('[TasksButton] 📊 Результат проверки:', available, 'тип:', typeof available);
+      console.log('[TasksButton] 📊 available === true?', available === true);
+      console.log('[TasksButton] 📊 Boolean(available)?', Boolean(available));
+      
       setHasTasks(available);
-      console.log('[TasksButton] Проверка наличия заданий:', available ? '✅ Есть задания' : '❌ Нет заданий');
+      console.log('[TasksButton] ✅ hasTasks установлен в:', available, available ? '→ ПОКАЗАТЬ кнопку' : '→ СКРЫТЬ кнопку');
       
       // Уведомляем родительский компонент об изменении видимости
       // Кнопка видна только если hasTasks === true
+      const shouldShow = available === true;
+      console.log('[TasksButton] 📤 Уведомляем родителя: shouldShow =', shouldShow);
       if (onVisibilityChange) {
-        onVisibilityChange(available === true);
+        onVisibilityChange(shouldShow);
       }
     } catch (error) {
-      console.error('[TasksButton] Ошибка при проверке заданий:', error);
+      console.error('[TasksButton] ❌ Ошибка при проверке заданий:', error);
       setHasTasks(false); // При ошибке считаем, что заданий нет
       if (onVisibilityChange) {
         onVisibilityChange(false);
@@ -28,13 +35,24 @@ const TasksButton = ({ onVisibilityChange }) => {
 
   // Инициализируем SDK и проверяем наличие заданий
   useEffect(() => {
+    console.log('[TasksButton] 🚀 Компонент смонтирован, начинаем инициализацию...');
+    
     // Инициализируем SDK
     initOfferWallSDK();
 
     // Проверяем наличие заданий с задержкой (чтобы SDK успел загрузиться)
     const initialCheck = async () => {
-      // Даем время на загрузку SDK (увеличиваем задержку для надежности)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('[TasksButton] ⏳ Ждем загрузки SDK (2 секунды)...');
+      // Увеличиваем задержку для надежности - SDK может загружаться асинхронно
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Проверяем, что SDK загружен
+      if (!window.gigaOfferWallSDK && !window.loadOfferWallSDK) {
+        console.warn('[TasksButton] ⚠️ SDK еще не загружен, ждем еще...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      console.log('[TasksButton] ✅ Начинаем проверку заданий...');
       await checkTasks();
     };
 
@@ -71,19 +89,29 @@ const TasksButton = ({ onVisibilityChange }) => {
 
   // Уведомляем родительский компонент при изменении состояния
   useEffect(() => {
+    console.log('[TasksButton] 🔄 hasTasks изменился:', hasTasks, 'тип:', typeof hasTasks);
+    console.log('[TasksButton] 🔄 hasTasks === true?', hasTasks === true);
+    console.log('[TasksButton] 🔄 hasTasks !== true?', hasTasks !== true);
+    
     if (onVisibilityChange) {
       // Кнопка видна только если hasTasks === true
       // Если проверка еще не завершена (null) или заданий нет (false) - кнопка скрыта
-      onVisibilityChange(hasTasks === true);
+      const shouldShow = hasTasks === true;
+      console.log('[TasksButton] 📤 Уведомляем родителя (useEffect): shouldShow =', shouldShow);
+      onVisibilityChange(shouldShow);
     }
   }, [hasTasks, onVisibilityChange]);
 
   // Не показываем кнопку, если:
   // 1. Проверка еще не завершена (null) - ждем результата
   // 2. Заданий нет (false) - скрываем кнопку
+  console.log('[TasksButton] 🎨 Рендер: hasTasks =', hasTasks, 'hasTasks !== true?', hasTasks !== true);
   if (hasTasks !== true) {
+    console.log('[TasksButton] 🚫 Кнопка СКРЫТА (hasTasks !== true)');
     return null;
   }
+  
+  console.log('[TasksButton] ✅ Кнопка ПОКАЗАНА (hasTasks === true)');
 
   // Показываем кнопку только если hasTasks === true (есть задания)
   return (
