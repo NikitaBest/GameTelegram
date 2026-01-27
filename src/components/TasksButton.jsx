@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { initOfferWallSDK, hasAvailableTasks } from '../lib/gigaOfferWall';
 import TasksRulesModal from './TasksRulesModal';
+import RewardDebugModal from './RewardDebugModal';
 import './TasksButton.css';
 
 const TasksButton = ({ onVisibilityChange }) => {
   const [hasTasks, setHasTasks] = useState(null); // null = проверка в процессе, true = есть задания, false = нет заданий
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rewardDebugData, setRewardDebugData] = useState(null);
+  const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
 
   // Функция для проверки наличия заданий
   const checkTasks = async () => {
@@ -84,6 +87,21 @@ const TasksButton = ({ onVisibilityChange }) => {
     };
   }, []);
 
+  // Слушаем кастомное событие с данными награды от GigaPub
+  useEffect(() => {
+    const handleRewardDebug = (event) => {
+      console.log('[TasksButton] 📡 Получено событие gigaOfferWallRewardDebug:', event.detail);
+      setRewardDebugData(event.detail);
+      setIsRewardModalOpen(true);
+    };
+
+    window.addEventListener('gigaOfferWallRewardDebug', handleRewardDebug);
+
+    return () => {
+      window.removeEventListener('gigaOfferWallRewardDebug', handleRewardDebug);
+    };
+  }, []);
+
   const handleClick = () => {
     console.log('[TasksButton] Клик по кнопке "Задания"');
     setIsModalOpen(true);
@@ -142,6 +160,11 @@ const TasksButton = ({ onVisibilityChange }) => {
       <TasksRulesModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+      />
+      <RewardDebugModal
+        isOpen={isRewardModalOpen}
+        onClose={() => setIsRewardModalOpen(false)}
+        rewardData={rewardDebugData}
       />
     </>
   );

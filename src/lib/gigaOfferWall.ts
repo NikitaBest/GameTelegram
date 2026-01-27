@@ -352,6 +352,19 @@ async function handleRewardClaim(data: any): Promise<void> {
   console.log('%c[GigaOfferWall] ✅ Обработанные данные награды (готовы для отправки на бекенд):', 'color: #4CAF50; font-weight: bold;', rewardData);
   console.log('%c[GigaOfferWall] 📤 Формат для отправки на бекенд (JSON):', 'color: #9C27B0; font-weight: bold;', JSON.stringify(rewardData, null, 2));
 
+  // Отправляем данные награды в React через кастомное событие
+  // Это нужно, чтобы в модальном окне показать, что именно мы будем отправлять на бекенд
+  try {
+    window.dispatchEvent(
+      new CustomEvent('gigaOfferWallRewardDebug', {
+        detail: rewardData,
+      })
+    );
+    console.log('[GigaOfferWall] 📡 Отправлено событие gigaOfferWallRewardDebug с данными награды');
+  } catch (e) {
+    console.warn('[GigaOfferWall] ⚠️ Не удалось отправить событие gigaOfferWallRewardDebug:', e);
+  }
+
   // ========== ИНФОРМАЦИЯ ДЛЯ ПРОВЕРКИ НА БЕКЕНДЕ ==========
   console.group('%c[GigaOfferWall] 🔐 Информация для проверки на бекенде:', 'color: #9C27B0; font-weight: bold;');
   console.log('Формула проверки hash (согласно документации GigaPub):');
@@ -517,6 +530,18 @@ async function processPendingReward(rewardData: RewardClaimData, _sdk: any): Pro
     console.log(`sha1("${rewardData.userId}:${rewardData.projectId}:${rewardData.rewardId}:${rewardData.amount}:SECRET_KEY")`);
     console.log('Полученный hash:', rewardData.hash);
     console.groupEnd();
+
+    // Отправляем данные pending reward в React через кастомное событие
+    try {
+      window.dispatchEvent(
+        new CustomEvent('gigaOfferWallRewardDebug', {
+          detail: rewardData,
+        })
+      );
+      console.log('[GigaOfferWall] 📡 Отправлено событие gigaOfferWallRewardDebug для pending reward');
+    } catch (e) {
+      console.warn('[GigaOfferWall] ⚠️ Не удалось отправить событие gigaOfferWallRewardDebug для pending reward:', e);
+    }
 
     // ВРЕМЕННО: Только логируем, не отправляем на бекенд
     // TODO: После готовности бекенда раскомментировать код ниже
