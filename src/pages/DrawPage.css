@@ -42,6 +42,11 @@
   box-sizing: border-box;
 }
 
+/* Когда кнопка "Задания" скрыта, центрируем "Баланс" */
+.balance-tasks-container.tasks-hidden {
+  justify-content: center;
+}
+
 .treasure-and-prize-container {
   position: relative;
   width: 100%;

@@ -22,6 +22,7 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLeaderboardLoaded, setIsLeaderboardLoaded] = useState(false);
+  const [isTasksButtonVisible, setIsTasksButtonVisible] = useState(true); // По умолчанию показываем, пока не проверим
 
   // Загружаем данные о розыгрыше
   useEffect(() => {
@@ -320,8 +321,8 @@ const DrawPage = ({ drawId, onStartGame, onParticipatingIdReceived, onAttemptsRe
 
       <BackgroundStars />
       <div className="draw-content">
-        <div className="balance-tasks-container">
-          <TasksButton />
+        <div className={`balance-tasks-container ${!isTasksButtonVisible ? 'tasks-hidden' : ''}`}>
+          <TasksButton onVisibilityChange={setIsTasksButtonVisible} />
           <BalanceIndicator balance={drawData.balance} />
         </div>
         
