@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { initOfferWallSDK, openOfferWall, hasAvailableTasks } from '../lib/gigaOfferWall';
+import { initOfferWallSDK, hasAvailableTasks } from '../lib/gigaOfferWall';
+import TasksRulesModal from './TasksRulesModal';
 import './TasksButton.css';
 
 const TasksButton = ({ onVisibilityChange }) => {
   const [hasTasks, setHasTasks] = useState(null); // null = проверка в процессе, true = есть задания, false = нет заданий
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Функция для проверки наличия заданий
   const checkTasks = async () => {
@@ -84,47 +86,64 @@ const TasksButton = ({ onVisibilityChange }) => {
 
   const handleClick = () => {
     console.log('[TasksButton] Клик по кнопке "Задания"');
-    openOfferWall();
+    setIsModalOpen(true);
   };
 
   // Уведомляем родительский компонент при изменении состояния
   useEffect(() => {
+    const isDev = import.meta.env?.DEV || import.meta.env?.MODE === 'development';
+    
     console.log('[TasksButton] 🔄 hasTasks изменился:', hasTasks, 'тип:', typeof hasTasks);
     console.log('[TasksButton] 🔄 hasTasks === true?', hasTasks === true);
     console.log('[TasksButton] 🔄 hasTasks !== true?', hasTasks !== true);
     
     if (onVisibilityChange) {
-      // Кнопка видна только если hasTasks === true
-      // Если проверка еще не завершена (null) или заданий нет (false) - кнопка скрыта
-      const shouldShow = hasTasks === true;
-      console.log('[TasksButton] 📤 Уведомляем родителя (useEffect): shouldShow =', shouldShow);
+      // В режиме разработки всегда показываем кнопку для тестирования
+      // В продакшене кнопка видна только если hasTasks === true
+      const shouldShow = isDev ? true : (hasTasks === true);
+      console.log('[TasksButton] 📤 Уведомляем родителя (useEffect): shouldShow =', shouldShow, isDev ? '(режим разработки)' : '');
       onVisibilityChange(shouldShow);
     }
   }, [hasTasks, onVisibilityChange]);
 
+  // В режиме разработки показываем кнопку всегда для тестирования
+  const isDev = import.meta.env?.DEV || import.meta.env?.MODE === 'development';
+  
   // Не показываем кнопку, если:
   // 1. Проверка еще не завершена (null) - ждем результата
   // 2. Заданий нет (false) - скрываем кнопку
-  console.log('[TasksButton] 🎨 Рендер: hasTasks =', hasTasks, 'hasTasks !== true?', hasTasks !== true);
-  if (hasTasks !== true) {
+  // ИСКЛЮЧЕНИЕ: В режиме разработки показываем всегда для тестирования
+  console.log('[TasksButton] 🎨 Рендер: hasTasks =', hasTasks, 'hasTasks !== true?', hasTasks !== true, 'isDev =', isDev);
+  
+  if (!isDev && hasTasks !== true) {
     console.log('[TasksButton] 🚫 Кнопка СКРЫТА (hasTasks !== true)');
     return null;
   }
   
-  console.log('[TasksButton] ✅ Кнопка ПОКАЗАНА (hasTasks === true)');
+  if (isDev) {
+    console.log('[TasksButton] ✅ Кнопка ПОКАЗАНА (режим разработки - всегда показываем для тестирования)');
+  } else {
+    console.log('[TasksButton] ✅ Кнопка ПОКАЗАНА (hasTasks === true)');
+  }
 
   // Показываем кнопку только если hasTasks === true (есть задания)
   return (
-    <div className="tasks-button" onClick={handleClick}>
-      <div className="tasks-icon">
-        <img 
-          src="/CupLeader.svg" 
-          alt="Задания" 
-          className="tasks-icon-image"
-        />
+    <>
+      <div className="tasks-button" onClick={handleClick}>
+        <div className="tasks-icon">
+          <img 
+            src="/CupLeader.svg" 
+            alt="Задания" 
+            className="tasks-icon-image"
+          />
+        </div>
+        <span className="tasks-text">Задания</span>
       </div>
-      <span className="tasks-text">Задания</span>
-    </div>
+      <TasksRulesModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
+    </>
   );
 };
 
