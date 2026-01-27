@@ -42,14 +42,14 @@ const TasksButton = ({ onVisibilityChange }) => {
 
     // Проверяем наличие заданий с задержкой (чтобы SDK успел загрузиться)
     const initialCheck = async () => {
-      console.log('[TasksButton] ⏳ Ждем загрузки SDK (2 секунды)...');
+      console.log('[TasksButton] ⏳ Ждем загрузки SDK (4 секунды)...');
       // Увеличиваем задержку для надежности - SDK может загружаться асинхронно
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 4000));
       
       // Проверяем, что SDK загружен
       if (!window.gigaOfferWallSDK && !window.loadOfferWallSDK) {
         console.warn('[TasksButton] ⚠️ SDK еще не загружен, ждем еще...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
       
       console.log('[TasksButton] ✅ Начинаем проверку заданий...');

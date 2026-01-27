@@ -106,13 +106,30 @@ export function initOfferWallSDK(): void {
         // Настраиваем обработчик событий изменения доступности заданий (если доступен)
         try {
           sdk.on('offersUpdated', () => {
-            console.log('[GigaOfferWall] Событие: задания обновлены');
+            console.log('[GigaOfferWall] ✅ Событие: задания обновлены (offersUpdated)');
             // Триггерим событие для обновления состояния в компоненте
             window.dispatchEvent(new CustomEvent('gigaOfferWallUpdated'));
           });
         } catch (e) {
           // Событие может не поддерживаться, это нормально
         }
+        
+        // Дополнительная проверка: если hasOffers() вернул true, но оферы еще загружаются,
+        // событие offersUpdated сработает когда оферы загрузятся
+        // Делаем повторную проверку через 3 секунды после инициализации
+        setTimeout(async () => {
+          if (window.gigaOfferWallSDK && typeof window.gigaOfferWallSDK.hasOffers === 'function') {
+            const hasOffersAfterDelay = window.gigaOfferWallSDK.hasOffers();
+            const hasOffersBool = hasOffersAfterDelay instanceof Promise ? await hasOffersAfterDelay : Boolean(hasOffersAfterDelay);
+            console.log('[GigaOfferWall] 🔄 Повторная проверка через 3 сек после инициализации:', hasOffersBool);
+            
+            if (!hasOffersBool) {
+              // Если после задержки hasOffers() вернул false, значит оферов точно нет
+              console.log('[GigaOfferWall] ❌ Повторная проверка: оферов нет → обновляем состояние');
+              window.dispatchEvent(new CustomEvent('gigaOfferWallUpdated'));
+            }
+          }
+        }, 3000);
       })
       .catch((error: Error) => {
         console.error('[GigaOfferWall] Ошибка загрузки SDK:', error);
@@ -634,13 +651,15 @@ export async function hasAvailableTasks(): Promise<boolean> {
   // }
   // ```
   try {
-    // Даем SDK немного времени на загрузку оферов (если они загружаются асинхронно)
-    // Это может помочь, если hasOffers() возвращает true до полной загрузки
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Даем SDK время на загрузку оферов (если они загружаются асинхронно)
+    // Увеличиваем задержку до 4 секунд, чтобы оферы точно успели загрузиться
+    // Задержка помогает, если hasOffers() возвращает true до полной загрузки оферов
+    await new Promise(resolve => setTimeout(resolve, 4000));
     
-    // Проверяем наличие заданий согласно документации: sdk.hasOffers()
+    // Проверяем наличие заданий строго согласно документации партнерки:
+    // if (sdk.hasOffers()) { ... } else { ... }
     if (typeof sdk.hasOffers === 'function') {
-      console.log('[GigaOfferWall] 🔍 Вызываем sdk.hasOffers() (согласно документации)...');
+      console.log('[GigaOfferWall] 🔍 Вызываем sdk.hasOffers() (строго согласно документации)...');
       
       const result = sdk.hasOffers();
       // hasOffers() может возвращать Promise<boolean> или boolean
@@ -649,6 +668,7 @@ export async function hasAvailableTasks(): Promise<boolean> {
       console.log('[GigaOfferWall] 📊 Результат sdk.hasOffers():', hasOffers);
       console.log('[GigaOfferWall]', hasOffers ? '✅ Есть задания → ПОКАЗАТЬ кнопку' : '❌ Нет заданий → СКРЫТЬ кнопку');
       
+      // Строго следуем документации: доверяем результату hasOffers()
       return hasOffers;
     }
     
