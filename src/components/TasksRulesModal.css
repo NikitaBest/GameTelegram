@@ -23,6 +23,8 @@
   border: none;
   cursor: pointer;
   transition: transform 0.2s;
+  /* Крестик всегда поверх содержимого модалки */
+  z-index: 10;
 }
 
 .modal-close img {
@@ -36,7 +38,7 @@
 
 .tasks-rules-modal-content {
   position: relative;
-  width: min(340px, 90vw);
+  width: min(360px, 92vw);
   background: linear-gradient(180deg, #B9D6FF 0%, #8DB7F5 100%);
   border-radius: 12px;
   border: 1px solid #B9D6FF;
@@ -51,24 +53,29 @@
   align-items: center;
   gap: 12px;
   box-sizing: border-box;
+  max-height: 90vh;
+  /* Даем крестику выходить за пределы модалки, чтобы он был поверх */
+  overflow: visible;
 }
 
 .tasks-rules-modal-inner {
   background: linear-gradient(180deg, #699ADE 0%, #649BE6 100%);
   border-radius: 10px;
   border: 2px solid #5E90D3;
-  padding: 20px 16px;
+  padding: 18px 14px;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  max-height: calc(90vh - 80px);
+  overflow-y: auto;
 }
 
 .tasks-rules-modal-title {
   color: #FFFFFF;
-  font-size: 20px;
+  font-size: clamp(18px, 5vw, 22px);
   font-weight: 700;
   margin: 0;
   text-align: center;
@@ -78,7 +85,7 @@
   background: transparent;
   border: 3px solid rgba(255, 255, 255, 0.6);
   border-radius: 16px;
-  padding: 16px 20px;
+  padding: 14px 12px;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
@@ -101,13 +108,13 @@
 .tasks-rule-number {
   background: linear-gradient(180deg, #F5A623 0%, #E09000 100%);
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: clamp(24px, 6vw, 30px);
+  height: clamp(24px, 6vw, 30px);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: clamp(13px, 3.5vw, 16px);
   font-weight: 700;
   flex-shrink: 0;
   box-shadow: 0px 2px 0px 0px #B87A00;
@@ -115,7 +122,7 @@
 
 .tasks-rule-text {
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: clamp(14px, 3.5vw, 17px);
   font-weight: 500;
   line-height: 1.4;
   flex: 1;
@@ -123,9 +130,39 @@
 
 .tasks-rules-modal-hint {
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: clamp(14px, 3.5vw, 17px);
   margin: 0;
   line-height: 1.4;
+}
+
+@media (max-height: 700px) {
+  .modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+  }
+
+  .tasks-rules-modal-content {
+    margin-top: 20px;
+    max-height: 95vh;
+  }
+
+  .tasks-rules-modal-inner {
+    max-height: calc(95vh - 60px);
+  }
+
+  .tasks-rules-list {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .tasks-rules-modal-info {
+    padding: 12px 10px;
+  }
+
+  .tasks-rule-item {
+    gap: 8px;
+  }
 }
 
 .tasks-rules-modal-start {
