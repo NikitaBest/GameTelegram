@@ -3,17 +3,26 @@ import { initOfferWallSDK, openOfferWall, hasAvailableTasks } from '../lib/gigaO
 import './TasksButton.css';
 
 const TasksButton = ({ onVisibilityChange }) => {
-  const [hasTasks, setHasTasks] = useState(null); // null = проверка в процессе, true/false = результат
+  const [hasTasks, setHasTasks] = useState(null); // null = проверка в процессе, true = есть задания, false = нет заданий
 
   // Функция для проверки наличия заданий
   const checkTasks = async () => {
-    const available = await hasAvailableTasks();
-    setHasTasks(available);
-    console.log('[TasksButton] Наличие заданий:', available);
-    
-    // Уведомляем родительский компонент об изменении видимости
-    if (onVisibilityChange) {
-      onVisibilityChange(available !== false);
+    try {
+      const available = await hasAvailableTasks();
+      setHasTasks(available);
+      console.log('[TasksButton] Проверка наличия заданий:', available ? '✅ Есть задания' : '❌ Нет заданий');
+      
+      // Уведомляем родительский компонент об изменении видимости
+      // Кнопка видна только если hasTasks === true
+      if (onVisibilityChange) {
+        onVisibilityChange(available === true);
+      }
+    } catch (error) {
+      console.error('[TasksButton] Ошибка при проверке заданий:', error);
+      setHasTasks(false); // При ошибке считаем, что заданий нет
+      if (onVisibilityChange) {
+        onVisibilityChange(false);
+      }
     }
   };
 
@@ -24,8 +33,8 @@ const TasksButton = ({ onVisibilityChange }) => {
 
     // Проверяем наличие заданий с задержкой (чтобы SDK успел загрузиться)
     const initialCheck = async () => {
-      // Даем время на загрузку SDK
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Даем время на загрузку SDK (увеличиваем задержку для надежности)
+      await new Promise(resolve => setTimeout(resolve, 1500));
       await checkTasks();
     };
 
@@ -63,18 +72,20 @@ const TasksButton = ({ onVisibilityChange }) => {
   // Уведомляем родительский компонент при изменении состояния
   useEffect(() => {
     if (onVisibilityChange) {
-      // Если проверка еще не завершена (null), считаем что кнопка видна
-      // Если проверка завершена, передаем результат
-      onVisibilityChange(hasTasks !== false);
+      // Кнопка видна только если hasTasks === true
+      // Если проверка еще не завершена (null) или заданий нет (false) - кнопка скрыта
+      onVisibilityChange(hasTasks === true);
     }
   }, [hasTasks, onVisibilityChange]);
 
-  // Не показываем кнопку, если заданий нет
-  if (hasTasks === false) {
+  // Не показываем кнопку, если:
+  // 1. Проверка еще не завершена (null) - ждем результата
+  // 2. Заданий нет (false) - скрываем кнопку
+  if (hasTasks !== true) {
     return null;
   }
 
-  // Показываем кнопку, если задания есть или проверка еще в процессе
+  // Показываем кнопку только если hasTasks === true (есть задания)
   return (
     <div className="tasks-button" onClick={handleClick}>
       <div className="tasks-icon">
