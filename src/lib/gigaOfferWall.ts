@@ -4,7 +4,8 @@
  */
 
 import { getTelegramUserData, isTelegramWebApp } from './telegram';
-import { verifyReward, type RewardClaimData } from '../api/services/rewardService';
+// import { verifyReward } from '../api/services/rewardService'; // Раскомментировать после готовности бекенда
+import type { RewardClaimData } from '../api/services/rewardService';
 
 const PROJECT_ID = '5315'; // Ваш project ID
 
@@ -23,6 +24,19 @@ declare global {
       hasOffers?: () => Promise<boolean> | boolean;
       getOffersCount?: () => Promise<number> | number;
       checkAvailability?: () => Promise<boolean>;
+      _eventsConfigured?: boolean; // Флаг для отслеживания настройки событий
+    };
+    Telegram?: {
+      WebApp?: {
+        showAlert: (message: string, callback?: () => void) => void;
+      };
+    };
+  }
+  
+  // Расширение типов для Vite
+  interface ImportMeta {
+    env?: {
+      DEV?: boolean;
     };
   }
 }
@@ -444,6 +458,7 @@ async function checkPendingRewards(sdk: any): Promise<void> {
       };
 
       // Обрабатываем награду (отправляем на бекенд и подтверждаем)
+      // sdk передается для использования в закомментированном коде
       await processPendingReward(rewardData, sdk);
     }
   } catch (error: any) {
@@ -455,9 +470,9 @@ async function checkPendingRewards(sdk: any): Promise<void> {
  * Обработка одной pending reward
  * 
  * @param rewardData - Данные награды
- * @param sdk - Экземпляр GigaPub SDK
+ * @param sdk - Экземпляр GigaPub SDK (используется в закомментированном коде)
  */
-async function processPendingReward(rewardData: RewardClaimData, sdk: any): Promise<void> {
+async function processPendingReward(rewardData: RewardClaimData, _sdk: any): Promise<void> {
   try {
     console.log('%c[GigaOfferWall] ====== PENDING REWARD: Награда, ожидающая подтверждения ======', 'color: #FF9800; font-size: 14px; font-weight: bold;');
     console.log('[GigaOfferWall] Обрабатываем pending reward:', rewardData);
@@ -593,7 +608,7 @@ export async function hasAvailableTasks(): Promise<boolean> {
       window.gigaOfferWallSDK = sdk;
       
       // Настраиваем обработчик событий, если еще не настроен
-      if (!sdk._eventsConfigured) {
+      if (sdk && !sdk._eventsConfigured) {
         sdk.on('rewardClaim', handleRewardClaim);
         sdk._eventsConfigured = true;
       }
@@ -611,48 +626,63 @@ export async function hasAvailableTasks(): Promise<boolean> {
   // Проверяем наличие заданий согласно документации GigaPub
   // Согласно документации: после await loadOfferWallSDK() вызываем sdk.hasOffers()
   // hasOffers() - синхронный метод, возвращает boolean
+  // 
+  // ВАЖНО: Иногда hasOffers() может возвращать true до полной загрузки оферов,
+  // поэтому добавляем дополнительную проверку через getOffersCount()
   try {
+    // Даем SDK немного времени на загрузку оферов (если они загружаются асинхронно)
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     // Метод 1: hasOffers() - основной метод согласно документации
     // Согласно документации: if (sdk.hasOffers()) { ... } else { ... }
     // hasOffers() вызывается синхронно, без await
+    let hasOffersResult: boolean | null = null;
+    
     if (typeof sdk.hasOffers === 'function') {
       console.log('[GigaOfferWall] 🔍 Вызываем sdk.hasOffers() (согласно документации)...');
       
       // Согласно документации, hasOffers() вызывается синхронно
-      const hasOffersResult = sdk.hasOffers();
+      hasOffersResult = Boolean(sdk.hasOffers());
       console.log('[GigaOfferWall] 📊 Результат sdk.hasOffers():', hasOffersResult, 'тип:', typeof hasOffersResult);
-      
-      // Преобразуем в boolean строго
-      // Согласно документации, hasOffers() должен возвращать boolean
-      const hasOffersBool = Boolean(hasOffersResult);
-      
-      console.log('[GigaOfferWall] ✅ Финальный результат hasOffers():', hasOffersBool);
-      console.log('[GigaOfferWall]', hasOffersBool ? '✅ Есть задания → ПОКАЗАТЬ кнопку' : '❌ Нет заданий → СКРЫТЬ кнопку');
-      
-      return hasOffersBool;
     }
-
-    // Метод 2: getOffersCount() - альтернативный метод (количество заданий)
+    
+    // Дополнительная проверка: getOffersCount() - более надежный метод
+    // Если количество оферов = 0, значит их точно нет
+    let offersCount: number | null = null;
     if (typeof sdk.getOffersCount === 'function') {
-      const result = sdk.getOffersCount();
-      const count = result instanceof Promise ? await result : result;
-      const hasOffers = count > 0;
-      console.log('[GigaOfferWall] ✅ Проверка через getOffersCount():', count, 'заданий', hasOffers ? '(есть задания)' : '(нет заданий)');
-      return hasOffers;
+      console.log('[GigaOfferWall] 🔍 Дополнительная проверка через sdk.getOffersCount()...');
+      const countResult = sdk.getOffersCount();
+      // getOffersCount() может возвращать Promise<number> или number
+      if (countResult instanceof Promise) {
+        offersCount = await countResult;
+      } else if (typeof countResult === 'number') {
+        offersCount = countResult;
+      } else {
+        offersCount = null;
+      }
+      console.log('[GigaOfferWall] 📊 Количество оферов (getOffersCount):', offersCount);
     }
-
-    // Метод 3: checkAvailability() - альтернативный метод (проверка доступности)
-    if (typeof sdk.checkAvailability === 'function') {
-      const isAvailable = await sdk.checkAvailability();
-      const hasOffers = Boolean(isAvailable);
-      console.log('[GigaOfferWall] ✅ Проверка через checkAvailability():', hasOffers ? 'Есть задания' : 'Нет заданий');
-      return hasOffers;
+    
+    // Финальное решение: если getOffersCount() доступен и возвращает 0, то заданий точно нет
+    // Иначе используем результат hasOffers()
+    let finalResult: boolean;
+    
+    if (offersCount !== null) {
+      // Если можем проверить количество - это более надежно
+      finalResult = offersCount > 0;
+      console.log('[GigaOfferWall] ✅ Используем результат getOffersCount():', finalResult, `(${offersCount} оферов)`);
+    } else if (hasOffersResult !== null) {
+      // Используем результат hasOffers()
+      finalResult = hasOffersResult;
+      console.log('[GigaOfferWall] ✅ Используем результат hasOffers():', finalResult);
+    } else {
+      // Если оба метода недоступны, считаем что заданий нет (безопаснее)
+      console.warn('[GigaOfferWall] ⚠️ Методы проверки недоступны, считаем что заданий нет');
+      finalResult = false;
     }
-
-    // Если нет специальных методов проверки, считаем что заданий нет
-    // Это безопаснее, чем показывать кнопку без заданий
-    console.warn('[GigaOfferWall] ⚠️ Методы проверки наличия заданий недоступны. Считаем что заданий нет.');
-    return false;
+    
+    console.log('[GigaOfferWall]', finalResult ? '✅ Есть задания → ПОКАЗАТЬ кнопку' : '❌ Нет заданий → СКРЫТЬ кнопку');
+    return finalResult;
   } catch (error) {
     console.error('[GigaOfferWall] ❌ Ошибка при проверке наличия заданий:', error);
     // В случае ошибки считаем, что задания недоступны (безопаснее скрыть кнопку)
